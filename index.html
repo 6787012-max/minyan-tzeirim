@@ -27,6 +27,7 @@
     </a>
     <nav class="nav">
       <a href="#zmanim">זמנים</a>
+      <a href="#seats">מקומות</a>
       <a href="#shabbat">שבת</a>
       <a href="shas.html">ש״ס</a>
       <a href="hok.html">הוראת קבע</a>
@@ -61,8 +62,34 @@
     </div>
   </div>
 
+  <!-- מקומות לימים הנוראים -->
+  <section id="seats" hidden>
+    <div class="wrap">
+      <div class="seats-box">
+        <div class="seats-head">
+          <div>
+            <div class="eyebrow" id="seatsEyebrow"></div>
+            <h2 id="seatsTitle"></h2>
+            <p id="seatsIntro"></p>
+            <p class="dates" id="seatsDates"></p>
+          </div>
+          <div class="draft-flag" id="seatsDraft" hidden></div>
+        </div>
+        <div class="seats-grid" id="seatsGrid"></div>
+        <div class="seats-foot">
+          <div class="total">
+            <span>סה״כ לתשלום</span>
+            <b id="seatsTotal">₪0</b>
+          </div>
+          <a class="btn btn-g" id="seatsBuy" href="#" target="_blank" rel="noopener">לרכישה מאובטחת</a>
+        </div>
+        <p class="note" id="seatsNote"></p>
+      </div>
+    </div>
+  </section>
+
   <!-- זמנים -->
-  <section id="zmanim">
+  <section id="zmanim" class="alt">
     <div class="wrap">
       <div class="head">
         <div class="eyebrow">לוח יומי</div>
@@ -75,7 +102,7 @@
   </section>
 
   <!-- שבת -->
-  <section id="shabbat" class="alt">
+  <section id="shabbat">
     <div class="wrap">
       <div class="head">
         <div class="eyebrow">שבת קודש</div>

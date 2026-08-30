@@ -1,11 +1,11 @@
 /* network-first על ה-shell עם נפילה ל-cache. מעלים את V ביד בכל דיפלוי. */
-var V = 'mt-v2';
+var V = 'mt-v3';
 var SHELL = [
   './', './index.html', './shas.html', './hok.html',
   './css/main.css', './css/shas.css', './css/hok.css',
   './js/app.js', './js/luach.js', './js/shas.js', './js/hok.js',
   './data/config.json', './data/shabbat.json', './data/shas.json',
-  './data/hok.json', './manifest.json',
+  './data/hok.json', './data/yamim_noraim.json', './manifest.json',
   './img/mark.svg', './img/logo-gate.svg', './img/logo-h-white.svg',
   './fonts/frank-medium.woff2', './fonts/frank-black.woff2',
   './fonts/assistant-regular.woff2', './fonts/assistant-semibold.woff2',

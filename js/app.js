@@ -264,6 +264,104 @@
     $('barFill').style.width = pct + '%';
   }
 
+  /* ── מקומות לימים הנוראים ─────────────────────────────────────── */
+
+  var YN = null, QTY = {};
+
+  /* מוצא את התאריכים האמיתיים של ר״ה ויוה״כ מטבלת הלוח */
+  function yamimNoraimDates(now) {
+    var out = [], seen = {};
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    for (var i = 0; i < 400; i++) {
+      var iso = Luach.iso(d), h = LU.days[iso];
+      if (h && /ראש השנה|יום כיפור/.test(h)) {
+        var k = /ראש השנה/.test(h) ? 'rh' : 'yk';
+        if (!seen[k]) { seen[k] = 1; out.push([k, new Date(d), h]); }
+        if (out.length === 2) break;
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  }
+
+  function renderSeats(now) {
+    if (!YN || !(YN.options || []).length) return;
+    var sec = $('seats');
+    sec.hidden = false;
+
+    $('seatsEyebrow').textContent = YN.eyebrow || '';
+    $('seatsTitle').textContent = YN.title || '';
+    $('seatsIntro').textContent = YN.intro || '';
+
+    var dates = yamimNoraimDates(now);
+    if (dates.length) {
+      $('seatsDates').textContent = dates.map(function (x) {
+        var hd = Luach.hebrew(x[1]);
+        return (x[0] === 'rh' ? 'ראש השנה' : 'יום כיפור') + ' · ' +
+          x[1].getDate() + '.' + (x[1].getMonth() + 1) +
+          ' (' + Luach.numToHeb(hd.d, true) + ' ב' + hd.monthName + ')';
+      }).join('  ·  ');
+    }
+
+    if (YN.draft) {
+      var df = $('seatsDraft');
+      df.hidden = false;
+      df.innerHTML = '<b>המחירים כאן טרם אושרו</b> — הם ברירת מחדל. יש לאשר אותם ' +
+        'בקובץ <code>data/yamim_noraim.json</code> ולהוריד את <code>draft</code> ל-false.';
+    }
+
+    var g = $('seatsGrid');
+    g.innerHTML = YN.options.map(function (o) {
+      QTY[o.id] = QTY[o.id] || 0;
+      return '<div class="seat" data-id="' + esc(o.id) + '">' +
+        '<span class="info"><b>' + esc(o.name) + '</b><span>' + esc(o.desc || '') + '</span></span>' +
+        '<span class="price">₪' + o.price + '</span>' +
+        '<span class="stepper">' +
+        '<button type="button" data-d="1" aria-label="הוסף">+</button>' +
+        '<span class="q">0</span>' +
+        '<button type="button" data-d="-1" aria-label="הפחת" disabled>−</button>' +
+        '</span></div>';
+    }).join('');
+
+    g.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-d]');
+      if (!b) return;
+      var row = b.closest('.seat'), id = row.dataset.id;
+      var opt = YN.options.filter(function (o) { return o.id === id; })[0];
+      var max = opt.max || 9;
+      QTY[id] = Math.max(0, Math.min(max, (QTY[id] || 0) + (+b.dataset.d)));
+      row.querySelector('.q').textContent = QTY[id];
+      row.querySelector('[data-d="-1"]').disabled = QTY[id] === 0;
+      row.querySelector('[data-d="1"]').disabled = QTY[id] === max;
+      updateSeatsTotal();
+    });
+
+    $('seatsNote').innerHTML = esc(YN.note || '') +
+      ' התשלום מתבצע באתר המאובטח של נדרים פלוס.';
+    updateSeatsTotal();
+  }
+
+  function updateSeatsTotal() {
+    var total = 0, parts = [];
+    YN.options.forEach(function (o) {
+      var q = QTY[o.id] || 0;
+      if (!q) return;
+      total += q * o.price;
+      parts.push(o.name + ' ×' + q);
+    });
+    $('seatsTotal').textContent = '₪' + total.toLocaleString('he-IL');
+    var btn = $('seatsBuy');
+    btn.setAttribute('aria-disabled', String(total === 0));
+    if (!total) { btn.href = '#'; btn.textContent = 'בחרו מקומות'; return; }
+    btn.textContent = 'לרכישה מאובטחת · ₪' + total.toLocaleString('he-IL');
+    var n = CFG.nedarim || {}, yn = YN.nedarim || {};
+    btn.href = n.url + '&Amount=' + total + '&AmountLock=1&OnlyNormal=1' +
+      '&Groupe=' + encodeURIComponent(yn.groupe || 'מקומות לימים נוראים') +
+      '&GroupeLock=1' +
+      '&CustomAvour=' + encodeURIComponent(yn.avourTitle || 'פירוט המקומות') +
+      '&Avour=' + encodeURIComponent(parts.join(' · '));
+  }
+
   /* ── אודות ותחתית ─────────────────────────────────────────────── */
 
   function renderAbout() {
@@ -302,12 +400,13 @@
 
   /* ── הפעלה ────────────────────────────────────────────────────── */
 
-  function boot(cfg, luach) {
-    CFG = cfg; LU = luach;
+  function boot(cfg, luach, yn) {
+    CFG = cfg; LU = luach; YN = yn;
     document.title = CFG.name + ' · ' + CFG.place;
     if (CFG.tagline) $('tagline').textContent = CFG.tagline;
     var now = new Date();
     renderToday(now);
+    try { renderSeats(now); } catch (e) { console.error('seats', e); }
     renderZmanim(now);
     renderShabbat(now);
     renderGive();
@@ -324,8 +423,10 @@
 
   Promise.all([
     fetch('data/config.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
-    fetch('data/shabbat.json', { cache: 'no-cache' }).then(function (r) { return r.json(); })
-  ]).then(function (a) { boot(a[0], a[1]); })
+    fetch('data/shabbat.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
+    fetch('data/yamim_noraim.json', { cache: 'no-cache' })
+      .then(function (r) { return r.json(); }).catch(function () { return null; })
+  ]).then(function (a) { boot(a[0], a[1], a[2]); })
     .catch(function (e) { fail('שגיאה בטעינת הנתונים'); console.error(e); });
 
   if ('serviceWorker' in navigator) {
