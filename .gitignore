@@ -1,0 +1,8 @@
+_CREDENTIALS.md
+.gh_token
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+_masav/
+_unused/

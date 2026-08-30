@@ -1,0 +1,70 @@
+/* shas.css — דף חלוקת ש״ס. נטען אחרי main.css. */
+
+.shas-hero{padding:52px 0 44px}
+.shas-hero .eyebrow{color:var(--gold);font-weight:600;font-size:14.5px;letter-spacing:2.4px;
+  margin-bottom:8px}
+.shas-hero h1{font-size:clamp(32px,5vw,54px);margin-bottom:10px}
+.shas-hero .lead{color:var(--muted);font-size:19.5px;max-width:62ch;margin:0 0 26px}
+
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 20px;
+  box-shadow:var(--shadow);min-width:132px}
+.stat .v{font-family:'Frank',serif;font-weight:900;font-size:30px;line-height:1;
+  color:var(--navy);font-variant-numeric:tabular-nums}
+.stat .k{font-size:14px;color:var(--muted);margin-top:4px}
+
+.progress .track{height:11px;border-radius:11px;background:rgba(176,141,62,.18);overflow:hidden}
+.progress .fill{display:block;height:100%;border-radius:11px;width:0;
+  background:linear-gradient(90deg,var(--gold),var(--gold-lt));
+  transition:width .8s cubic-bezier(.2,.7,.2,1)}
+.progress .cap{font-size:15px;color:var(--muted);margin-top:9px}
+
+/* סרגל כלים */
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:22px}
+.toolbar input[type=search]{flex:1 1 240px;min-width:0;font:inherit;font-size:16.5px;
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;
+  color:var(--ink)}
+.toolbar input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.filters{display:flex;flex-wrap:wrap;gap:7px}
+.filters button{font:inherit;font-size:15.5px;cursor:pointer;background:#fff;
+  border:1px solid var(--line);border-radius:9px;padding:9px 15px;color:var(--muted)}
+.filters button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);
+  color:var(--cream);font-weight:600}
+
+/* קבוצות סדרים */
+.seder{margin-bottom:30px}
+.seder > h3{font-family:'Frank',serif;font-size:23px;font-weight:500;margin:0 0 4px;
+  display:flex;align-items:baseline;gap:11px}
+.seder > h3 span{font-family:'Asst',sans-serif;font-size:14px;color:var(--muted);
+  font-weight:400}
+.seder > h3::after{content:'';flex:1;height:1px;background:var(--line)}
+.vols{display:grid;gap:10px;margin-top:14px;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+
+.vol{display:flex;align-items:center;gap:12px;text-align:start;width:100%;
+  text-decoration:none;
+  font:inherit;cursor:pointer;background:#fff;border:1px solid var(--line);
+  border-radius:11px;padding:12px 14px;color:var(--ink);
+  transition:border-color .14s ease,transform .12s ease,box-shadow .14s ease}
+.vol:hover{border-color:var(--gold);transform:translateY(-1px);box-shadow:var(--shadow)}
+.vol .n{flex:0 0 auto;min-width:34px;height:34px;padding:0 7px;border-radius:8px;
+  background:var(--cream);border:1px solid var(--line);color:var(--gold);
+  font-family:'Frank',serif;font-size:16px;display:grid;place-items:center;line-height:1}
+.vol .b{min-width:0}
+.vol .b b{display:block;font-family:'Frank',serif;font-weight:500;font-size:18.5px;
+  line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vol .b span{font-size:13.5px;color:var(--muted)}
+
+.vol.taken{background:var(--cream-2);border-style:dashed;cursor:default;opacity:.9}
+.vol.taken:hover{border-color:var(--line);transform:none;box-shadow:none}
+.vol.taken .n{background:var(--navy);border-color:var(--navy);color:var(--gold-lt)}
+.vol.taken .b span{color:var(--gold);font-weight:600}
+
+.empty{color:var(--muted);padding:20px 0}
+
+@media(max-width:520px){
+  .vols{grid-template-columns:1fr 1fr;gap:8px}
+  .vol{padding:10px;gap:9px}
+  .vol .b b{font-size:16px}
+  .vol .n{min-width:30px;height:30px;font-size:14px}
+}

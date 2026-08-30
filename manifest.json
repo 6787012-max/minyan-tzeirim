@@ -1,0 +1,16 @@
+{
+  "name": "מניין הצעירים · מעלה עמוס",
+  "short_name": "מניין הצעירים",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F1E5",
+  "theme_color": "#12233F",
+  "icons": [
+    { "src": "img/icon-128.png", "sizes": "128x128", "type": "image/png" },
+    { "src": "img/icon-256.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

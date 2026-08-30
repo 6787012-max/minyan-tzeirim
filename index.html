@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>מניין הצעירים · מעלה עמוס</title>
+<meta name="description" content="מניין הצעירים מעלה עמוס — שיעור דף יומי מדי בוקר, זמני תפילה, זמני שבת, ושותפות במניין.">
+<meta name="theme-color" content="#12233F">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="img/icon-256.png">
+<link rel="manifest" href="manifest.json">
+<meta property="og:title" content="מניין הצעירים · מעלה עמוס">
+<meta property="og:description" content="שיעור דף יומי מדי בוקר, זמני תפילה וזמני שבת.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/assistant-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <img src="img/mark.svg" alt="" width="30" height="30">
+      <b>מניין הצעירים<span class="dot"> · </span><span class="pl">מעלה עמוס</span></b>
+    </a>
+    <nav class="nav">
+      <a href="#zmanim">זמנים</a>
+      <a href="#shabbat">שבת</a>
+      <a href="shas.html">ש״ס</a>
+      <a href="hok.html">הוראת קבע</a>
+      <a class="give" href="#give">בוא תהיה שותף</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- פתיח -->
+  <div class="hero">
+    <div class="wrap hero-in">
+      <div>
+        <h1><em>בס״ד</em>מניין הצעירים<br>מעלה עמוס</h1>
+        <p class="lead" id="tagline">בית של תורה ותפילה לצעירי מעלה עמוס</p>
+        <div class="cta-row">
+          <a class="btn btn-p" href="#give">בוא תהיה שותף</a>
+          <a class="btn btn-s" href="#zmanim">זמני תפילות ושיעורים</a>
+        </div>
+      </div>
+      <div class="hero-art">
+        <img src="img/logo-gate.svg" alt="לוגו מניין הצעירים מעלה עמוס" width="1060" height="960">
+      </div>
+    </div>
+  </div>
+
+  <!-- פס היום -->
+  <div class="today">
+    <div class="wrap" id="todayStrip">
+      <div class="tcell"><div class="k">היום</div><div class="v loading">טוען…</div></div>
+    </div>
+  </div>
+
+  <!-- זמנים -->
+  <section id="zmanim">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">לוח יומי</div>
+        <h2>תפילות ושיעורים</h2>
+        <p id="zmanimLead">השעות קבועות כל השנה. בימי הסליחות המניין מקדים.</p>
+      </div>
+      <div class="grid g3" id="zmanimGrid"></div>
+      <p class="note" id="zmanimNote" hidden></p>
+    </div>
+  </section>
+
+  <!-- שבת -->
+  <section id="shabbat" class="alt">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">שבת קודש</div>
+        <h2 id="shabbatTitle">זמני השבת</h2>
+        <p>הזמנים מחושבים לפי מיקומה של מעלה עמוס. השקיעה מוצגת כדי שאפשר יהיה לאמת כל שורה.</p>
+      </div>
+      <div class="grid g3" id="shabbatCards"></div>
+      <h3 style="margin:34px 0 14px;font-size:22px">השבתות הקרובות</h3>
+      <div class="tbl-wrap">
+        <table id="shabbatTable">
+          <thead><tr><th>פרשה</th><th>תאריך</th><th>הדלקת נרות</th><th>שקיעה</th><th>צאת השבת</th></tr></thead>
+          <tbody><tr><td colspan="5" class="loading">טוען…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="note" id="shabbatNote"></p>
+    </div>
+  </section>
+
+  <!-- שותפות -->
+  <section id="give">
+    <div class="wrap">
+      <div class="give-box">
+        <div class="give-in">
+          <div>
+            <div class="hand">מרגיש חלק?</div>
+            <h2>בוא תהיה שותף!</h2>
+            <p>המניין מוחזק מכיסם של אנשים פרטיים. אין תקציב חיצוני, אין גוף שמאחורינו — יש שותפים.</p>
+            <div class="bar" id="giveBar" hidden>
+              <div class="row"><span id="barLabel">גויס עד כה</span><b id="barVal">—</b></div>
+              <div class="track"><i class="fill" id="barFill"></i></div>
+              <div class="cap" id="barCap"></div>
+            </div>
+          </div>
+          <div class="give-opts" id="giveOpts"></div>
+        </div>
+      </div>
+      <p class="note" id="giveNote"></p>
+    </div>
+  </section>
+
+  <!-- מה קורה עכשיו -->
+  <section id="now" class="alt">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">מה קורה עכשיו</div>
+        <h2>לקחת חלק</h2>
+        <p>שני דברים פתוחים כרגע לכל מי שרוצה להיות שותף.</p>
+      </div>
+      <div class="grid g2">
+        <a class="promo" href="shas.html">
+          <span class="k">73 כרכים · ₪70 לכרך</span>
+          <b>ש״ס שוטנשטיין לבית הכנסת</b>
+          <span class="d">ברוך השם נקנה ש״ס לבית הכנסת. הדף מחלק את העלות לפי
+            כרכים — כל אחד יכול לקחת על עצמו כרך.</span>
+          <span class="go">לטבלת הכרכים ←</span>
+        </a>
+        <a class="promo" href="hok.html">
+          <span class="k">הוראת קבע בנקאית</span>
+          <b>לתמוך בלי לחשוב על זה כל חודש</b>
+          <span class="d">בלי עמלת סליקה ובלי כרטיס אשראי שפג תוקפו. הנחיות,
+            טופס למילוי דיגיטלי, והמסמכים המקוריים.</span>
+          <span class="go">להקמת הוראת קבע ←</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- אודות -->
+  <section id="about">
+    <div class="wrap about">
+      <div id="aboutText"></div>
+      <div class="facts" id="aboutFacts"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-logo">
+        <img src="img/logo-h-white.svg" alt="מניין הצעירים מעלה עמוס" width="1240" height="510" loading="lazy">
+      </div>
+      <div class="foot-col" id="footWhere"></div>
+      <div class="foot-col" id="footGive"></div>
+    </div>
+    <div class="foot-bot">
+      <span id="footAmuta"></span>
+      <span>נבנה בקוד · <a href="https://github.com/6787012-max/minyan-tzeirim">קוד המקור</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/luach.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

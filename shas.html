@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>חלוקת ש״ס שוטנשטיין · מניין הצעירים</title>
+<meta name="description" content="ש״ס שוטנשטיין לבית הכנסת של מניין הצעירים מעלה עמוס — טבלת הכרכים, מי לקח מה, ואיך לוקחים חלק.">
+<meta name="theme-color" content="#12233F">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="manifest" href="manifest.json">
+<meta property="og:title" content="ש״ס שוטנשטיין לבית הכנסת">
+<meta property="og:description" content="73 כרכים. כל אחד יכול לקחת חלק.">
+<meta property="og:type" content="website">
+<link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/shas.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <img src="img/mark.svg" alt="" width="30" height="30">
+      <b>מניין הצעירים<span class="dot"> · </span><span class="pl">מעלה עמוס</span></b>
+    </a>
+    <nav class="nav">
+      <a href="./">לדף הבית</a>
+      <a href="#table">הכרכים</a>
+      <a class="give" href="#table">קח כרך</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="shas-hero">
+    <div class="wrap">
+      <div class="eyebrow" id="eyebrow">חלוקת הכרכים</div>
+      <h1 id="title">ש״ס שוטנשטיין לבית הכנסת</h1>
+      <p class="lead" id="intro"></p>
+      <div class="stats" id="stats"></div>
+      <div class="progress">
+        <div class="track"><i class="fill" id="fill"></i></div>
+        <div class="cap" id="cap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="table">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">73 כרכים</div>
+        <h2>טבלת העזר — פירוט הכרכים</h2>
+        <p>לחיצה על כרך פנוי פותחת את דף התרומה של נדרים פלוס, עם הסכום ושם הכרך
+          כבר ממולאים. אחרי התשלום הגבאי מסמן את הכרך על שמכם.</p>
+      </div>
+
+      <div class="toolbar">
+        <input type="search" id="q" placeholder="חיפוש מסכת או כרך…" aria-label="חיפוש">
+        <div class="filters" id="filters"></div>
+      </div>
+
+      <div id="grid"></div>
+      <p class="note" id="note"></p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bot" style="border:0;padding-top:0">
+      <span><a href="./">← חזרה לדף הבית</a></span>
+      <span id="footGive"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/shas.js"></script>
+</body>
+</html>

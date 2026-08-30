@@ -1,0 +1,96 @@
+/* hok.css — דף ההוראת קבע הבנקאית. נטען אחרי main.css. */
+
+.hok-hero{padding:52px 0 40px;position:relative}
+.hok-hero h1{font-size:clamp(32px,5vw,52px);margin-bottom:8px}
+.hok-hero .eyebrow{color:var(--gold);font-weight:600;font-size:14.5px;letter-spacing:2.4px;
+  margin-bottom:8px}
+.hok-hero .lead{color:var(--muted);font-size:19.5px;max-width:56ch;margin:0 0 26px}
+
+.mosad-strip{display:flex;flex-wrap:wrap;gap:12px}
+.ms{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 18px;
+  box-shadow:var(--shadow);min-width:150px}
+.ms .k{font-size:13px;letter-spacing:1.2px;color:var(--gold);margin-bottom:2px}
+.ms .v{font-family:'Frank',serif;font-size:22px;line-height:1.2;font-variant-numeric:tabular-nums}
+
+/* מסלולים */
+.track{background:#fff;border:1px solid var(--line);border-radius:var(--r);
+  padding:22px 22px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.track.best{border-color:var(--gold);border-width:1.5px}
+.track h3{font-size:24px}
+.track .tag{align-self:flex-start;font-size:12.5px;font-weight:600;color:#fff;
+  background:var(--gold);border-radius:20px;padding:3px 11px;margin-bottom:9px}
+.track .who{color:var(--muted);font-size:16px;margin-bottom:14px}
+.track ol{margin:0;padding-inline-start:0;list-style:none;counter-reset:s}
+.track li{counter-increment:s;position:relative;padding-inline-start:34px;
+  margin-bottom:12px;font-size:16px;line-height:1.55}
+.track li::before{content:counter(s);position:absolute;inset-inline-start:0;top:1px;
+  width:23px;height:23px;border-radius:50%;background:var(--navy);color:var(--cream);
+  font-family:'Frank',serif;font-size:14px;display:grid;place-items:center}
+.track li b{color:var(--navy)}
+.track .end{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);
+  color:var(--gold);font-weight:600;font-size:15.5px}
+
+/* פריסת הטופס */
+.hok-split{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:32px;
+  align-items:start}
+@media(max-width:1000px){.hok-split{grid-template-columns:1fr}}
+
+.hok-fields fieldset{border:1px solid var(--line);border-radius:var(--r);background:#fff;
+  padding:16px 18px 18px;margin:0 0 16px}
+.hok-fields legend{font-family:'Frank',serif;font-size:19px;padding:0 8px;color:var(--navy)}
+.hok-fields label{display:block;font-size:14.5px;color:var(--muted);margin-bottom:11px}
+.hok-fields input{display:block;width:100%;margin-top:4px;font:inherit;font-size:16.5px;
+  color:var(--ink);background:var(--cream-2);border:1px solid var(--line);border-radius:9px;
+  padding:9px 12px}
+.hok-fields input:focus{outline:2px solid var(--gold);outline-offset:1px;background:#fff}
+.hok-fields .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hok-fields .three{display:grid;grid-template-columns:.8fr .8fr 1.4fr;gap:10px}
+.hok-fields .hint{font-size:14px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+
+.days .lbl{display:block;font-size:14.5px;color:var(--muted);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{font:inherit;font-size:16px;font-weight:600;cursor:pointer;
+  background:var(--cream-2);border:1px solid var(--line);border-radius:9px;
+  padding:8px 15px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--cream)}
+
+.sigwrap{position:relative}
+.sigwrap canvas{width:100%;height:auto;aspect-ratio:640/200;display:block;
+  background:var(--cream-2);border:1px dashed var(--gold);border-radius:10px;
+  touch-action:none;cursor:crosshair}
+.btn.small{font-size:15px;padding:8px 16px;margin-top:9px}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.actions .btn{font-size:16.5px;padding:12px 20px}
+
+/* הנייר */
+.hok-preview .paper{position:relative;background:#fff;border:1px solid var(--line);
+  border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.hok-preview .paper img{display:block;width:100%;height:auto}
+.overlay{position:absolute;inset:0}
+.ov{position:absolute;font-family:'Asst',sans-serif;color:#10243f;line-height:1;
+  white-space:nowrap;overflow:hidden}
+.ov.center{text-align:center}
+.ov.right{text-align:right}
+.ov-check{position:absolute;font-family:'Asst',sans-serif;color:#10243f;font-weight:700;
+  transform:translate(50%,-50%);line-height:1}
+.ov-sig{position:absolute;object-fit:contain}
+
+.doc{display:block;background:#fff;border:1px solid var(--line);border-radius:var(--r);
+  padding:20px 22px;text-decoration:none;box-shadow:var(--shadow);
+  transition:border-color .15s ease,transform .12s ease}
+.doc:hover{border-color:var(--gold);transform:translateY(-1px)}
+.doc b{display:block;font-family:'Frank',serif;font-weight:500;font-size:21px;margin-bottom:4px}
+.doc span{color:var(--muted);font-size:15.5px}
+
+/* הדפסה — רק הנייר */
+@media print{
+  @page{size:A4 portrait;margin:0}
+  .noprint,header.top,footer,#tracks,#docs,.hok-hero,.head{display:none !important}
+  body{background:#fff}
+  section{padding:0}
+  .wrap{max-width:none;padding:0;margin:0}
+  .hok-split{display:block;gap:0}
+  .hok-preview .paper{border:0;border-radius:0;box-shadow:none;width:210mm;height:297mm}
+  .hok-preview .paper img{width:210mm;height:297mm}
+}

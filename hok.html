@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>הוראת קבע בנקאית · מניין הצעירים</title>
+<meta name="description" content="הקמת הוראת קבע בנקאית (מס״ב) למניין הצעירים מעלה עמוס — הנחיות, טופס למילוי דיגיטלי, והמסמכים המקוריים.">
+<meta name="theme-color" content="#12233F">
+<meta name="robots" content="noindex">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/hok.css">
+</head>
+<body>
+
+<header class="top noprint">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <img src="img/mark.svg" alt="" width="30" height="30">
+      <b>מניין הצעירים<span class="dot"> · </span><span class="pl">מעלה עמוס</span></b>
+    </a>
+    <nav class="nav">
+      <a href="./">לדף הבית</a>
+      <a class="give" href="#form">למילוי הטופס</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- פתיח -->
+  <section class="hok-hero noprint">
+    <div class="wrap">
+      <div class="eyebrow">תרומה קבועה</div>
+      <h1>הוראת קבע בנקאית</h1>
+      <p class="lead">הדרך הזולה והיציבה ביותר לתמוך במניין: הסכום יורד ישירות מחשבון
+        הבנק, בלי עמלת סליקה ובלי כרטיס אשראי שפג תוקפו באמצע השנה.</p>
+      <div class="mosad-strip" id="mosadStrip"></div>
+    </div>
+  </section>
+
+  <!-- שלושת המסלולים -->
+  <section class="alt noprint" id="tracks">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">מסלול ג׳ · מ.ש.ג.ב</div>
+        <h2>שלוש דרכים להקים את ההוראה</h2>
+        <p>כך זה עובד אצל נדרים פלוס. בחרו את המסלול שנוח לכם — התוצאה זהה.</p>
+      </div>
+      <div class="grid g3" id="tracksGrid"></div>
+      <p class="note">מקור: מסמך ההנחיות של נדרים פלוס, אוגוסט 2026.
+        <a href="img/hok-guide.jpg" target="_blank" rel="noopener">לצפייה במסמך המקורי</a>.</p>
+    </div>
+  </section>
+
+  <!-- טופס -->
+  <section id="form">
+    <div class="wrap">
+      <div class="head noprint">
+        <div class="eyebrow">מילוי דיגיטלי</div>
+        <h2>מלאו את הטופס כאן</h2>
+        <p>מה שתקלידו מופיע מיד על גבי הטופס המקורי של משגב. בסיום — הדפסה או
+          שמירה כ-PDF, חתימה, ושליחה. אין כאן שרת: הנתונים לא יוצאים מהמכשיר שלכם.</p>
+      </div>
+
+      <div class="hok-split">
+
+        <!-- שדות -->
+        <div class="hok-fields noprint" id="fieldsBox">
+          <fieldset>
+            <legend>פרטי התורם</legend>
+            <label>שם פרטי ומשפחה<input id="f-name" autocomplete="name"></label>
+            <div class="two">
+              <label>ת.ז.<input id="f-zeout" inputmode="numeric" autocomplete="off"></label>
+              <label>טלפון<input id="f-phone" inputmode="tel" autocomplete="tel"></label>
+            </div>
+            <label>כתובת מלאה<input id="f-address" autocomplete="street-address"></label>
+            <label>מייל<input id="f-email" type="email" inputmode="email" autocomplete="email"></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>פרטי התרומה</legend>
+            <div class="two">
+              <label>סכום חודשי (₪)<input id="f-amount" inputmode="numeric" value="100"></label>
+              <label>מספר חיובים<input id="f-payments" inputmode="numeric" placeholder="ריק = ללא הגבלה"></label>
+            </div>
+            <div class="days">
+              <span class="lbl">יום חיוב בחודש</span>
+              <div class="chips" id="dayChips"></div>
+            </div>
+            <label>התרומה מיועדת עבור<input id="f-avour" value="החזקת המניין"></label>
+            <label>הערות<input id="f-notes"></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>פרטי חשבון הבנק</legend>
+            <p class="hint">החלק הזה נשלח לבנק. יש למלא בדיוק כפי שמופיע בפנקס
+              השיקים או באפליקציית הבנק.</p>
+            <div class="three">
+              <label>בנק (מספר)<input id="f-bankNo" inputmode="numeric"></label>
+              <label>סניף<input id="f-branchNo" inputmode="numeric"></label>
+              <label>מספר חשבון<input id="f-account" inputmode="numeric"></label>
+            </div>
+            <div class="two">
+              <label>שם הבנק<input id="f-bankName"></label>
+              <label>שם הסניף<input id="f-branchName"></label>
+            </div>
+            <label>שם בעלי החשבון כמופיע בספרי הבנק<input id="f-holder"></label>
+            <div class="two">
+              <label>מס׳ זהות / ח.פ. של בעל החשבון<input id="f-holderId" inputmode="numeric"></label>
+              <label>תאריך<input id="f-date" type="date"></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>חתימה</legend>
+            <p class="hint">חתמו באצבע או בעכבר. החתימה חייבת להיות זהה לזו
+              שמופיעה בבנק.</p>
+            <div class="sigwrap">
+              <canvas id="sig" width="640" height="200"></canvas>
+              <button type="button" class="btn btn-s small" id="sigClear">נקה חתימה</button>
+            </div>
+          </fieldset>
+
+          <div class="actions">
+            <button type="button" class="btn btn-p" id="btnPrint">הדפסה / שמירה כ-PDF</button>
+            <button type="button" class="btn btn-s" id="btnSend">שליחה למשגב במייל</button>
+            <button type="button" class="btn btn-s" id="btnReset">איפוס</button>
+          </div>
+          <p class="note" id="sendNote"></p>
+        </div>
+
+        <!-- תצוגת הטופס -->
+        <div class="hok-preview">
+          <div class="paper" id="paper">
+            <img src="img/hok-form.png" alt="טופס הוראת קבע של משגב" id="paperImg">
+            <div class="overlay" id="overlay"></div>
+          </div>
+          <p class="note noprint">התצוגה היא הטופס המקורי של משגב. מה שנראה כאן —
+            זה מה שיצא במדפסת.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- מסמכים -->
+  <section class="alt noprint" id="docs">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">המסמכים המקוריים</div>
+        <h2>להורדה ולצפייה</h2>
+      </div>
+      <div class="grid g2">
+        <a class="doc" href="docs/tofes-horaat-keva.pdf" target="_blank" rel="noopener">
+          <b>טופס הוראת קבע</b>
+          <span>הטופס התקני של משגב, עם קוד המוסד של המניין כבר מודפס עליו · PDF</span>
+        </a>
+        <a class="doc" href="docs/eich-mekimim-hok.pdf" target="_blank" rel="noopener">
+          <b>איך מקימים הוראת קבע בנקאית</b>
+          <span>דף ההנחיות של נדרים פלוס — מסלול ג׳ · PDF</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="noprint">
+  <div class="wrap">
+    <div class="foot-bot" style="border:0;padding-top:0">
+      <span><a href="./">← חזרה לדף הבית</a></span>
+      <span id="footAmuta"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/hok.js"></script>
+</body>
+</html>
