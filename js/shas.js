@@ -31,9 +31,10 @@
     var all = S.volumes.length;
     var got = S.volumes.filter(taken).length;
     var left = all - got;
+    var per = S.pricePerVolume, bind = S.bindingPerVolume || 0;
     $('#stats').innerHTML = [
       [all, 'כרכים בסט'],
-      [shekel(S.pricePerVolume), 'לכרך · כולל כריכה'],
+      [shekel(per), bind ? shekel(per - bind) + ' לכרך + ' + shekel(bind) + ' כריכה' : 'לכרך'],
       [got, 'כרכים נלקחו'],
       [left, 'עדיין פנויים']
     ].map(function (r) {

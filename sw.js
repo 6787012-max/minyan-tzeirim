@@ -1,5 +1,5 @@
 /* network-first על ה-shell עם נפילה ל-cache. מעלים את V ביד בכל דיפלוי. */
-var V = 'mt-v4';
+var V = 'mt-v5';
 var SHELL = [
   './', './index.html', './shas.html', './hok.html',
   './css/main.css', './css/shas.css', './css/hok.css',
