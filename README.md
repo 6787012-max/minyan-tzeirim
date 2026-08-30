@@ -3,8 +3,8 @@
 אתר סטטי, בלי build ובלי תלויות. כל דבר שאפשר לחשב — מחושב בדפדפן;
 כל דבר שצריך אדם שיקבע — יושב בקובץ JSON אחד ב-`data/`.
 
-**חי:** https://maninhatzairimmaalaamus.github.io/minyan-tzeirim/
-**Repo:** `maninhatzairimmaalaamus/minyan-tzeirim` · Pages מהשורש של `main`
+**חי:** https://maninhatzairimmaalaamus.github.io/
+**Repo:** `maninhatzairimmaalaamus/maninhatzairimmaalaamus.github.io` · Pages מהשורש של `main`
 
 > ⚠️ **נטפרי חוסם subdomain חדש של github.io עד לאישור ידני.**
 > יש לבקש אישור ל-`maninhatzairimmaalaamus.github.io` בפאנל נטפרי, אחרת
