@@ -24,9 +24,9 @@
   {
    "id": "name",
    "x": 49.892,
-   "w": 34.27,
+   "w": 33.094,
    "y": 19.124,
-   "align": "right",
+   "align": "center",
    "size": 10,
    "label": "שם פרטי ומשפחה"
   },
@@ -35,7 +35,7 @@
    "x": 28.39,
    "w": 17.639,
    "y": 19.124,
-   "align": "right",
+   "align": "center",
    "size": 10,
    "label": "ת.ז."
   },
@@ -44,16 +44,16 @@
    "x": 2.184,
    "w": 16.295,
    "y": 19.124,
-   "align": "right",
+   "align": "center",
    "size": 10,
    "label": "טלפון"
   },
   {
    "id": "address",
    "x": 42.333,
-   "w": 46.365,
+   "w": 45.189,
    "y": 22.865,
-   "align": "right",
+   "align": "center",
    "size": 10,
    "label": "כתובת מלאה"
   },
@@ -62,25 +62,25 @@
    "x": 2.184,
    "w": 35.613,
    "y": 22.865,
-   "align": "right",
+   "align": "center",
    "size": 9,
    "label": "מייל"
   },
   {
    "id": "avour",
    "x": 2.184,
-   "w": 29.902,
+   "w": 29.062,
    "y": 30.23,
-   "align": "right",
+   "align": "center",
    "size": 9,
    "label": "התרומה מיועדת עבור"
   },
   {
    "id": "notes",
    "x": 2.184,
-   "w": 34.438,
+   "w": 33.598,
    "y": 32.605,
-   "align": "right",
+   "align": "center",
    "size": 9,
    "label": "הערות"
   },
@@ -113,8 +113,8 @@
   },
   {
    "id": "branchName",
-   "x": 55.436,
-   "w": 11.759,
+   "x": 56.108,
+   "w": 12.431,
    "y": 55.47,
    "align": "center",
    "size": 10,
@@ -122,19 +122,19 @@
   },
   {
    "id": "holder",
-   "x": 34.438,
-   "w": 44.517,
+   "x": 43.341,
+   "w": 40.317,
    "y": 67.23,
-   "align": "right",
+   "align": "center",
    "size": 10,
    "label": "שם בעלי החשבון"
   },
   {
    "id": "holderId",
-   "x": 20.495,
-   "w": 21.502,
+   "x": 20.159,
+   "w": 8.735,
    "y": 67.23,
-   "align": "right",
+   "align": "center",
    "size": 10,
    "label": "מס׳ זהות / ח.פ."
   },

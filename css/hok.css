@@ -71,9 +71,9 @@
 .ov{position:absolute;font-family:'Asst',sans-serif;color:#10243f;line-height:1;
   white-space:nowrap;overflow:hidden}
 .ov.center{text-align:center}
-.ov.right{text-align:right}
+.ov.right{text-align:right;padding-inline-end:5px}
 .ov-check{position:absolute;font-family:'Asst',sans-serif;color:#10243f;font-weight:700;
-  transform:translate(50%,-50%);line-height:1}
+  transform:translate(-50%,-50%);line-height:1}
 .ov-sig{position:absolute;object-fit:contain}
 
 .doc{display:block;background:#fff;border:1px solid var(--line);border-radius:var(--r);
