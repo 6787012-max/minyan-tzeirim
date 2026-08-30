@@ -3,12 +3,27 @@
 אתר סטטי, בלי build ובלי תלויות. כל דבר שאפשר לחשב — מחושב בדפדפן;
 כל דבר שצריך אדם שיקבע — יושב בקובץ JSON אחד ב-`data/`.
 
-**חי:** https://maninhatzairimmaalaamus.github.io/
-**Repo:** `maninhatzairimmaalaamus/maninhatzairimmaalaamus.github.io` · Pages מהשורש של `main`
+**חי (עובד היום):** https://6787012-max.github.io/minyan-tzeirim/
+**Repo פעיל:** `6787012-max/minyan-tzeirim`
 
-> ⚠️ **נטפרי חוסם subdomain חדש של github.io עד לאישור ידני.**
-> יש לבקש אישור ל-`maninhatzairimmaalaamus.github.io` בפאנל נטפרי, אחרת
-> האתר לא ייפתח במחשבים מסוננים — וזה רוב הקהל שלו.
+**Repo של החשבון החדש:** `maninhatzairimmaalaamus/maninhatzairimmaalaamus.github.io`
+(הקוד שם ומעודכן, אבל **האתר לא עולה** — ראה למטה)
+
+> ### 🚫 שני חסמים על הכתובת של החשבון החדש
+>
+> **1. GitHub השבית Actions לחשבון `maninhatzairimmaalaamus`.**
+> `POST .../actions/workflows/pages.yml/dispatches` מחזיר
+> `"Actions has been disabled for this user."` — ולכן **Pages לא בונה כלום**,
+> לא במנגנון ה-legacy ולא ב-workflow (`builds` ריק, `pages.status = null`).
+> זה קורה לחשבונות חדשים שגיטהב מסמן. הפתרון הוא של יוסף:
+> להיכנס ל-github.com עם החשבון, לאמת טלפון, ואם צריך לפתוח פנייה לתמיכה.
+>
+> **2. נטפרי חוסם subdomain חדש של github.io עד לאישור ידני.**
+> גם אחרי שגיטהב ישחרר, צריך לבקש אישור ל-`maninhatzairimmaalaamus.github.io`
+> בפאנל נטפרי. `6787012-max.github.io` כבר מאושר, ולכן הוא המראה הפעילה.
+>
+> **המעבר לחשבון החדש כשהוא ישוחרר:** `./push.cmd` דוחף לשני הריפו,
+> ואז רק צריך לעדכן את הקישורים שמפנים לכתובת הישנה.
 
 ---
 
@@ -58,7 +73,8 @@ python tools/gen_hok_form.py       # img/hok-form.png + data/hok.json
 ## פריסה
 
 ```bash
-git add -A && git commit -m "..." && git push
+git add -A && git commit -m "..."
+push.cmd        # דוחף לשני הריפו — הפעיל והחדש
 ```
 
 GitHub Pages מגיש את השורש של `main`. יש `.nojekyll`, כך שתיקיות עם קו תחתון עוברות.
