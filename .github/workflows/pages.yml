@@ -1,0 +1,45 @@
+name: Deploy site to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      # אימות: נטפרי חוסם לי את הדומיין מהמחשב, אז הבדיקה רצה כאן
+      - name: בדיקת הדפים החיים
+        run: |
+          set -e
+          base="${{ steps.deployment.outputs.page_url }}"
+          echo "בודק $base"
+          for p in "" "shas.html" "hok.html" "data/config.json" "data/shas.json" \
+                   "data/hok.json" "img/hok-form.png" "docs/tofes-horaat-keva.pdf"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --retry 5 --retry-delay 6 \
+                   --retry-all-errors "${base}${p}")
+            echo "$code  /$p"
+            [ "$code" = "200" ] || { echo "נכשל: /$p"; exit 1; }
+          done
+          echo "כל הדפים מגיבים 200"
