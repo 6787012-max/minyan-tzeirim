@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://minyan.mokad.co.il/sitemap.xml
