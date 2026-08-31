@@ -78,7 +78,7 @@ def build_html(d, row_mm=12.0):
 
 
     # הטמעה inline: Chrome headless לא טוען אמין <img src="file://...svg"> בהדפסה
-    lp = os.path.join(HERE, "img", "logo-h.svg")
+    lp = os.path.join(HERE, "img", "logo-gate.svg")
     logo_svg = io.open(lp, encoding="utf-8").read() if os.path.exists(lp) else ""
     taken = sum(1 for v in vols if (v.get("by") or "").strip())
     major = d.get("majorDonors") or []
@@ -104,8 +104,8 @@ body{width:297mm;background:#fff;color:%s;
 .bsd{position:absolute;top:11mm;right:14mm;font-size:11pt;color:%s}
 header{text-align:center;padding-bottom:6mm;border-bottom:1pt solid %s;margin-bottom:5mm;
   position:relative;z-index:1}
-header .logo{height:30mm;margin:0 auto 2.5mm;display:flex;justify-content:center}
-header .logo svg{height:30mm;width:auto;display:block}
+header .logo{height:44mm;margin:0 auto 2.5mm;display:flex;justify-content:center}
+header .logo svg{height:44mm;width:auto;display:block}
 header h1{font-family:'Frank',serif;font-weight:900;font-size:34pt;line-height:1.1}
 header .sub{font-size:14pt;color:#5C6980;margin-top:1.5mm}
 .bar{display:flex;justify-content:center;gap:5mm;margin-top:3mm;flex-wrap:wrap}
