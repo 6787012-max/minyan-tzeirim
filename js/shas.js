@@ -26,11 +26,18 @@
     return url;
   }
 
+  function majorSum() {
+    return (S.majorDonors || []).reduce(function (a, x) { return a + (+x.amount || 0); }, 0);
+  }
+
   /* ── סטטיסטיקה ───────────────────────────────────────────────── */
   function renderStats() {
     var all = S.volumes.length;
     var got = S.volumes.filter(taken).length;
     var left = all - got;
+    var major = majorSum();
+    var raised = got * S.pricePerVolume + major;
+    var goal = all * S.pricePerVolume;
     var per = S.pricePerVolume, bind = S.bindingPerVolume || 0;
     $('#stats').innerHTML = [
       [all, 'כרכים בסט'],
@@ -42,10 +49,26 @@
         '<div class="k">' + esc(r[1]) + '</div></div>';
     }).join('');
 
-    var pct = all ? got / all * 100 : 0;
-    $('#cap').textContent = got + ' מתוך ' + all + ' כרכים · ' +
-      shekel(got * S.pricePerVolume) + ' מתוך ' + shekel(all * S.pricePerVolume);
+    var pct = goal ? Math.min(100, raised / goal * 100) : 0;
+    $('#cap').textContent = shekel(raised) + ' מתוך ' + shekel(goal) +
+      ' · ' + Math.round(pct) + '%' +
+      (major ? '  (כולל ' + shekel(major) + ' בתרומות ישירות)' : '');
     requestAnimationFrame(function () { $('#fill').style.width = pct + '%'; });
+
+    /* תורמים עיקריים — תרומה בסכום ולא בכרך מסוים */
+    var md = S.majorDonors || [];
+    var box = $('#majorBox');
+    if (box) {
+      if (!md.length) { box.hidden = true; }
+      else {
+        box.hidden = false;
+        box.innerHTML = '<div class="md-k">תודה לתורמים</div>' +
+          md.map(function (x) {
+            return '<div class="md-row"><b>' + esc(x.name) + '</b>' +
+              '<span>' + shekel(x.amount) + '</span></div>';
+          }).join('');
+      }
+    }
   }
 
   /* ── מסננים ──────────────────────────────────────────────────── */

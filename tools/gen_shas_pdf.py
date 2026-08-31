@@ -59,6 +59,14 @@ def build_html(d):
     lp = os.path.join(HERE, "img", "logo-h.svg")
     logo_svg = io.open(lp, encoding="utf-8").read() if os.path.exists(lp) else ""
     taken = sum(1 for v in vols if (v.get("by") or "").strip())
+    major = d.get("majorDonors") or []
+    major_sum = sum(int(x.get("amount") or 0) for x in major)
+    major_html = ""
+    if major:
+        major_html = ('<div class="md"><span class="k">תודה לתורמים</span>' +
+                      "".join('<span class="r"><b>%s</b> %s₪</span>'
+                              % (x["name"], "{:,}".format(int(x["amount"])))
+                              for x in major) + '</div>')
 
     return """<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><style>
 %s %s %s
@@ -81,6 +89,12 @@ header .sub{font-size:9.5pt;color:#5C6980;margin-top:1.5mm}
 .bar{display:flex;justify-content:center;gap:5mm;margin-top:3mm;flex-wrap:wrap}
 .bar span{font-size:9pt;background:%s;border:.5pt solid %s;border-radius:2mm;padding:1.2mm 4mm}
 .bar b{font-family:'Frank',serif;font-size:11pt;color:%s}
+.md{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2mm 6mm;
+  background:#12233F;color:#F6F1E5;border-radius:2mm;padding:2mm 5mm;margin-bottom:3.5mm;
+  position:relative;z-index:1}
+.md .k{font-size:7.5pt;letter-spacing:1.2pt;color:#D9BE7C}
+.md .r{font-size:10pt;font-family:'Frank',serif}
+.md .r b{font-weight:500}
 main{flex:1;column-count:3;column-gap:5mm;position:relative;z-index:1}
 .sd{break-inside:avoid;margin-bottom:2.8mm}
 .sd h2{font-family:'Frank',serif;font-weight:500;font-size:11pt;color:%s;
@@ -113,6 +127,7 @@ footer .site{font-family:'Frank',serif;font-size:10.5pt;color:%s;margin-top:1.2m
       <span>פנויים <b>%d</b></span>
     </div>
   </header>
+  %s
   <main>%s</main>
   <footer>
     לרישום — למלא את השם בשורה שליד הכרך, או להירשם באתר.<br>
@@ -128,7 +143,7 @@ footer .site{font-family:'Frank',serif;font-size:10.5pt;color:%s;margin-top:1.2m
         NAVY, GOLD_LT, GOLD, NAVY, GOLD, GOLD, NAVY, GOLD,
         logo_svg, d["title"], d["intro"].split(".")[0] + ".",
         len(vols), price, taken, len(vols) - taken,
-        blocks, "8000707", d.get("priceNote", ""),
+        major_html, blocks, "8000707", d.get("priceNote", ""),
         "minyan.mokad.co.il")
 
 

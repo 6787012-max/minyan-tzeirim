@@ -93,3 +93,13 @@
 .modal .hint{font-size:14.5px;color:var(--muted);margin:12px 0 0;line-height:1.5;min-height:1em}
 
 button.vol{font-family:inherit}
+
+/* תורמים עיקריים */
+.major{background:var(--navy);color:var(--cream);border-radius:14px;
+  padding:16px 20px;margin-bottom:18px;display:flex;flex-wrap:wrap;
+  align-items:center;gap:10px 22px}
+.major .md-k{font-size:13.5px;letter-spacing:2px;color:var(--gold-lt);font-weight:600}
+.major .md-row{display:flex;align-items:baseline;gap:9px}
+.major .md-row b{font-family:'Frank',serif;font-weight:500;font-size:20px}
+.major .md-row span{font-family:'Frank',serif;font-size:19px;color:var(--gold-lt);
+  font-variant-numeric:tabular-nums}
