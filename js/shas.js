@@ -85,8 +85,8 @@
       '<span class="b"><b>' + esc(v.name) + '</b><span>' +
       (t ? esc(v.by) : shekel(S.pricePerVolume) + ' · פנוי') + '</span></span>';
     if (t) return '<div class="vol taken" title="נלקח על ידי ' + esc(v.by) + '">' + inner + '</div>';
-    return '<a class="vol" href="' + esc(volUrl(v)) + '" target="_blank" rel="noopener" ' +
-      'title="לקחת את הכרך הזה">' + inner + '</a>';
+    return '<button type="button" class="vol" data-n="' + esc(v.n) + '" ' +
+      'title="לקחת את הכרך הזה">' + inner + '</button>';
   }
 
   function renderGrid() {
@@ -101,6 +101,67 @@
         '<div class="vols">' + list.map(volHtml).join('') + '</div></div>';
     });
     g.innerHTML = any ? out : '<p class="empty">לא נמצאו כרכים שמתאימים לחיפוש.</p>';
+  }
+
+
+  /* ── חלונית נטילת כרך ─────────────────────────────────────────── */
+  var CUR = null;
+
+  function openModal(n) {
+    CUR = S.volumes.filter(function (v) { return v.n === n; })[0];
+    if (!CUR) return;
+    $('#mTitle').textContent = 'כרך ' + CUR.n + ' — ' + CUR.name;
+    $('#mPrice').textContent = shekel(S.pricePerVolume) + ' · ' + (S.priceNote || '');
+    $('#mHint').textContent = '';
+    $('#modal').hidden = false;
+    document.body.style.overflow = 'hidden';
+    updateModal();
+    $('#mName').focus();
+  }
+
+  function closeModal() {
+    $('#modal').hidden = true;
+    document.body.style.overflow = '';
+    CUR = null;
+  }
+
+  function updateModal() {
+    if (!CUR) return;
+    var n = CFG.nedarim || {};
+    var nm = $('#mName').value.trim(), ph = $('#mPhone').value.trim();
+    $('#mPay').href = volUrl(CUR) +
+      (nm ? '&ClientName=' + encodeURIComponent(nm) : '') +
+      (ph ? '&Phone=' + encodeURIComponent(ph) : '');
+  }
+
+  /* רישום בלי תשלום — נשלח לגבאי */
+  function registerLater() {
+    var nm = $('#mName').value.trim(), ph = $('#mPhone').value.trim();
+    if (!nm || !ph) {
+      $('#mHint').innerHTML = '<b style="color:#9B1E1E">יש למלא שם וטלפון.</b>';
+      $('#mName').focus();
+      return;
+    }
+    var o = S.order || {};
+    var body = [
+      'נטילת כרך בש״ס',
+      '',
+      'כרך ' + CUR.n + ' — ' + CUR.name + ' (' + CUR.seder + ')',
+      'שם: ' + nm,
+      'טלפון: ' + ph,
+      'סכום: ' + shekel(S.pricePerVolume),
+      '',
+      'הרישום נעשה באתר. התשלום יתבצע מול הגבאי.'
+    ].join('\n');
+
+    if (o.whatsapp) {
+      window.open('https://wa.me/' + o.whatsapp + '?text=' + encodeURIComponent(body), '_blank');
+    } else if (o.email) {
+      location.href = 'mailto:' + o.email +
+        '?subject=' + encodeURIComponent('נטילת כרך ' + CUR.n + ' — ' + nm) +
+        '&body=' + encodeURIComponent(body);
+    }
+    $('#mHint').innerHTML = '<b>נשלח לגבאי.</b> הכרך יסומן על שמך אחרי אישורו.';
   }
 
   /* ── הפעלה ───────────────────────────────────────────────────── */
@@ -128,6 +189,27 @@
 
     var q = $('#q');
     q.addEventListener('input', function () { Q = q.value.trim(); renderGrid(); });
+
+    $('#grid').addEventListener('click', function (e) {
+      var b = e.target.closest('button.vol');
+      if (b) openModal(b.dataset.n);
+    });
+    $('#mClose').addEventListener('click', closeModal);
+    $('#modal').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !$('#modal').hidden) closeModal();
+    });
+    ['#mName', '#mPhone'].forEach(function (sel) {
+      $(sel).addEventListener('input', updateModal);
+    });
+    $('#mLater').addEventListener('click', registerLater);
+
+    if (S.pdf) {
+      $('#pdfNote').innerHTML = 'רוצים לתלות דף רישום בבית הכנסת? ' +
+        '<a href="' + esc(S.pdf) + '" target="_blank" rel="noopener"><b>להורדת דף הרישום המודפס (PDF)</b></a>';
+    }
   }).catch(function (e) {
     $('#intro').textContent = 'שגיאה בטעינת רשימת הכרכים.';
     console.error(e);

@@ -59,6 +59,13 @@
     });
   }
 
+  /* פריט תפילה/שיעור יכול להיות מוגבל לימים מסוימים (weekdays: 0=ראשון…6=שבת).
+     בלי השדה — הוא חל בכל יום. */
+  function runsOn(item, date) {
+    if (!item.weekdays || !item.weekdays.length) return true;
+    return item.weekdays.indexOf(date.getDay()) >= 0;
+  }
+
   /* מוצא את המופע הקרוב ביותר מבין השיעורים והתפילות */
   function nextShiur(now, sel) {
     var items = (CFG.shiurim || []).concat(CFG.tefillot || []);
@@ -67,18 +74,29 @@
       var t = (sel && it.timeSelichot) ? it.timeSelichot : it.time;
       if (!t || !/^\d{1,2}:\d{2}$/.test(t)) return;
       var p = t.split(':');
-      var when = new Date(now.getFullYear(), now.getMonth(), now.getDate(), +p[0], +p[1]);
-      if (when <= now) when = new Date(when.getTime() + 864e5);   // מחר
-      if (!best || when < best.when) best = { title: it.title, when: when, t: t };
+      /* סורקים שבוע קדימה — תפילה שמתקיימת רק בשבת לא בהכרח היום או מחר */
+      for (var d = 0; d < 8; d++) {
+        var when = new Date(now.getFullYear(), now.getMonth(), now.getDate() + d,
+                            +p[0], +p[1]);
+        if (when <= now || !runsOn(it, when)) continue;
+        if (!best || when < best.when) best = { title: it.title, when: when, t: t };
+        break;
+      }
     });
     if (!best) return null;
     var mins = Math.round((best.when - now) / 60000);
+    var DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    var dayGap = Math.round(
+      (new Date(best.when.getFullYear(), best.when.getMonth(), best.when.getDate()) -
+       new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
     var txt;
     if (mins < 60) txt = 'בעוד ' + mins + ' דק׳ · ' + best.t;
-    else if (mins < 60 * 20) {
+    else if (dayGap === 0) {
       var hh = Math.floor(mins / 60), mm = mins % 60;
       txt = 'בעוד ' + hh + ' שע׳' + (mm ? ' ו-' + mm + ' דק׳' : '') + ' · ' + best.t;
-    } else txt = 'מחר ב-' + best.t;
+    } else if (dayGap === 1) txt = 'מחר ב-' + best.t;
+    else txt = (best.when.getDay() === 6 ? 'בשבת' : 'ביום ' + DAYS[best.when.getDay()]) +
+               ' ב-' + best.t;
     return { title: best.title, when: txt };
   }
 
@@ -105,6 +123,7 @@
                : 'בימי הסליחות <b>' + esc(it.timeSelichot) + '</b>') + '</div>';
       }
       if (it.note) html += '<div class="alt-time">' + esc(it.note) + '</div>';
+      if (!runsOn(it, now)) c.classList.add('not-today');
       c.innerHTML = html;
       grid.appendChild(c);
     });
@@ -266,7 +285,7 @@
 
   /* ── מקומות לימים הנוראים ─────────────────────────────────────── */
 
-  var YN = null, QTY = {};
+  var YN = null, PLACES = 1, HAS_KEVA = false;
 
   /* מוצא את התאריכים האמיתיים של ר״ה ויוה״כ מטבלת הלוח */
   function yamimNoraimDates(now) {
@@ -276,7 +295,7 @@
       var iso = Luach.iso(d), h = LU.days[iso];
       if (h && /ראש השנה|יום כיפור/.test(h)) {
         var k = /ראש השנה/.test(h) ? 'rh' : 'yk';
-        if (!seen[k]) { seen[k] = 1; out.push([k, new Date(d), h]); }
+        if (!seen[k]) { seen[k] = 1; out.push([k, new Date(d)]); }
         if (out.length === 2) break;
       }
       d.setDate(d.getDate() + 1);
@@ -285,13 +304,13 @@
   }
 
   function renderSeats(now) {
-    if (!YN || !(YN.options || []).length) return;
-    var sec = $('seats');
-    sec.hidden = false;
+    if (!YN || !YN.price) return;
+    $('seats').hidden = false;
 
     $('seatsEyebrow').textContent = YN.eyebrow || '';
     $('seatsTitle').textContent = YN.title || '';
     $('seatsIntro').textContent = YN.intro || '';
+    $('placesLabel').textContent = (YN.places || {}).label || 'כמה מקומות?';
 
     var dates = yamimNoraimDates(now);
     if (dates.length) {
@@ -303,63 +322,118 @@
       }).join('  ·  ');
     }
 
-    if (YN.draft) {
-      var df = $('seatsDraft');
-      df.hidden = false;
-      df.innerHTML = '<b>המחירים כאן טרם אושרו</b> — הם ברירת מחדל. יש לאשר אותם ' +
-        'בקובץ <code>data/yamim_noraim.json</code> ולהוריד את <code>draft</code> ל-false.';
+    var ex = YN.exemption || {};
+    if (ex.enabled) {
+      $('kevaLabel').textContent = ex.label || '';
+    } else {
+      $('kevaWrap').hidden = true;
     }
 
-    var g = $('seatsGrid');
-    g.innerHTML = YN.options.map(function (o) {
-      QTY[o.id] = QTY[o.id] || 0;
-      return '<div class="seat" data-id="' + esc(o.id) + '">' +
-        '<span class="info"><b>' + esc(o.name) + '</b><span>' + esc(o.desc || '') + '</span></span>' +
-        '<span class="price">₪' + o.price + '</span>' +
-        '<span class="stepper">' +
-        '<button type="button" data-d="1" aria-label="הוסף">+</button>' +
-        '<span class="q">0</span>' +
-        '<button type="button" data-d="-1" aria-label="הפחת" disabled>−</button>' +
-        '</span></div>';
-    }).join('');
+    PLACES = (YN.places || {}).default || 1;
+    $('placesQty').textContent = PLACES;
 
-    g.addEventListener('click', function (e) {
+    $('placesStep').addEventListener('click', function (e) {
       var b = e.target.closest('button[data-d]');
       if (!b) return;
-      var row = b.closest('.seat'), id = row.dataset.id;
-      var opt = YN.options.filter(function (o) { return o.id === id; })[0];
-      var max = opt.max || 9;
-      QTY[id] = Math.max(0, Math.min(max, (QTY[id] || 0) + (+b.dataset.d)));
-      row.querySelector('.q').textContent = QTY[id];
-      row.querySelector('[data-d="-1"]').disabled = QTY[id] === 0;
-      row.querySelector('[data-d="1"]').disabled = QTY[id] === max;
-      updateSeatsTotal();
+      var pl = YN.places || {};
+      PLACES = Math.max(pl.min || 1, Math.min(pl.max || 10, PLACES + (+b.dataset.d)));
+      $('placesQty').textContent = PLACES;
+      updateSeats();
     });
+    $('kevaChk').addEventListener('change', function () {
+      HAS_KEVA = this.checked;
+      updateSeats();
+    });
+    $('seatsSend').addEventListener('click', sendOrder);
 
     $('seatsNote').innerHTML = esc(YN.note || '') +
       ' התשלום מתבצע באתר המאובטח של נדרים פלוס.';
-    updateSeatsTotal();
+    updateSeats();
   }
 
-  function updateSeatsTotal() {
-    var total = 0, parts = [];
-    YN.options.forEach(function (o) {
-      var q = QTY[o.id] || 0;
-      if (!q) return;
-      total += q * o.price;
-      parts.push(o.name + ' ×' + q);
-    });
-    $('seatsTotal').textContent = '₪' + total.toLocaleString('he-IL');
-    var btn = $('seatsBuy');
-    btn.setAttribute('aria-disabled', String(total === 0));
-    if (!total) { btn.href = '#'; btn.textContent = 'בחרו מקומות'; return; }
-    btn.textContent = 'לרכישה מאובטחת · ₪' + total.toLocaleString('he-IL');
-    var n = CFG.nedarim || {}, yn = YN.nedarim || {};
-    btn.href = n.url + '&Amount=' + total + '&AmountLock=1&OnlyNormal=1' +
-      '&Groupe=' + encodeURIComponent(yn.groupe || 'מקומות לימים נוראים') +
-      '&GroupeLock=1' +
-      '&CustomAvour=' + encodeURIComponent(yn.avourTitle || 'פירוט המקומות') +
-      '&Avour=' + encodeURIComponent(parts.join(' · '));
+  function orderSummary() {
+    return [
+      'הזמנת מקומות לימים הנוראים',
+      '',
+      'שם: ' + ($('ordName').value.trim() || '—'),
+      'טלפון: ' + ($('ordPhone').value.trim() || '—'),
+      'מספר מקומות: ' + PLACES,
+      HAS_KEVA ? 'יש הוראת קבע של שותף — פטור מתשלום' : 'לתשלום: ₪' + seatsTotal(),
+      ($('ordNote').value.trim() ? 'הערה: ' + $('ordNote').value.trim() : '')
+    ].filter(Boolean).join('\n');
+  }
+
+  function seatsTotal() {
+    if (HAS_KEVA) return 0;
+    return (YN.priceUnit === 'place') ? YN.price * PLACES : YN.price;
+  }
+
+  function updateSeats() {
+    var total = seatsTotal();
+    var pay = $('seatsPay');
+
+    if (HAS_KEVA) {
+      $('totalLabel').textContent = 'שותף בהוראת קבע';
+      $('seatsTotal').textContent = 'ללא תשלום';
+      $('seatsTotal').classList.add('free');
+      pay.hidden = true;
+      $('seatsSend').textContent = 'שריון המקומות';
+      $('seatsSend').className = 'btn btn-g';
+    } else {
+      $('totalLabel').textContent = (YN.priceUnit === 'place')
+        ? PLACES + ' מקומות × ₪' + YN.price : esc(YN.priceLabel || 'לתשלום');
+      $('seatsTotal').textContent = '₪' + total.toLocaleString('he-IL');
+      $('seatsTotal').classList.remove('free');
+      pay.hidden = false;
+      $('seatsSend').textContent = 'רישום בלי תשלום כעת';
+      $('seatsSend').className = 'btn btn-s';
+
+      var n = CFG.nedarim || {}, yn = YN.nedarim || {};
+      var detail = PLACES + ' מקומות · ' + ($('ordName').value.trim() || '');
+      pay.href = n.url + '&Amount=' + total + '&AmountLock=1&OnlyNormal=1' +
+        '&Groupe=' + encodeURIComponent(yn.groupe || 'מקומות לימים נוראים') +
+        '&GroupeLock=1' +
+        '&CustomAvour=' + encodeURIComponent(yn.avourTitle || 'פירוט ההזמנה') +
+        '&Avour=' + encodeURIComponent(detail) +
+        ($('ordName').value.trim() ? '&ClientName=' + encodeURIComponent($('ordName').value.trim()) : '') +
+        ($('ordPhone').value.trim() ? '&Phone=' + encodeURIComponent($('ordPhone').value.trim()) : '');
+    }
+  }
+
+  /* שליחת ההזמנה לגבאי — וואטסאפ אם יש מספר, אחרת מייל */
+  function sendOrder() {
+    if (!$('ordName').value.trim() || !$('ordPhone').value.trim()) {
+      $('seatsNote').innerHTML = '<b style="color:#9B1E1E">יש למלא שם וטלפון לפני השליחה.</b>';
+      $('ordName').focus();
+      return;
+    }
+    var o = YN.order || {}, body = orderSummary();
+    if (o.whatsapp) {
+      window.open('https://wa.me/' + o.whatsapp + '?text=' + encodeURIComponent(body), '_blank');
+    } else if (o.email) {
+      location.href = 'mailto:' + o.email +
+        '?subject=' + encodeURIComponent('הזמנת מקומות לימים הנוראים — ' + $('ordName').value.trim()) +
+        '&body=' + encodeURIComponent(body);
+    }
+    $('seatsNote').innerHTML = 'ההזמנה נשלחה לגבאי. ' +
+      (HAS_KEVA ? 'שותפים בהוראת קבע — אין צורך בתשלום נוסף.'
+                : 'אפשר לשלם עכשיו או מאוחר יותר מול הגבאי.');
+  }
+
+
+  /* באנר הש״ס בדף הבית — המספר מגיע מ-shas.json, לא קשיח */
+  function renderShasBanner() {
+    fetch('data/shas.json', { cache: 'no-cache' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var vols = d.volumes || [];
+        var free = vols.filter(function (v) { return !(v.by && v.by.trim()); }).length;
+        var el1 = $('sbFree');
+        if (el1) el1.textContent = free;
+        var el2 = $('promoShasK');
+        if (el2) el2.textContent = vols.length + ' כרכים · ₪' + d.pricePerVolume + ' לכרך';
+      })
+      .catch(function () { /* הבאנר נשאר עם ערך ברירת המחדל */ });
   }
 
   /* ── אודות ותחתית ─────────────────────────────────────────────── */
@@ -412,6 +486,7 @@
     renderGive();
     renderAbout();
     renderFooter();
+    renderShasBanner();
     // רענון פס היום כל דקה (הספירה לאחור)
     setInterval(function () { renderToday(new Date()); }, 60000);
   }

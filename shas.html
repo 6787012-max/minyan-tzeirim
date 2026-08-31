@@ -13,8 +13,8 @@
 <meta property="og:type" content="website">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="canonical" href="https://minyan.mokad.co.il/shas.html">
-<link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/shas.css">
+<link rel="stylesheet" href="css/main.css?v=8">
+<link rel="stylesheet" href="css/shas.css?v=8">
 </head>
 <body>
 
@@ -63,10 +63,28 @@
 
       <div id="grid"></div>
       <p class="note" id="note"></p>
+      <p class="note" id="pdfNote"></p>
     </div>
   </section>
 
 </main>
+
+<!-- חלונית בחירה על כרך -->
+<div class="modal" id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <button type="button" class="x" id="mClose" aria-label="סגירה">×</button>
+    <div class="eyebrow" id="mEyebrow">נטילת כרך</div>
+    <h3 id="mTitle"></h3>
+    <p id="mPrice"></p>
+    <label class="fld"><span>שם מלא</span><input id="mName" autocomplete="name"></label>
+    <label class="fld"><span>טלפון</span><input id="mPhone" inputmode="tel" autocomplete="tel"></label>
+    <div class="m-actions">
+      <a class="btn btn-g" id="mPay" href="#" target="_blank" rel="noopener">תשלום בנדרים פלוס</a>
+      <button type="button" class="btn btn-s" id="mLater">רישום בלי תשלום כעת</button>
+    </div>
+    <p class="hint" id="mHint"></p>
+  </div>
+</div>
 
 <footer>
   <div class="wrap">
@@ -77,6 +95,6 @@
   </div>
 </footer>
 
-<script src="js/shas.js"></script>
+<script src="js/shas.js?v=8"></script>
 </body>
 </html>

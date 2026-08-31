@@ -68,3 +68,28 @@
   .vol .b b{font-size:16px}
   .vol .n{min-width:30px;height:30px;font-size:14px}
 }
+
+/* ── חלונית נטילת כרך ─────────────────────────────────────────── */
+.modal{position:fixed;inset:0;z-index:80;background:rgba(18,35,63,.55);
+  backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .sheet{background:var(--cream);border:1px solid var(--gold);border-radius:16px;
+  padding:28px 26px 22px;max-width:440px;width:100%;position:relative;
+  box-shadow:0 24px 60px rgba(18,35,63,.3);max-height:90vh;overflow-y:auto}
+.modal .x{position:absolute;inset-inline-start:14px;top:12px;width:34px;height:34px;
+  border:0;background:transparent;font-size:26px;line-height:1;color:var(--muted);
+  cursor:pointer;border-radius:50%}
+.modal .x:hover{background:rgba(176,141,62,.15);color:var(--navy)}
+.modal .eyebrow{color:var(--gold);font-weight:600;font-size:13.5px;letter-spacing:2px;
+  margin-bottom:6px}
+.modal h3{font-family:'Frank',serif;font-weight:500;font-size:25px;line-height:1.2;margin:0}
+.modal > .sheet > p{color:var(--muted);font-size:15.5px;margin:8px 0 18px}
+.modal .fld{display:block;margin-bottom:12px}
+.modal .fld > span{display:block;font-size:14.5px;color:var(--muted);margin-bottom:5px}
+.modal .fld input{display:block;width:100%;font:inherit;font-size:16.5px;color:var(--ink);
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 14px}
+.modal .fld input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.m-actions{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.m-actions .btn{justify-content:center;text-align:center}
+.modal .hint{font-size:14.5px;color:var(--muted);margin:12px 0 0;line-height:1.5;min-height:1em}
+
+button.vol{font-family:inherit}

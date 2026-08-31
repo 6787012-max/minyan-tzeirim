@@ -17,7 +17,7 @@
 <link rel="canonical" href="https://minyan.mokad.co.il/">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/assistant-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/main.css?v=8">
 </head>
 <body>
 
@@ -64,6 +64,24 @@
     </div>
   </div>
 
+
+  <!-- באנר ש״ס — הדבר הבולט ביותר בדף -->
+  <a class="shas-banner" href="shas.html">
+    <div class="wrap">
+      <div class="sb-text">
+        <span class="k">חדש בבית הכנסת</span>
+        <b>ש״ס שוטנשטיין</b>
+        <span class="d">ברוך השם נקנה ש״ס לבית הכנסת. 73 כרכים —
+          כל אחד יכול לקחת על עצמו כרך.</span>
+      </div>
+      <div class="sb-side">
+        <span class="num" id="sbFree">73</span>
+        <span class="lbl">כרכים עדיין פנויים</span>
+        <span class="go">לטבלת הכרכים ←</span>
+      </div>
+    </div>
+  </a>
+
   <!-- מקומות לימים הנוראים -->
   <section id="seats" hidden>
     <div class="wrap">
@@ -75,16 +93,43 @@
             <p id="seatsIntro"></p>
             <p class="dates" id="seatsDates"></p>
           </div>
-          <div class="draft-flag" id="seatsDraft" hidden></div>
         </div>
-        <div class="seats-grid" id="seatsGrid"></div>
-        <div class="seats-foot">
-          <div class="total">
-            <span>סה״כ לתשלום</span>
-            <b id="seatsTotal">₪0</b>
+
+        <div class="order">
+          <div class="order-row">
+            <label class="fld">
+              <span id="placesLabel">כמה מקומות צריך?</span>
+              <span class="stepper" id="placesStep">
+                <button type="button" data-d="1" aria-label="הוסף">+</button>
+                <span class="q" id="placesQty">1</span>
+                <button type="button" data-d="-1" aria-label="הפחת">−</button>
+              </span>
+            </label>
           </div>
-          <a class="btn btn-g" id="seatsBuy" href="#" target="_blank" rel="noopener">לרכישה מאובטחת</a>
+
+          <label class="keva" id="kevaWrap">
+            <input type="checkbox" id="kevaChk">
+            <span id="kevaLabel"></span>
+          </label>
+
+          <div class="order-row two">
+            <label class="fld"><span>שם מלא</span><input id="ordName" autocomplete="name"></label>
+            <label class="fld"><span>טלפון</span><input id="ordPhone" inputmode="tel" autocomplete="tel"></label>
+          </div>
+          <label class="fld"><span>הערה לגבאי (לא חובה)</span><input id="ordNote"></label>
+
+          <div class="seats-foot">
+            <div class="total">
+              <span id="totalLabel">לתשלום</span>
+              <b id="seatsTotal">₪0</b>
+            </div>
+            <div class="order-actions">
+              <a class="btn btn-g" id="seatsPay" href="#" target="_blank" rel="noopener">תשלום והזמנה</a>
+              <button type="button" class="btn btn-s" id="seatsSend">שליחה לגבאי</button>
+            </div>
+          </div>
         </div>
+
         <p class="note" id="seatsNote"></p>
       </div>
     </div>
@@ -155,10 +200,10 @@
       </div>
       <div class="grid g2">
         <a class="promo" href="shas.html">
-          <span class="k">73 כרכים · ₪70 לכרך</span>
+          <span class="k" id="promoShasK">73 כרכים</span>
           <b>ש״ס שוטנשטיין לבית הכנסת</b>
-          <span class="d">ברוך השם נקנה ש״ס לבית הכנסת. הדף מחלק את העלות לפי
-            כרכים — כל אחד יכול לקחת על עצמו כרך.</span>
+          <span class="d">טבלת הכרכים המלאה, לפי סדרים — עם חיפוש, סימון מה נלקח,
+            ודף רישום להדפסה.</span>
           <span class="go">לטבלת הכרכים ←</span>
         </a>
         <a class="promo" href="hok.html">
@@ -198,7 +243,7 @@
   </div>
 </footer>
 
-<script src="js/luach.js"></script>
-<script src="js/app.js"></script>
+<script src="js/luach.js?v=8"></script>
+<script src="js/app.js?v=8"></script>
 </body>
 </html>
