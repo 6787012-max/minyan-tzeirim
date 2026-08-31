@@ -101,6 +101,66 @@
     return { title: best.title, when: txt };
   }
 
+  /* ── זמני היום ההלכתיים ───────────────────────────────────────── */
+
+  var ZY = [
+    ['בוקר', 'sunrise', [
+      ['alot',      'עלות השחר',      '16.1° מתחת לאופק'],
+      ['mishyakir', 'משיכיר',          'זמן טלית ותפילין · 11.5°'],
+      ['sunrise',   'הנץ החמה',        '', 1],
+      ['shemaMGA',  'סוף זמן ק״ש',     'מגן אברהם'],
+      ['shemaGRA',  'סוף זמן ק״ש',     'הגר״א', 1],
+      ['tefilaMGA', 'סוף זמן תפילה',   'מגן אברהם'],
+      ['tefilaGRA', 'סוף זמן תפילה',   'הגר״א', 1]
+    ]],
+    ['אחר הצהריים והערב', 'moon', [
+      ['chatzot',  'חצות היום',       ''],
+      ['minchaG',  'מנחה גדולה',      'חצי שעה זמנית אחרי חצות'],
+      ['minchaK',  'מנחה קטנה',       ''],
+      ['plag',     'פלג המנחה',       ''],
+      ['sunset',   'שקיעה',           '', 1],
+      ['tzet',     'צאת הכוכבים',     '8.5° מתחת לאופק', 1],
+      ['tzetRT',   'צאת הכוכבים ר״ת', '72 דקות אחרי השקיעה']
+    ]]
+  ];
+
+  function renderZmaneiYom(now) {
+    var z = Luach.zmanim(now, CFG.geo);
+    var box = $('zyGrid');
+    if (!z || !box) return;
+
+    /* הזמן הקרוב הבא — מודגש */
+    var nextKey = null, best = Infinity;
+    ZY.forEach(function (col) {
+      col[2].forEach(function (r) {
+        var t = z[r[0]];
+        if (t && t > now && (t - now) < best) { best = t - now; nextKey = r[0]; }
+      });
+    });
+
+    box.innerHTML = ZY.map(function (col) {
+      var rows = col[2].map(function (r) {
+        var t = z[r[0]];
+        if (!t) return '';
+        var cls = 'zy-row';
+        if (r[0] === nextKey) cls += ' now';
+        else if (r[3]) cls += ' key';
+        if (t < now && r[0] !== nextKey) cls += ' past';
+        return '<div class="' + cls + '"><span class="nm">' + esc(r[1]) +
+          (r[2] ? '<small>' + esc(r[2]) + '</small>' : '') +
+          '</span><span class="tm">' + Luach.hhmm(t) + '</span></div>';
+      }).join('');
+      return '<div class="zy-col"><h3>' + (ICONS[col[1]] || '') + esc(col[0]) + '</h3>' +
+        rows + '</div>';
+    }).join('');
+
+    $('zyNote').innerHTML = 'שעה זמנית היום: <b>' +
+      Math.round(z.hour / 60000) + ' דקות</b>. ' +
+      'הזמנים אסטרונומיים לפי שיטות מקובלות ואינם פסק הלכה — ' +
+      '<b>לוח מודפס של הרב המקומי גובר.</b>';
+    if (window.Motion) window.Motion.refresh();
+  }
+
   /* ── כרטיסי זמנים ─────────────────────────────────────────────── */
 
   function renderZmanim(now) {
@@ -486,6 +546,7 @@
     if (CFG.tagline) $('tagline').textContent = CFG.tagline;
     var now = new Date();
     renderToday(now);
+    try { renderZmaneiYom(now); } catch (e) { console.error('zmanim', e); }
     try { renderSeats(now); } catch (e) { console.error('seats', e); }
     renderZmanim(now);
     renderShabbat(now);
@@ -495,7 +556,11 @@
     renderShasBanner();
     if (window.Motion) window.Motion.refresh();
     // רענון פס היום כל דקה (הספירה לאחור)
-    setInterval(function () { renderToday(new Date()); }, 60000);
+    setInterval(function () {
+      var t = new Date();
+      renderToday(t);
+      try { renderZmaneiYom(t); } catch (e) {}
+    }, 60000);
   }
 
   function fail(msg) {

@@ -196,6 +196,57 @@
   }
 
 
+
+  /* ── זמני היום ההלכתיים ──────────────────────────────────────────
+     כל הזמנים נגזרים משני עוגנים אסטרונומיים: הנץ והשקיעה בגובה פני הים.
+     "שעה זמנית" = שתים־עשרה חלקים שווים בין הנץ לשקיעה (שיטת הגר"א).
+
+     הזוויות שמתחת לאופק:
+       עלות השחר  16.1°   ·  משיכיר 11.5°  ·  צאת הכוכבים 8.5°
+     רבנו תם מחושב כ-72 דקות אחרי השקיעה.
+
+     ⚠️ אלה חישובים אסטרונומיים לפי שיטות מקובלות, לא פסק הלכה.
+     לוח מודפס של הרב המקומי גובר. */
+  function zmanim(date, geo) {
+    var y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate();
+    var rd = rdFromGreg(y, m, d), off = ilOffset(y, m, d);
+
+    function at(zenith, rising) {
+      var h = solarEvent(rd, geo.lat, geo.lon, zenith, rising);
+      return h === null ? null : mkTime(y, m, d, h, off);
+    }
+    var sunrise = at(90.833, true), sunset = at(90.833, false);
+    if (!sunrise || !sunset) return null;
+
+    /* שעה זמנית של הגר"א, במילישניות */
+    var hour = (sunset - sunrise) / 12;
+    function fromSunrise(n) { return new Date(sunrise.getTime() + n * hour); }
+
+    var alot = at(106.1, true);          /* 16.1° מתחת לאופק */
+    var tzet = at(98.5, false);          /* 8.5°  מתחת לאופק */
+
+    /* שעה זמנית של המגן אברהם — מעלות השחר עד צאת הכוכבים */
+    var mgaHour = (alot && tzet) ? (tzet - alot) / 12 : null;
+
+    return {
+      alot:      alot,
+      mishyakir: at(101.5, true),        /* 11.5° */
+      sunrise:   sunrise,
+      shemaMGA:  mgaHour ? new Date(alot.getTime() + 3 * mgaHour) : null,
+      shemaGRA:  fromSunrise(3),
+      tefilaMGA: mgaHour ? new Date(alot.getTime() + 4 * mgaHour) : null,
+      tefilaGRA: fromSunrise(4),
+      chatzot:   fromSunrise(6),
+      minchaG:   fromSunrise(6.5),
+      minchaK:   fromSunrise(9.5),
+      plag:      fromSunrise(10.75),
+      sunset:    sunset,
+      tzet:      tzet,
+      tzetRT:    new Date(sunset.getTime() + 72 * 60000),
+      hour:      hour
+    };
+  }
+
   /* ── ה-API ──────────────────────────────────────────────────────── */
 
   var Luach = {
@@ -214,6 +265,9 @@
       h.dayName = DAY_NAMES[date.getDay()];
       return h;
     },
+
+    /* זמני היום ההלכתיים */
+    zmanim: zmanim,
 
     /* geo = {lat, lon}. מחזיר Date בשעון מקומי של המחשב —
        מדויק רק כשהמחשב על שעון ישראל, ולכן החישוב עצמו נעשה בשעון ישראל. */

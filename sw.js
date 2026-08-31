@@ -1,6 +1,6 @@
 /* network-first על ה-shell עם נפילה ל-cache. מעלים את V ביד בכל דיפלוי — וגם את ?v= בתגיות ה-script/link
    בשלושת קבצי ה-HTML, אחרת דפדפן שכבר ביקר יגיש JS ישן מה-cache שלו. */
-var V = 'mt-v14';
+var V = 'mt-v15';
 var SHELL = [
   './', './index.html', './shas.html', './hok.html',
   './css/main.css', './css/shas.css', './css/hok.css',

@@ -392,3 +392,30 @@ html.js-motion [data-anim].in{opacity:1;transform:none}
   [data-anim]{opacity:1 !important;transform:none !important;transition:none !important}
   html{scroll-behavior:auto !important}
 }
+
+/* ── זמני היום ההלכתיים ───────────────────────────────────────── */
+.zy{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
+  gap:clamp(16px,1.8vw,24px)}
+.zy-col{background:#fff;border:1px solid var(--line);border-radius:18px;
+  padding:clamp(20px,2.2vw,28px);box-shadow:var(--shadow)}
+.zy-col > h3{font-family:'Frank',serif;font-weight:500;font-size:21px;color:var(--navy);
+  padding-bottom:11px;margin-bottom:6px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:9px}
+.zy-col > h3 svg{width:19px;height:19px;color:var(--gold);flex:0 0 auto}
+.zy-row{display:flex;align-items:baseline;gap:12px;padding:9px 0;
+  border-bottom:1px solid rgba(176,141,62,.13)}
+.zy-row:last-child{border-bottom:0}
+.zy-row .nm{flex:1;min-width:0;font-size:16.5px}
+.zy-row .nm small{display:block;font-size:13px;color:var(--muted);margin-top:1px}
+.zy-row .tm{font-family:'Num','Asst',sans-serif;font-weight:900;font-size:19px;
+  color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.01em;
+  white-space:nowrap}
+.zy-row.key{background:rgba(176,141,62,.07);margin-inline:-12px;padding-inline:12px;
+  border-radius:9px;border-bottom-color:transparent}
+.zy-row.key .tm{color:var(--gold)}
+.zy-row.past{opacity:.45}
+.zy-row.now{background:var(--navy);margin-inline:-12px;padding-inline:12px;
+  border-radius:9px;border-bottom-color:transparent}
+.zy-row.now .nm,.zy-row.now .tm{color:var(--cream)}
+.zy-row.now .nm small{color:var(--gold-pale)}
+.zy-row.now .tm{color:var(--gold-lt)}
