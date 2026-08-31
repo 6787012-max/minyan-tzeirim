@@ -9,7 +9,8 @@
 .stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:22px}
 .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 20px;
   box-shadow:var(--shadow);min-width:132px}
-.stat .v{font-family:'Frank',serif;font-weight:900;font-size:30px;line-height:1;
+.stat .v{font-family:'Num','Asst',sans-serif;font-weight:900;font-size:32px;line-height:1;
+  letter-spacing:-.01em;
   color:var(--navy);font-variant-numeric:tabular-nums}
 .stat .k{font-size:14px;color:var(--muted);margin-top:4px}
 
@@ -101,5 +102,6 @@ button.vol{font-family:inherit}
 .major .md-k{font-size:13.5px;letter-spacing:2px;color:var(--gold-lt);font-weight:600}
 .major .md-row{display:flex;align-items:baseline;gap:9px}
 .major .md-row b{font-family:'Frank',serif;font-weight:500;font-size:20px}
-.major .md-row span{font-family:'Frank',serif;font-size:19px;color:var(--gold-lt);
+.major .md-row span{font-family:'Num','Asst',sans-serif;font-weight:900;font-size:18px;
+  color:var(--gold-lt);
   font-variant-numeric:tabular-nums}

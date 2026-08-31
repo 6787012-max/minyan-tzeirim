@@ -10,7 +10,8 @@
 .ms{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 18px;
   box-shadow:var(--shadow);min-width:150px}
 .ms .k{font-size:13px;letter-spacing:1.2px;color:var(--gold);margin-bottom:2px}
-.ms .v{font-family:'Frank',serif;font-size:22px;line-height:1.2;font-variant-numeric:tabular-nums}
+.ms .v{font-family:'Num','Asst',sans-serif;font-weight:900;font-size:22px;line-height:1.2;
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 
 /* מסלולים */
 .track{background:#fff;border:1px solid var(--line);border-radius:var(--r);

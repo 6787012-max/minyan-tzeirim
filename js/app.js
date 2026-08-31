@@ -41,12 +41,13 @@
     var special = LU.days[Luach.iso(now)];
     var sel = Luach.isSelichot(now);
 
+    /* האיבר השלישי מסמן שהערך הוא מספר — הוא מקבל את גופן הספרות */
     var cells = [];
     cells.push(['היום', 'יום ' + h.dayName + '<small>' + esc(h.str) + '</small>']);
     if (special) cells.push(['מועד', esc(special)]);
-    cells.push(['נץ החמה', Luach.hhmm(sun.sunrise) + '<small>מעלה עמוס</small>']);
+    cells.push(['נץ החמה', Luach.hhmm(sun.sunrise) + '<small>מעלה עמוס</small>', 1]);
     cells.push(['שקיעה', Luach.hhmm(sun.sunset) + '<small>' +
-                (sel ? 'ימי הסליחות' : 'שעון ישראל') + '</small>']);
+                (sel ? 'ימי הסליחות' : 'שעון ישראל') + '</small>', 1]);
 
     var next = nextShiur(now, sel);
     if (next) cells.push(['הבא בתור', esc(next.title) + '<small>' + next.when + '</small>']);
@@ -54,7 +55,7 @@
     var strip = $('todayStrip');
     strip.innerHTML = '';
     cells.forEach(function (c) {
-      strip.appendChild(el('div', 'tcell',
+      strip.appendChild(el('div', 'tcell' + (c[2] ? ' n' : ''),
         '<div class="k">' + c[0] + '</div><div class="v">' + c[1] + '</div>'));
     });
   }

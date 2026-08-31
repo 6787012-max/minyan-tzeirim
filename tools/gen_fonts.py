@@ -3,7 +3,8 @@
 
 למה לא Google Fonts: נטפרי חוסם דומיינים שלא אושרו, ואתר שתלוי בגופן חיצוני
 נראה שבור אצל חלק מהמשתמשים. הגופנים כאן חופשיים לשימוש ולהפצה
-(FrankRuhlLibre ו-Assistant ברישיון OFL, DrugulinCLM של Culmus ברישיון חופשי),
+(FrankRuhlLibre, Assistant ו-Heebo ברישיון OFL, DrugulinCLM של Culmus
+ברישיון חופשי),
 ולכן הם נארזים בתוך האתר.
 
 הצמצום: עברית + ניקוד + פיסוק + ספרות + לטינית בסיסית. זה חותך ~85% מהמשקל.
@@ -26,6 +27,7 @@ FONTS = [
     ("Assistant-Regular.ttf",     "assistant-regular.woff2"),
     ("Assistant-SemiBold.ttf",    "assistant-semibold.woff2"),
     ("drugulinclm-bold-webfont.ttf", "drugulin-bold.woff2"),
+    ("Heebo-Black.ttf",            "heebo-black.woff2"),
 ]
 
 # עברית (כולל ניקוד וטעמים), פיסוק עברי, ספרות, לטינית, וסימנים שבשימוש
