@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mokad-stats",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+  "observability": { "enabled": true },
+  "kv_namespaces": [
+    { "binding": "STATS", "id": "e0f0d8816a8e43189836955f0fe1d1df" }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://minyan.mokad.co.il,https://6787012-max.github.io"
+  }
+}

@@ -6,6 +6,14 @@
   var $ = function (s) { return document.querySelector(s); };
   var S = null, CFG = null, SEDER = null, Q = '';
 
+  /* הכתובת שמורה ב-base64 בקובץ הנתונים — לא סוד, רק מונע קצירה
+     אוטומטית של בוטי ספאם מהקוד הפתוח. */
+  function orderEmail(o) {
+    if (!o) return '';
+    if (o.email) return o.email;
+    try { return o.email_b64 ? atob(o.email_b64) : ''; } catch (e) { return ''; }
+  }
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -177,8 +185,8 @@
 
     if (o.whatsapp) {
       window.open('https://wa.me/' + o.whatsapp + '?text=' + encodeURIComponent(body), '_blank');
-    } else if (o.email) {
-      location.href = 'mailto:' + o.email +
+    } else if (orderEmail(o)) {
+      location.href = 'mailto:' + orderEmail(o) +
         '?subject=' + encodeURIComponent('נטילת כרך ' + CUR.n + ' — ' + nm) +
         '&body=' + encodeURIComponent(body);
     }

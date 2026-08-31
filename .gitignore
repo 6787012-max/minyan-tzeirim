@@ -10,3 +10,5 @@ push.cmd
 .gh_token_max
 _recovery-codes-github.txt
 _github-avatar.png
+analytics/node_modules/
+analytics/.wrangler/
