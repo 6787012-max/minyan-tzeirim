@@ -1,10 +1,10 @@
 /* network-first על ה-shell עם נפילה ל-cache. מעלים את V ביד בכל דיפלוי — וגם את ?v= בתגיות ה-script/link
    בשלושת קבצי ה-HTML, אחרת דפדפן שכבר ביקר יגיש JS ישן מה-cache שלו. */
-var V = 'mt-v11';
+var V = 'mt-v12';
 var SHELL = [
   './', './index.html', './shas.html', './hok.html',
   './css/main.css', './css/shas.css', './css/hok.css',
-  './js/app.js', './js/luach.js', './js/shas.js', './js/hok.js',
+  './js/app.js', './js/luach.js', './js/motion.js', './js/shas.js', './js/hok.js',
   './data/config.json', './data/shabbat.json', './data/shas.json',
   './data/hok.json', './data/yamim_noraim.json', './manifest.json', './favicon.ico',
   './img/mark.svg', './img/logo-gate.svg', './img/logo-h-white.svg',

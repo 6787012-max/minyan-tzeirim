@@ -40,9 +40,13 @@
       [got, 'כרכים נלקחו'],
       [left, 'עדיין פנויים']
     ].map(function (r) {
-      return '<div class="stat"><div class="v">' + esc(r[0]) + '</div>' +
+      /* מספר טהור מקבל ספירה עולה; מחיר נשאר כמו שהוא */
+      var num = (typeof r[0] === 'number');
+      return '<div class="stat"><div class="v"' +
+        (num ? ' data-count="' + r[0] + '">' + r[0] : '>' + esc(r[0])) + '</div>' +
         '<div class="k">' + esc(r[1]) + '</div></div>';
     }).join('');
+    if (window.Motion) window.Motion.refresh();
 
     var pct = goal ? Math.min(100, raised / goal * 100) : 0;
     $('#cap').textContent = shekel(raised) + ' מתוך ' + shekel(goal) +

@@ -429,10 +429,15 @@
         var vols = d.volumes || [];
         var free = vols.filter(function (v) { return !(v.by && v.by.trim()); }).length;
         var el1 = $('sbFree');
-        if (el1) el1.textContent = free;
+        if (el1) {
+          el1.textContent = free;          /* הערך הסופי תמיד נוכח */
+          el1.setAttribute('data-count', free);
+          el1.classList.remove('counted');
+        }
         var el2 = $('promoShasK');
         if (el2) el2.textContent = vols.length + ' כרכים · ₪' + d.pricePerVolume + ' לכרך';
       })
+      .then(function () { if (window.Motion) window.Motion.refresh(); })
       .catch(function () { /* הבאנר נשאר עם ערך ברירת המחדל */ });
   }
 
@@ -487,6 +492,7 @@
     renderAbout();
     renderFooter();
     renderShasBanner();
+    if (window.Motion) window.Motion.refresh();
     // רענון פס היום כל דקה (הספירה לאחור)
     setInterval(function () { renderToday(new Date()); }, 60000);
   }

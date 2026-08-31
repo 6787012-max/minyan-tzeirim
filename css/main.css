@@ -335,3 +335,44 @@ footer a:hover{text-decoration:underline}
   .sb-side{flex:1 1 100%;padding:14px 20px}
   .sb-side .num{font-size:42px}
 }
+
+/* ── תנועה ─────────────────────────────────────────────────────
+   אנימציות כניסה עדינות בגלילה. הכל מבוטל אוטומטית תחת
+   prefers-reduced-motion, ואם ה-JS לא רץ — התוכן גלוי במלואו. */
+/* ההסתרה חלה רק אחרי ש-motion.js סימן html.js-motion. אם ה-JS נכשל,
+   נחסם, או רץ לאט — התוכן פשוט גלוי, ושום דבר לא נעלם. */
+html.js-motion [data-anim]{opacity:0;transform:translateY(18px);
+  transition:opacity .62s cubic-bezier(.22,.7,.25,1) var(--d,0ms),
+             transform .62s cubic-bezier(.22,.7,.25,1) var(--d,0ms)}
+html.js-motion [data-anim].in{opacity:1;transform:none}
+
+/* פינות רכות יותר, בקו של האתר שיוסף הראה */
+.card,.promo,.doc,.track,.seat,.stat,.fact,.ms{border-radius:18px}
+.seats-box,.give-box{border-radius:24px}
+.tbl-wrap{border-radius:20px}
+
+/* אינטראקציות עדינות */
+.card,.promo,.doc,.vol,.stat{transition:transform .22s cubic-bezier(.22,.7,.25,1),
+  box-shadow .22s ease,border-color .18s ease}
+.promo:hover,.doc:hover{transform:translateY(-4px);
+  box-shadow:0 14px 34px rgba(18,35,63,.11)}
+.card:hover{box-shadow:0 10px 26px rgba(18,35,63,.09)}
+.btn{transition:transform .16s cubic-bezier(.22,.7,.25,1),background .18s ease,
+  box-shadow .18s ease,border-color .18s ease}
+.btn-p:hover,.btn-g:hover{transform:translateY(-2px);
+  box-shadow:0 10px 22px rgba(18,35,63,.18)}
+
+/* חץ עגול — כמו באתר הייחוס */
+.go{display:inline-flex;align-items:center;gap:10px}
+.promo .go::after{content:'';width:34px;height:34px;border-radius:50%;
+  background:var(--navy);flex:0 0 auto;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M19 12H5M11 6l-6 6 6 6'/%3E%3C/svg%3E") center/17px no-repeat,
+        linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  transition:transform .22s cubic-bezier(.22,.7,.25,1)}
+.promo:hover .go::after{transform:translateX(-5px)}
+
+@media(prefers-reduced-motion:reduce){
+  [data-anim]{opacity:1 !important;transform:none !important;transition:none !important}
+  html{scroll-behavior:auto !important}
+}

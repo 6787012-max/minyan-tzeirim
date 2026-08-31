@@ -298,6 +298,7 @@
       HOK = d;
       renderMosad();
       renderTracks();
+      if (window.Motion) window.Motion.refresh();
       renderDays();
       buildOverlay();
       initSig();
