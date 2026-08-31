@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """מייצר דף רישום מודפס לחלוקת ש״ס — docs/shas-rishum.pdf
 
-דף A4 לתלייה בבית הכנסת: הלוגו למעלה, 73 הכרכים בטור לפי סדרים, ולצד כל
-כרך שורה ריקה לרישום שם. הנתונים מגיעים מ-data/shas.json — אותו מקור שמזין
-את האתר, כך שהדף המודפס והאתר לא יכולים להיפרד.
+דף **A3** לתלייה בבית הכנסת: הלוגו למעלה, 73 הכרכים בארבעה טורים לפי סדרים,
+ולצד כל כרך שורה ריקה לרישום שם. הנתונים מגיעים מ-data/shas.json — אותו מקור
+שמזין את האתר, כך שהדף המודפס והאתר לא יכולים להיפרד.
+
+העיצוב ממלא את הדף: הטורים נמתחים לגובה מלא (flex:1) והשורות מתפרשות
+ביניהן, כך שאין שטח לבן בתחתית ללא תלות בכמה כרכים כבר נלקחו.
 
 הרינדור: HTML → Chrome headless → PDF. אין תלות בספריות PDF.
 הרצה:  python tools/gen_shas_pdf.py
@@ -31,7 +34,7 @@ def font_face(name, path, weight=400):
             "font-weight:%d;font-display:block}" % (name, p, weight))
 
 
-def build_html(d):
+def build_html(d, row_mm=12.0):
     vols = d["volumes"]
     price = d["pricePerVolume"]
 
@@ -43,7 +46,11 @@ def build_html(d):
             order.append(v["seder"])
         groups[v["seder"]].append(v)
 
-    blocks = ""
+    # מחלקים את הסדרים לארבעה טורים מאוזנים לפי מספר הכרכים
+    def col_blocks(sedarim):
+        return "".join(sd_html[x] for x in sedarim)
+
+    sd_html = {}
     for sd in order:
         rows = "".join(
             '<div class="v%s"><span class="n">%s</span>'
@@ -52,8 +59,23 @@ def build_html(d):
                x["n"], x["name"], (x.get("by") or "").strip())
             for x in groups[sd])
         free = sum(1 for x in groups[sd] if not (x.get("by") or "").strip())
-        blocks += ('<div class="sd"><h2>%s<i>%d כרכים · %d פנויים</i></h2>'
-                   '<div class="vs">%s</div></div>' % (sd, len(groups[sd]), free, rows))
+        sd_html[sd] = ('<div class="sd" style="flex-grow:%d"><h2>%s'
+                       '<i>%d כרכים · %d פנויים</i></h2>'
+                       '<div class="vs">%s</div></div>'
+                       % (len(groups[sd]), sd, len(groups[sd]), free, rows))
+
+    NCOL = 4
+    per_col = sum(len(groups[x]) for x in order) / float(NCOL)
+    cols, cur, run = [], [], 0
+    for sd in order:
+        if cur and run + len(groups[sd]) / 2.0 > per_col and len(cols) < NCOL - 1:
+            cols.append(cur); cur, run = [], 0
+        cur.append(sd); run += len(groups[sd])
+    if cur:
+        cols.append(cur)
+    blocks = "".join(sd_html[x] for x in order)
+
+
 
     # הטמעה inline: Chrome headless לא טוען אמין <img src="file://...svg"> בהדפסה
     lp = os.path.join(HERE, "img", "logo-h.svg")
@@ -71,48 +93,49 @@ def build_html(d):
     return """<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8"><style>
 %s %s %s
 *{box-sizing:border-box;margin:0;padding:0}
-@page{size:A4;margin:0}
-body{width:210mm;background:#fff;color:%s;
+@page{size:A3;margin:0}
+body{width:297mm;background:#fff;color:%s;
   font-family:'Asst',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.pg{width:210mm;min-height:297mm;padding:11mm 12mm 9mm;position:relative;
+.pg{width:297mm;height:420mm;padding:15mm 16mm 12mm;position:relative;
   page-break-after:always;display:flex;flex-direction:column}
 .pg:last-child{page-break-after:auto}
-.frame{position:absolute;inset:5mm;border:1.1pt solid %s;border-radius:2mm;pointer-events:none}
+.frame{position:absolute;inset:7mm;border:1.1pt solid %s;border-radius:2mm;pointer-events:none}
 .frame::before{content:'';position:absolute;inset:1.6mm;border:.4pt solid %s;border-radius:1.4mm}
-.bsd{position:absolute;top:8mm;right:10mm;font-size:8pt;color:%s}
-header{text-align:center;padding-bottom:4mm;border-bottom:.8pt solid %s;margin-bottom:4mm;
+.bsd{position:absolute;top:11mm;right:14mm;font-size:11pt;color:%s}
+header{text-align:center;padding-bottom:6mm;border-bottom:1pt solid %s;margin-bottom:5mm;
   position:relative;z-index:1}
-header .logo{height:15mm;margin:0 auto 2.5mm;display:flex;justify-content:center}
-header .logo svg{height:15mm;width:auto;display:block}
-header h1{font-family:'Frank',serif;font-weight:900;font-size:20pt;line-height:1.1}
-header .sub{font-size:9.5pt;color:#5C6980;margin-top:1.5mm}
+header .logo{height:30mm;margin:0 auto 2.5mm;display:flex;justify-content:center}
+header .logo svg{height:30mm;width:auto;display:block}
+header h1{font-family:'Frank',serif;font-weight:900;font-size:34pt;line-height:1.1}
+header .sub{font-size:14pt;color:#5C6980;margin-top:1.5mm}
 .bar{display:flex;justify-content:center;gap:5mm;margin-top:3mm;flex-wrap:wrap}
-.bar span{font-size:9pt;background:%s;border:.5pt solid %s;border-radius:2mm;padding:1.2mm 4mm}
-.bar b{font-family:'Frank',serif;font-size:11pt;color:%s}
-.md{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2mm 6mm;
+.bar span{font-size:13pt;background:%s;border:.5pt solid %s;border-radius:2mm;padding:1.2mm 4mm}
+.bar b{font-family:'Frank',serif;font-size:16pt;color:%s}
+.md{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2mm 9mm;
   background:#12233F;color:#F6F1E5;border-radius:2mm;padding:2mm 5mm;margin-bottom:3.5mm;
   position:relative;z-index:1}
-.md .k{font-size:7.5pt;letter-spacing:1.2pt;color:#D9BE7C}
-.md .r{font-size:10pt;font-family:'Frank',serif}
+.md .k{font-size:11pt;letter-spacing:1.6pt;color:#D9BE7C}
+.md .r{font-size:14pt;font-family:'Frank',serif}
 .md .r b{font-weight:500}
-main{flex:1;column-count:3;column-gap:5mm;position:relative;z-index:1}
-.sd{break-inside:avoid;margin-bottom:2.8mm}
-.sd h2{font-family:'Frank',serif;font-weight:500;font-size:11pt;color:%s;
+main{flex:1;column-count:4;column-gap:8mm;position:relative;z-index:1}
+.sd{break-inside:avoid;margin-bottom:4mm}
+
+.sd h2{font-family:'Frank',serif;font-weight:500;font-size:16pt;color:%s;
   border-bottom:.5pt solid %s;padding-bottom:.7mm;margin-bottom:1.2mm;
   display:flex;align-items:baseline;gap:1.5mm}
-.sd h2 i{font-style:normal;font-family:'Asst',sans-serif;font-size:6.6pt;color:#8A93A3;
+.sd h2 i{font-style:normal;font-family:'Asst',sans-serif;font-size:9.5pt;color:#8A93A3;
   margin-inline-start:auto;white-space:nowrap}
-.v{display:flex;align-items:baseline;gap:1.2mm;font-size:8.2pt;padding:.5mm 0;
+.v{display:flex;align-items:flex-end;gap:1.8mm;font-size:12pt;height:ROWMM;padding-bottom:.8mm;
   border-bottom:.3pt dotted #C9CEd6}
-.v .n{flex:0 0 6.5mm;color:%s;font-family:'Frank',serif;font-size:7.6pt}
-.v .nm{flex:0 0 auto;max-width:26mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v .n{flex:0 0 10mm;color:%s;font-family:'Frank',serif;font-size:11pt}
+.v .nm{flex:0 0 auto;max-width:36mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v .ln{flex:1;min-width:0;border-bottom:.4pt solid #AEB6C2;margin-inline-start:1mm;
-  height:3.1mm;font-size:7.4pt;color:%s;text-align:center;white-space:nowrap;overflow:hidden}
+  height:5mm;font-size:11pt;color:%s;text-align:center;white-space:nowrap;overflow:hidden}
 .v.taken .ln{border-bottom-color:%s;font-weight:600}
-footer{margin-top:3.5mm;padding-top:2.5mm;border-top:.8pt solid %s;
-  text-align:center;font-size:8.2pt;color:#5C6980;line-height:1.5;position:relative;z-index:1}
+footer{margin-top:5mm;padding-top:4mm;border-top:.8pt solid %s;
+  text-align:center;font-size:12pt;color:#5C6980;line-height:1.6;position:relative;z-index:1}
 footer b{color:%s}
-footer .site{font-family:'Frank',serif;font-size:10.5pt;color:%s;margin-top:1.2mm}
+footer .site{font-family:'Frank',serif;font-size:16pt;color:%s;margin-top:1.2mm}
 </style></head><body>
 <div class="pg">
   <div class="frame"></div><div class="bsd">בס״ד</div>
@@ -134,7 +157,7 @@ footer .site{font-family:'Frank',serif;font-size:10.5pt;color:%s;margin-top:1.2m
     התשלום דרך <b>נדרים פלוס</b> · מוסד <b>%s</b> · %s<br>
     <div class="site">%s</div>
   </footer>
-</div></body></html>""" % (
+</div></body></html>""".replace("ROWMM", "%.2fmm" % row_mm) % (
         font_face("Frank", "frank-medium.woff2", 500),
         font_face("Frank", "frank-black.woff2", 900),
         font_face("Asst", "assistant-regular.woff2", 400),
@@ -147,27 +170,38 @@ footer .site{font-family:'Frank',serif;font-size:10.5pt;color:%s;margin-top:1.2m
         "minyan.mokad.co.il")
 
 
-def main():
-    d = json.load(io.open(DATA, encoding="utf-8"))
-    os.makedirs(DOCS, exist_ok=True)
+def render(d, row_mm):
+    """מרנדר ומחזיר את מספר העמודים."""
     html = os.path.join(DOCS, "_shas-rishum.html")
-    io.open(html, "w", encoding="utf-8").write(build_html(d))
-
+    io.open(html, "w", encoding="utf-8").write(build_html(d, row_mm))
     subprocess.run([CHROME, "--headless", "--disable-gpu", "--no-pdf-header-footer",
                     "--print-to-pdf=" + OUT, "file:///" + html.replace("\\", "/")],
                    check=False, capture_output=True)
-
-    if not os.path.exists(OUT):
-        print("הרינדור נכשל")
-        return 1
-    try:
-        import fitz
-        doc = fitz.open(OUT)
-        pages = doc.page_count
-        doc.close()
-    except Exception:
-        pages = "?"
     os.remove(html)
+    if not os.path.exists(OUT):
+        return 0
+    import fitz
+    doc = fitz.open(OUT)
+    n = doc.page_count
+    doc.close()
+    return n
+
+
+def main():
+    d = json.load(io.open(DATA, encoding="utf-8"))
+    os.makedirs(DOCS, exist_ok=True)
+
+    # מוצאים את גובה השורה הגדול ביותר שעדיין נכנס לעמוד אחד — כך הדף
+    # מתמלא עד הסוף בלי חלל, ובלי לגלוש לעמוד שני.
+    lo, hi, best = 6.0, 18.0, 6.0
+    for _ in range(7):
+        mid = (lo + hi) / 2
+        if render(d, mid) == 1:
+            best, lo = mid, mid
+        else:
+            hi = mid
+    pages = render(d, best)
+    print("גובה שורה: %.2fmm" % best)
     print("docs/shas-rishum.pdf  ·  %s עמודים  ·  %d KB"
           % (pages, os.path.getsize(OUT) // 1024))
     return 0
