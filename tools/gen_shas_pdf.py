@@ -78,7 +78,7 @@ def build_html(d, row_mm=12.0):
 
 
     # הטמעה inline: Chrome headless לא טוען אמין <img src="file://...svg"> בהדפסה
-    lp = os.path.join(HERE, "img", "logo-gate.svg")
+    lp = os.path.join(HERE, "img", "logo-framed.svg")
     logo_svg = io.open(lp, encoding="utf-8").read() if os.path.exists(lp) else ""
     taken = sum(1 for v in vols if (v.get("by") or "").strip())
     major = d.get("majorDonors") or []
