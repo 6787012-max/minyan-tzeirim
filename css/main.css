@@ -419,3 +419,8 @@ html.js-motion [data-anim].in{opacity:1;transform:none}
 .zy-row.now .nm,.zy-row.now .tm{color:var(--cream)}
 .zy-row.now .nm small{color:var(--gold-pale)}
 .zy-row.now .tm{color:var(--gold-lt)}
+
+/* לוגו השותפות בתחתית */
+.foot-partner img{width:170px;height:auto;display:block;margin-top:8px;opacity:.92}
+.foot-partner b{display:block;color:var(--cream);font-family:'Frank',serif;
+  font-weight:500;font-size:18px;margin-bottom:2px}
