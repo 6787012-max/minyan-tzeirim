@@ -164,6 +164,25 @@ def body_text(m):
     h.append('<div class="body">%s</div>' % "".join(
         '<p%s>%s</p>' % (' class="strong"' if i == 0 and len(paras) > 1 else '', esc(p))
         for i, p in enumerate(paras)))
+    # מסלולי התרומה — הלשון והמבנה לקוחים מסקשן «בוא תהיה שותף»
+    # שבאתר, כדי שמי שראה שם יזהה את אותו דבר על הלוח.
+    tr = m.get("tracks")
+    if tr:
+        cards = "".join(
+            '<div class="trk%s"><b>%s</b><span class="amt">%s</span>'
+            '<span class="ds">%s</span></div>'
+            % (" hl" if t.get("hl") else "", esc(t["name"]),
+               esc(t["amount"]), esc(t.get("desc", "")))
+            for t in tr)
+        h.append('<div class="tracks">%s</div>' % cards)
+
+    q = m.get("qr")
+    if q:
+        qr = io.open(os.path.join(MODA, "qr.svg"), encoding="utf-8").read()
+        h.append('<div class="qr"><img src="%s" alt="">'
+                 '<div><b>%s</b><span>%s</span></div></div>'
+                 % (svg_uri(qr), esc(q.get("caption", "")), esc(q.get("note", ""))))
+
     if m.get("when"):
         h.append('<div class="when">%s</div>' % esc(m["when"]))
     if m.get("sign"):

@@ -346,6 +346,48 @@ h1.zt { font-size:2.655em; margin-bottom:1.6mm; }
   font-family:'Shofar','Frank',serif; font-weight:700; font-size:1.02em;
   color:var(--navy2); white-space:normal; text-align:end;
 }
+
+/* ── מסלולי תרומה ── */
+.tracks {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:3mm;
+  margin:6mm auto 0; max-width:132mm;
+}
+.trk {
+  border:1.3px solid var(--gold); border-radius:2mm; padding:3.4mm 2mm 3.8mm;
+  background:linear-gradient(#FFFDF7,#F6EEDD); text-align:center;
+  display:flex; flex-direction:column; gap:1mm;
+}
+.trk.hl {
+  border-width:2px;
+  background:linear-gradient(155deg,var(--navy3),var(--navy2) 60%,var(--navy));
+  box-shadow:0 1mm 3mm rgba(42,20,22,.28);
+}
+.trk b {
+  font-family:'Shofar',serif; font-weight:700; font-size:1.18em; color:var(--navy2);
+}
+.trk.hl b { color:#F2E2BC; }
+.trk .amt {
+  font-family:'Num','Asst',sans-serif; font-weight:900; font-size:1.42em;
+  color:#7A5C1C; line-height:1.15;
+}
+.trk.hl .amt { color:#EAD49A; }
+.trk .ds { font-size:.80em; color:var(--muted); line-height:1.35; }
+.trk.hl .ds { color:#D8C9AC; }
+
+/* ── QR ── */
+.qr {
+  display:flex; align-items:center; justify-content:center; gap:5mm;
+  margin:6mm auto 0; padding:3mm 6mm; max-width:118mm;
+  border:1.2px solid var(--gold); border-radius:2mm;
+  background:rgba(255,255,255,.62);
+}
+.qr img { width:24mm; height:24mm; display:block; }
+.qr div { text-align:start; }
+.qr b {
+  display:block; font-family:'Shofar',serif; font-weight:700;
+  font-size:1.12em; color:var(--navy2);
+}
+.qr span { font-size:.82em; color:var(--muted); }
 </style>
 </head>
 <body>
