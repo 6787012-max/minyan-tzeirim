@@ -79,7 +79,7 @@ def scaled(html, factor):
     return html.replace("</style>", tag, 1)
 
 
-def fit_one(name, lo=0.52, hi=1.0, rounds=9):
+def fit_one(name, lo=0.38, hi=1.0, rounds=10):
     """חיפוש בינארי על הסקלר. שבעה סבבים מספיקים לדיוק של פחות מאחוז,
     וזה פחות מסבב ידני אחד."""
     src = os.path.join(g.OUT, name + ".html")

@@ -121,6 +121,13 @@ def inline_assets(html):
         b = base64.b64encode(io.open(p, "rb").read()).decode()
         mime = "image/svg+xml" if p.endswith(".svg") else "image/png"
         return 'src="data:%s;base64,%s"' % (mime, b)
+    def bgimg(m):
+        p = os.path.normpath(os.path.join(MODA, m.group(1)))
+        if not os.path.exists(p):
+            return m.group(0)
+        b = base64.b64encode(io.open(p, "rb").read()).decode()
+        return "url('data:image/jpeg;base64,%s')" % b
+    html = re.sub(r"url\('([^']+\.jpe?g)'\)", bgimg, html)
     return re.sub(r'src="([^"]+\.(?:svg|png))"', img, html)
 
 
@@ -133,9 +140,9 @@ def crest(kind):
     if kind == "אירוע":
         # גביע קידוש ולא רימון: הרימון הוא סמל של ראש השנה בכלל,
         # והגביע אומר בדיוק על מה המודעה.
-        return ('<img class="crest" src="%s" style="width:30mm">'
+        return ('<img class="crest" src="%s" style="width:8.8em">'
                 % svg_uri(orn.on_dark(orn.kos())))
-    return ('<img class="crest" src="%s" style="width:40mm">'
+    return ('<img class="crest" src="%s" style="width:11.8em">'
             % svg_uri(orn.on_dark(orn.crown())))
 
 
@@ -192,7 +199,7 @@ def body_zmanim(z):
     sys.path.insert(0, MODA)
     import orn
     h = ['<div class="plaque tight">'
-         '<img class="crest" src="%s" style="width:30mm">'
+         '<img class="crest" src="%s" style="width:8.8em">'
          '<h1 class="zt">%s <em>%s</em></h1>'
          '<div class="lead">%s</div></div>'
          % (svg_uri(orn.on_dark(orn.shofar())), esc(z["title"]),
