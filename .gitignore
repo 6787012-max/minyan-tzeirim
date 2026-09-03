@@ -14,3 +14,4 @@ analytics/node_modules/
 analytics/.wrangler/
 _dns-backup.txt
 _sql_out.json
+_news.log
