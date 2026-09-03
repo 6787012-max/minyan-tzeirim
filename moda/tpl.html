@@ -332,6 +332,20 @@ h1.zt { font-size:2.655em; margin-bottom:1.6mm; }
 .z-nt { font-size:0.885em; }
 .z-warn { font-size:0.983em; padding:1.8mm 3mm; }
 .foot-note { font-size:0.846em; margin-top:3mm; }
+
+/* בעלי התפילה — רוחב מלא מתחת לרשת הימים, כי אלה שמות ולא שעות
+   ושורה צרה הייתה שוברת אותם. */
+.zb.tf { margin-top:3mm; }
+/* שש שורות בעמודה אחת דחפו את הסקלר של הלוח ל-0.40 והפכו את כל
+   הזמנים לבלתי קריאים. שתי עמודות חוסכות חצי גובה. */
+.zb.tf .tf-grid { display:grid; grid-template-columns:1fr 1fr; }
+.zb.tf .z-row { border-bottom:1px dotted var(--line); }
+.zb.tf .tf-grid > .z-row:nth-child(odd) { border-inline-end:1px dotted var(--line); }
+.zb.tf .zb-h { background:linear-gradient(150deg,#7A4B2E,#3E2416); }
+.z-v.nm {
+  font-family:'Shofar','Frank',serif; font-weight:700; font-size:1.02em;
+  color:var(--navy2); white-space:normal; text-align:end;
+}
 </style>
 </head>
 <body>

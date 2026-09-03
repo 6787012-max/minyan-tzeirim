@@ -205,6 +205,18 @@ def body_zmanim(z):
     if z.get("note"):
         h.append('<div class="z-note">%s</div>' % esc(z["note"]))
     h.append('<div class="z-grid">%s</div>' % "".join(zblock(b) for b in z["blocks"]))
+
+    # בעלי התפילה — נמסרו בנפרד מזמני היום, ולכן בלוק משלהם.
+    t = z.get("tefilot")
+    if t:
+        rows = "".join(
+            '<div class="z-row"><span>%s</span>%s</div>'
+            % (esc(a), '<i class="z-fill"></i>' if b == "—"
+               else '<b class="z-v nm">%s</b>' % esc(b))
+            for a, b in t["rows"])
+        h.append('<div class="zb tf"><div class="zb-h">%s</div>'
+                 '<div class="tf-grid">%s</div></div>'
+                 % (esc(t["head"]), rows))
     if z.get("foot"):
         h.append('<div class="foot-note">%s</div>' % esc(z["foot"]))
     return "".join(h)

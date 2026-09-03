@@ -105,7 +105,8 @@ def fit_one(name, lo=0.38, hi=1.0, rounds=10):
 
 
 def main():
-    names = sys.argv[1:] or ["sparka", "reich-glazer", "simons", "kiddush", "zmanim"]
+    names = sys.argv[1:] or ["sparka", "reich-glazer", "simons",
+                             "kiddush", "magbit", "zmanim"]
     out = {}
     for n in names:
         f, need, avail = fit_one(n)
