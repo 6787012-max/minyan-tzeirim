@@ -21,6 +21,9 @@ import shutil
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "moda")
+                if False else "")
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 MODA = os.path.join(ROOT, "moda")
@@ -50,6 +53,22 @@ def esc(s):
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
+def svg_uri(svg):
+    return "data:image/svg+xml;base64," + base64.b64encode(svg.encode("utf-8")).decode()
+
+
+def inject_ornaments(html):
+    """העיטורים נכנסים כ-data URI. Chrome ב---headless לא טוען אמינות
+    קבצים יחסיים בהדפסה, ו-SVG חיצוני היה נעלם בלי שגיאה."""
+    sys.path.insert(0, MODA)
+    import orn
+    return (html
+            .replace("url('PATTERN')", "url('%s')" % svg_uri(orn.bg_pattern()))
+            .replace('src="CORNER"', 'src="%s"' % svg_uri(orn.corner()))
+            .replace('src="RULE"', 'src="%s"' % svg_uri(orn.rule_small()))
+            .replace('src="DIVIDER"', 'src="%s"' % svg_uri(orn.divider())))
+
+
 def inline_assets(html):
     """הטמעת הפונטים והלוגו כ-data URI.
     Chrome ב---headless לא טוען אמינות משאבי file:// יחסיים בזמן הדפסה,
@@ -64,6 +83,14 @@ def inline_assets(html):
         return "url('data:font/woff2;base64,%s') format('woff2')" % b
     html = re.sub(r"url\('([^']+\.woff2)'\) format\('woff2'\)", font, html)
 
+    def ttf(m):
+        p = os.path.normpath(os.path.join(MODA, m.group(1)))
+        if not os.path.exists(p):
+            return m.group(0)
+        b = base64.b64encode(io.open(p, "rb").read()).decode()
+        return "url('data:font/ttf;base64,%s') format('truetype')" % b
+    html = re.sub(r"url\('([^']+\.ttf)'\) format\('truetype'\)", ttf, html)
+
     def img(m):
         rel = m.group(1)
         p = os.path.normpath(os.path.join(MODA, rel))
@@ -77,50 +104,77 @@ def inline_assets(html):
 
 # ── בניית הגוף לכל סוג מודעה ────────────────────────────────────────
 
+def crest(kind):
+    sys.path.insert(0, MODA)
+    import orn
+    if kind == "אירוע":
+        return '<img class="crest" src="%s" style="width:26mm">' % svg_uri(orn.pomegranate())
+    return '<img class="crest" src="%s" style="width:40mm">' % svg_uri(orn.crown())
+
+
 def body_text(m):
-    h = ['<div class="eyebrow">%s</div>' % esc(m.get("eyebrow", ""))]
-    cls = " long" if len(m.get("title", "")) > 26 else ""
-    h.append('<h1 class="%s">%s</h1>' % (cls.strip(), esc(m["title"])))
+    sys.path.insert(0, MODA)
+    import orn
+    n = len(m.get("title", ""))
+    cls = " long" if n > 30 else (" mid-len" if n > 20 else "")
+
+    plaque = [crest(m.get("kind", "")),
+              '<div class="eyebrow">%s</div>' % esc(m.get("eyebrow", "")),
+              '<h1 class="%s">%s</h1>' % (cls.strip(), esc(m["title"]))]
     if m.get("lead"):
-        h.append('<div class="lead">%s</div>' % esc(m["lead"]))
-    h.append('<div class="body">%s</div>' %
-             "".join("<p>%s</p>" % esc(p) for p in m.get("body", [])))
+        plaque.append('<div class="lead">%s</div>' % esc(m["lead"]))
+
+    h = ['<div class="plaque">%s</div>' % "".join(plaque)]
+
+    paras = m.get("body", [])
+    h.append('<div class="body">%s</div>' % "".join(
+        '<p%s>%s</p>' % (' class="strong"' if i == 0 and len(paras) > 1 else '', esc(p))
+        for i, p in enumerate(paras)))
     if m.get("when"):
         h.append('<div class="when">%s</div>' % esc(m["when"]))
+    if m.get("sign"):
+        h.append('<div class="sign">%s</div>' % esc(m["sign"]))
     return "".join(h)
 
 
-COLS = [("candles", "הדלקת נרות"), ("sunrise", "נץ"), ("shema", "סו״ז ק״ש"),
-        ("chatzot", "חצות"), ("sunset", "שקיעה"), ("tzet", "צאת"), ("rt", "ר״ת")]
+def zblock(b):
+    """בלוק של יום אחד. המבנה לקוח מלוח ראש השנה תשפ״ו של בית הכנסת
+    המרכזי — כותרת יום ומתחתיה שורות «שם הזמן … שעה». זה הפורמט
+    שהקהילה כבר קוראת, ואין סיבה להמציא אחר."""
+    rows = []
+    for r in b["rows"]:
+        label, val = r[0], r[1]
+        kind = r[2] if len(r) > 2 else ""
+        if kind == "note":
+            v = '<i class="z-nt">%s</i>' % esc(val)
+        elif val == "—":
+            # זמן תפילה שטרם נקבע: קו למילוי ביד. מקף היה נקרא
+            # כאילו הוחלט שאין תפילה.
+            v = '<i class="z-fill"></i>'
+        else:
+            v = '<b class="z-v%s">%s</b>' % (" big" if kind == "big" else "", esc(val))
+        rows.append('<div class="z-row%s"><span>%s</span>%s</div>'
+                    % (" em" if kind == "big" else "", esc(label), v))
+    warn = ('<div class="z-warn">%s</div>' % esc(b["warn"])) if b.get("warn") else ""
+    return ('<div class="zb%s"><div class="zb-h">%s<span>%s</span></div>%s%s</div>'
+            % (" hl" if b.get("hl") else "", esc(b["head"]), esc(b["date"]),
+               "".join(rows), warn))
 
 
 def body_zmanim(z):
-    h = ['<div class="eyebrow">לוח זמנים</div>',
-         '<h1>%s</h1>' % esc(z["title"])]
+    sys.path.insert(0, MODA)
+    import orn
+    h = ['<div class="plaque tight">'
+         '<img class="crest" src="%s" style="width:30mm">'
+         '<h1 class="zt">%s <em>%s</em></h1>'
+         '<div class="lead">%s</div></div>'
+         % (svg_uri(orn.shofar()), esc(z["title"]),
+            esc(z.get("year", "")), esc(z.get("sub", "")))]
     if z.get("note"):
         h.append('<div class="z-note">%s</div>' % esc(z["note"]))
-
-    head = "".join("<th>%s</th>" % esc(t) for _, t in COLS)
-    rows = []
-    for d in z["days"]:
-        hl = " class=\"hl\"" if "ראש השנה" in d["label"] else ""
-        cells = []
-        for key, _ in COLS:
-            v = d.get(key)
-            if key == "candles" and not v and d.get("candlesNote"):
-                cells.append('<td style="font-size:9.5pt;color:#8A5A16">%s</td>'
-                             % esc(d["candlesNote"]))
-                continue
-            cells.append('<td>%s</td>' % (
-                '<span class="num">%s</span>' % esc(v) if v else '<span class="dash">—</span>'))
-        rows.append('<tr%s><td class="day"><b>%s</b><span>%s</span></td>%s</tr>'
-                    % (hl, esc(d["label"]), esc(d["date"]), "".join(cells)))
-
-    h.append('<table><thead><tr><th>היום</th>%s</tr></thead><tbody>%s</tbody></table>'
-             % (head, "".join(rows)))
-    h.append('<div class="foot-note">הזמנים לפי מנהג הלוח המקומי — הדלקה 35 דקות '
-             'לפני השקיעה, צאת הכוכבים 36 דקות אחריה, רבנו תם 71 דקות. '
-             'לכל המאוחר יש לקבל תוספת שבת ויום טוב לפני השקיעה.</div>')
+    h.append('<div class="z-grid">%s</div>' % "".join(zblock(b) for b in z["blocks"]))
+    if z.get("foot"):
+        h.append('<div class="foot-note">%s</div>' % esc(z["foot"]))
     return "".join(h)
 
 
@@ -131,6 +185,7 @@ def render(name, mid_html, slogan=None):
     if slogan:
         html = html.replace('id="slogan">שנה טובה ומבורכת<',
                             'id="slogan">%s<' % esc(slogan))
+    html = inject_ornaments(html)
     html = inline_assets(html)
 
     src = os.path.join(OUT, name + ".html")

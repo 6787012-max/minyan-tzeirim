@@ -5,8 +5,20 @@
 <title>מודעה</title>
 <style>
 /* מודעה לתלייה על לוח בבית הכנסת ולשליחה בוואטסאפ.
-   פורמט אחד לשניהם: יחס A4 לאורך, שנקרא גם כתמונה בטלפון.
-   הפונטים מוטמעים כקבצים מקומיים — אין רשת בזמן הרינדור. */
+   הגרסה הראשונה יצאה מינימליסטית מדי — הרבה לבן וקו דק — וזה לא
+   הרגיסטר של מודעת הכרת הטוב בבית כנסת. כאן: מסגרת כפולה עם פינות
+   מעוטרות, רקע בעל טקסטורה, כותרות בזהב מדורג, וכל עיטור מצויר
+   ב-SVG מקומי כדי שהרינדור לא יהיה תלוי ברשת. */
+
+/* פונטי הכותרות מגיעים מ-moda/fonts ולא מ-fonts של האתר: אלה
+   פונטי דפוס עבריים מסורתיים (כתר, שופר, דרוגולין) שמתאימים
+   למודעה על לוח בבית כנסת, ולא לממשק. */
+@font-face { font-family:'Keter';  src:url('fonts/keteryg-bold-webfont.ttf') format('truetype'); font-weight:700; }
+@font-face { font-family:'Keter';  src:url('fonts/keteryg-medium-webfont.ttf') format('truetype'); font-weight:500; }
+@font-face { font-family:'Shofar'; src:url('fonts/shofardemi-bold-webfont.ttf') format('truetype'); font-weight:700; }
+@font-face { font-family:'Drug';   src:url('fonts/drugulinclm-bold-webfont.ttf') format('truetype'); font-weight:700; }
+@font-face { font-family:'Stam';   src:url('fonts/stamashkenazclm-webfont.ttf') format('truetype'); font-weight:400; }
+@font-face { font-family:'FrankB'; src:url('fonts/FrankRuhlLibre-Black.ttf') format('truetype'); font-weight:900; }
 @font-face { font-family:'Frank'; src:url('../fonts/frank-medium.woff2') format('woff2'); font-weight:500; }
 @font-face { font-family:'Frank'; src:url('../fonts/frank-black.woff2') format('woff2'); font-weight:900; }
 @font-face { font-family:'Asst';  src:url('../fonts/assistant-regular.woff2') format('woff2'); font-weight:400; }
@@ -15,126 +27,266 @@
 @font-face { font-family:'Num';   src:url('../fonts/heebo-black.woff2') format('woff2'); font-weight:900; }
 
 :root {
-  --navy:#12233F; --gold:#B08D3E; --cream:#FBF8F3; --cream2:#F4EFE6;
-  --line:#E3D9C8; --muted:#6b6257; --ink:#3d3830;
+  --navy:#0E1B31; --navy2:#16294A;
+  --gold:#B08D3E; --gold-l:#E3C883; --gold-d:#8A6B24;
+  --cream:#FDFAF4; --cream2:#F6F0E4;
+  --line:#E0D4BE; --muted:#6F6555; --ink:#3A342B;
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 @page { size:A4 portrait; margin:0; }
 html,body { width:210mm; height:297mm; }
+
 body {
-  font-family:'Asst',sans-serif; background:var(--cream); color:var(--ink);
-  display:flex; flex-direction:column; position:relative; overflow:hidden;
+  font-family:'Asst',sans-serif; color:var(--ink); position:relative;
+  overflow:hidden; display:flex; flex-direction:column;
+  /* שכבות: הילה חמה מלמעלה, דוגמת יהלומים דהויה, ורקע שמנת */
+  background:
+    radial-gradient(125% 62% at 50% -8%, rgba(176,141,62,.16) 0%, rgba(176,141,62,0) 62%),
+    url('PATTERN') repeat,
+    linear-gradient(#FDFAF4, #F7F1E5);
 }
 
-/* מסגרת זהב דקה — נותנת למודעה נוכחות על לוח עמוס */
-.frame {
-  position:absolute; inset:9mm; border:1.6px solid var(--gold);
-  border-radius:3mm; pointer-events:none;
+/* ── מסגרת ── */
+.edge {
+  position:absolute; inset:7mm; border:2.2px solid var(--gold);
+  border-radius:2mm; pointer-events:none;
 }
-.frame::after {
-  content:''; position:absolute; inset:2.6mm;
-  border:0.7px solid rgba(176,141,62,.42); border-radius:2mm;
+.edge::after {
+  content:''; position:absolute; inset:2.2mm;
+  border:.8px solid rgba(176,141,62,.45); border-radius:1.4mm;
 }
+.corner { position:absolute; width:20mm; height:20mm; pointer-events:none; }
+.corner img { width:100%; height:100%; display:block; }
+.c-tr { top:8.4mm; right:8.4mm; }
+.c-tl { top:8.4mm; left:8.4mm; transform:scaleX(-1); }
+.c-br { bottom:8.4mm; right:8.4mm; transform:scaleY(-1); }
+.c-bl { bottom:8.4mm; left:8.4mm; transform:scale(-1,-1); }
 
 .inner {
-  position:relative; z-index:1; flex:1;
-  display:flex; flex-direction:column;
-  padding:22mm 20mm 18mm;
+  position:relative; z-index:2; flex:1;
+  display:flex; flex-direction:column; padding:16mm 16mm 11mm;
 }
 
 /* ── כותרת עליונה ── */
 .top { text-align:center; }
-.mark { width:17mm; height:auto; margin:0 auto 4mm; display:block; opacity:.95; }
+.mark { width:14mm; height:auto; margin:0 auto 3mm; display:block; }
 .brand {
-  font-family:'Frank',serif; font-weight:900; font-size:15pt; color:var(--navy);
+  font-family:'Keter',serif; font-weight:700; font-size:21pt; color:var(--navy);
   letter-spacing:.01em;
 }
-.place { font-size:10.5pt; color:var(--muted); letter-spacing:.16em; margin-top:1.5mm; }
-.rule {
-  width:34mm; height:1.4px; background:var(--gold); margin:6mm auto 0; opacity:.75;
+.place {
+  font-size:9.5pt; color:var(--gold-d); letter-spacing:.3em;
+  margin-top:1.8mm; font-weight:600;
 }
+.top .orn { margin:4.5mm auto 0; display:block; }
 
 /* ── גוף ── */
-.mid {
-  flex:1; display:flex; flex-direction:column; justify-content:center;
-  text-align:center;
-  /* מודעת הודיה קצרה נדחפה נמוך מדי במרכוז מלא. משיכה קלה כלפי מעלה
-     מיישרת אותה מול מודעת הזמנים, שממלאת את העמוד ממילא. */
-  padding-bottom:6mm;
+.mid { flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center; }
+/* לוחית הכותרת — הכתר, השם והנימוק יושבים יחד על רקע כהה.
+   בגרסה הקודמת הכל צף על שמנת, והמודעה נראתה ריקה באמצע.
+   הניגודיות היא מה שהופך אותה למודעה ולא למכתב. */
+.plaque {
+  background:linear-gradient(155deg, var(--navy2) 0%, var(--navy) 62%, #0A1526 100%);
+  border:1.6px solid var(--gold); border-radius:2.4mm;
+  padding:8mm 12mm 9mm; margin:0 0 8mm; position:relative;
+  box-shadow:0 2mm 7mm rgba(14,27,49,.18);
 }
+.plaque::after {
+  content:''; position:absolute; inset:1.6mm;
+  border:.7px solid rgba(227,200,131,.42); border-radius:1.4mm; pointer-events:none;
+}
+.crest { margin:0 auto 3mm; display:block; }
+
 .eyebrow {
-  font-size:11pt; letter-spacing:.22em; color:var(--gold);
-  font-weight:600; margin-bottom:5mm;
-}
-h1 {
-  font-family:'Frank',serif; font-weight:900; color:var(--navy);
-  font-size:34pt; line-height:1.22; margin-bottom:5mm;
-}
-h1.long { font-size:27pt; }
-.lead {
-  font-family:'Frank',serif; font-weight:500; font-size:17pt;
-  color:var(--gold); line-height:1.5; margin-bottom:9mm;
-}
-.body p {
-  font-size:13.5pt; line-height:1.85; color:var(--ink);
-  max-width:132mm; margin:0 auto 5mm;
-}
-.when {
-  margin-top:8mm; display:inline-block; align-self:center;
-  border:1.4px solid var(--gold); border-radius:2.4mm;
-  padding:3.5mm 9mm; font-size:13pt; font-weight:600; color:var(--navy);
-  background:rgba(176,141,62,.06);
+  font-size:10pt; letter-spacing:.36em; color:var(--gold-l);
+  font-weight:800; margin-bottom:3.5mm;
 }
 
-/* ── טבלת זמנים ── */
+h1 {
+  font-family:'Keter',serif; font-weight:700; font-size:46pt; line-height:1.14;
+  margin-bottom:4mm;
+  /* זהב מדורג על הכהה — כמו אותיות מוזהבות על שלט */
+  background:linear-gradient(180deg, #F0DDAA 0%, #D9BC79 46%, #B08D3E 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+h1.long { font-size:34pt; }
+h1.mid-len { font-size:40pt; }
+
+.lead {
+  font-family:'Shofar',serif; font-weight:700; font-size:19pt;
+  color:#EFE4CC; line-height:1.45; margin:0 auto; max-width:136mm;
+}
+.mid .orn { margin:0 auto 6mm; display:block; }
+
+.body p {
+  font-family:'Frank',serif; font-size:14pt; line-height:1.85; color:var(--ink);
+  max-width:142mm; margin:0 auto 4.5mm;
+}
+.body p:last-child { margin-bottom:0; }
+.body p.strong {
+  font-family:'Shofar',serif; font-weight:700; font-size:17pt;
+  color:var(--navy); line-height:1.6; margin-bottom:6mm;
+}
+/* חתימה — מודעת הודיה בלי חתימה נראית כמו טיוטה */
+.sign {
+  margin-top:9mm; font-family:'Drug',serif; font-size:15pt;
+  color:var(--gold-d); font-weight:700; letter-spacing:.02em;
+}
+
+/* לוחית התאריך — כמו חותם על המודעה */
+.when {
+  margin:9mm auto 0; display:inline-block; align-self:center;
+  border:1.6px solid var(--gold); border-radius:1.6mm;
+  padding:4.5mm 13mm; font-size:17pt; font-weight:700; color:var(--navy);
+  font-family:'Shofar',serif;
+  background:linear-gradient(#fff, var(--cream2));
+  box-shadow:0 1mm 3mm rgba(176,141,62,.14);
+  letter-spacing:.02em;
+}
+
+/* ── לוח זמנים בבלוקים ── */
+.plaque.tight { padding:4mm 9mm 5mm; margin-bottom:4.5mm; }
+h1.zt { font-size:33pt; margin-bottom:2mm; }
+h1.zt em {
+  font-style:normal; font-family:'Drug',serif;
+  -webkit-text-fill-color:#E3C883; font-size:.72em;
+}
+.plaque.tight .lead { font-size:13pt; letter-spacing:.08em; }
+
 .z-note {
-  background:var(--navy); color:#fff; border-radius:2.4mm;
-  padding:4mm 7mm; font-size:12pt; line-height:1.6; margin-bottom:7mm;
-  text-align:center;
+  background:linear-gradient(#FFF9EC, #F6ECD6);
+  border:1.4px solid var(--gold); border-inline-start:4px solid var(--gold);
+  color:#6B4E12; border-radius:1.8mm; padding:3mm 7mm;
+  font-family:'Frank',serif; font-size:12pt; line-height:1.45;
+  margin-bottom:4.5mm; text-align:center; font-weight:600;
 }
-table { width:100%; border-collapse:collapse; font-size:11.5pt; }
-thead th {
-  font-size:9.5pt; letter-spacing:.06em; color:var(--muted); font-weight:600;
-  padding:0 2mm 2.5mm; text-align:center; border-bottom:1.2px solid var(--gold);
+
+.z-grid { display:grid; grid-template-columns:1fr 1fr; gap:4mm; }
+
+.zb {
+  border:1.3px solid var(--line); border-radius:2mm; overflow:hidden;
+  background:rgba(255,255,255,.78); display:flex; flex-direction:column;
 }
-thead th:first-child { text-align:start; }
-tbody td { padding:3.4mm 2mm; border-bottom:1px solid var(--line); text-align:center; }
-tbody tr:last-child td { border-bottom:0; }
-td.day { text-align:start; }
-td.day b {
-  display:block; font-family:'Frank',serif; font-weight:900;
-  font-size:13pt; color:var(--navy); line-height:1.3;
+.zb.hl { border-color:var(--gold); border-width:1.8px; }
+
+.zb-h {
+  background:linear-gradient(150deg, var(--navy2), var(--navy));
+  color:#F3E7C9; font-family:'Shofar',serif; font-weight:700; font-size:12.5pt;
+  padding:2.6mm 3mm 2.2mm; text-align:center; line-height:1.2;
 }
-td.day span { font-size:9.5pt; color:var(--muted); }
-.num { font-family:'Num','Asst',sans-serif; font-weight:900; font-size:13pt; color:var(--navy); }
-.dash { color:var(--line); }
-tr.hl td { background:rgba(176,141,62,.09); }
+.zb.hl .zb-h { background:linear-gradient(150deg, #7A5C1C, #4A3712); }
+.zb-h span {
+  display:block; font-family:'Asst',sans-serif; font-weight:600;
+  font-size:9.5pt; color:var(--gold-l); letter-spacing:.1em; margin-top:1.2mm;
+}
+
+.z-row {
+  display:flex; align-items:baseline; gap:2mm;
+  padding:1.7mm 3.6mm; border-bottom:1px dotted var(--line);
+  font-size:10.5pt;
+}
+.z-row:last-of-type { border-bottom:0; }
+.z-row span { flex:1; color:var(--ink); }
+/* נקודות מובילות — מה שהופך רשימת זמנים ללוח ולא לרשימת מכולת */
+.z-row span::after {
+  content:''; display:inline-block; width:0; }
+.z-row.em { background:rgba(176,141,62,.10); }
+.z-row.em span { font-weight:800; color:var(--navy); }
+
+.z-v {
+  font-family:'Num','Asst',sans-serif; font-weight:900; font-size:12.5pt;
+  color:var(--navy); white-space:nowrap;
+}
+.z-v.big { font-size:14.5pt; color:#7A5C1C; }
+.z-nt {
+  font-style:normal; font-size:9.5pt; color:#8A5A16; font-weight:700;
+  text-align:end; max-width:34mm; line-height:1.35;
+}
+/* קו למילוי ביד — זמן תפילה שטרם נקבע */
+.z-fill {
+  display:inline-block; width:22mm; border-bottom:1.4px solid var(--gold);
+  opacity:.7; margin-bottom:1mm;
+}
+.z-warn {
+  margin-top:auto; background:rgba(155,30,30,.07);
+  border-top:1px solid rgba(155,30,30,.25);
+  color:#8E2020; font-weight:800; font-size:10.5pt;
+  padding:2mm 3mm; text-align:center;
+}
 .foot-note {
-  margin-top:6mm; font-size:9.5pt; color:var(--muted); line-height:1.6; text-align:center;
+  margin-top:3.5mm; font-size:8.6pt; color:var(--muted); line-height:1.5;
+  text-align:center; font-family:'Frank',serif;
 }
 
 /* ── תחתית ── */
-.bot { text-align:center; padding-top:7mm; border-top:1px solid var(--line); }
+.bot { text-align:center; padding-top:3.5mm; position:relative; }
+.bot .orn { margin:0 auto 2.5mm; display:block; }
 .bot .slogan {
-  font-family:'Frank',serif; font-size:12.5pt; color:var(--navy); font-weight:500;
+  font-family:'Keter',serif; font-size:19pt; color:var(--navy); font-weight:700;
+  letter-spacing:.01em;
 }
-.bot .site { font-size:10pt; color:var(--muted); margin-top:2mm; letter-spacing:.05em; }
+.bot .site {
+  font-size:9pt; color:var(--muted); margin-top:2mm; letter-spacing:.14em;
+}
+.seal { position:absolute; bottom:-2mm; inset-inline-end:2mm; opacity:.5; }
+
+/* ── כיול לגובה העמוד ─────────────────────────────────────────────
+   נמדד ב-Chrome: לוח הזמנים גלש ב-240px מתוך 1123. הכיול נעשה כאן
+   בבלוק אחד ולא בפיזור על כל הכלל, כדי שאפשר יהיה לכוונן אותו שוב
+   בלי לפרק את העיצוב. אחרי כל שינוי תוכן — למדוד מחדש. */
+.inner { padding:12mm 13mm 7mm; }
+.mark { width:10mm; }
+.brand { font-size:17pt; }
+.top .orn { margin:2.4mm auto 0; }
+
+.plaque.tight { padding:2.6mm 7mm 3mm; margin-bottom:3mm; }
+.plaque.tight .crest { width:26mm !important; margin-bottom:1.5mm; }
+h1.zt { font-size:24pt; margin-bottom:1.2mm; }
+.plaque.tight .lead { font-size:11pt; }
+
+.z-note { padding:2.2mm 6mm; font-size:10.4pt; line-height:1.38; margin-bottom:3mm; }
+.z-grid { gap:2.8mm; }
+.zb-h { font-size:11pt; padding:1.8mm 2.5mm 1.5mm; }
+.zb-h span { font-size:8.2pt; margin-top:.6mm; }
+.z-row { padding:1mm 3mm; font-size:9.4pt; }
+.z-v { font-size:11pt; }
+.z-v.big { font-size:12.4pt; }
+.z-nt { font-size:8.4pt; max-width:30mm; }
+.z-fill { width:19mm; }
+.z-warn { font-size:9pt; padding:1.3mm 3mm; }
+.foot-note { margin-top:2.2mm; font-size:7.8pt; line-height:1.45; }
+
+.bot { padding-top:2.2mm; }
+.bot .orn { margin:0 auto 1.6mm; }
+.bot .slogan { font-size:15pt; }
+.bot .site { font-size:8pt; margin-top:1.2mm; }
+
+/* מודעות ההודיה נכנסות בקלות; רק הקידוש חרג במעט */
+.body p { font-size:13pt; margin-bottom:4mm; }
+.body p.strong { font-size:16pt; margin-bottom:5mm; }
+.sign { margin-top:7mm; font-size:14pt; }
 </style>
 </head>
 <body>
-<div class="frame"></div>
+<div class="edge"></div>
+<div class="corner c-tr"><img src="CORNER" alt=""></div>
+<div class="corner c-tl"><img src="CORNER" alt=""></div>
+<div class="corner c-br"><img src="CORNER" alt=""></div>
+<div class="corner c-bl"><img src="CORNER" alt=""></div>
+
 <div class="inner">
 
   <div class="top">
     <img class="mark" src="../img/mark.svg" alt="">
     <div class="brand">מניין הצעירים</div>
     <div class="place">מעלה עמוס</div>
-    <div class="rule"></div>
+    <img class="orn" src="RULE" alt="" style="width:40mm">
   </div>
 
   <div class="mid" id="mid"></div>
 
   <div class="bot">
+    <img class="orn" src="DIVIDER" alt="" style="width:74mm">
     <div class="slogan" id="slogan">שנה טובה ומבורכת</div>
     <div class="site">minyan.mokad.co.il</div>
   </div>
