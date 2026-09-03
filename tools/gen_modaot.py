@@ -72,25 +72,23 @@ def lib(name, fallback=None):
 
 
 def inject_ornaments(html):
-    """העיטורים נכנסים כ-data URI. Chrome ב---headless לא טוען אמינות
-    קבצים יחסיים בהדפסה, ו-SVG חיצוני היה נעלם בלי שגיאה.
-    כל עיטור בתוך <img> נפרד, ולכן מזהי הגרדיאנט (url(#g)) שחוזרים
-    בכמה מהקבצים לא מתנגשים זה בזה."""
+    """כל העיטורים כ-data URI. Chrome ב---headless לא טוען אמינות
+    קבצים יחסיים בהדפסה, ו-SVG חיצוני נעלם בלי שגיאה.
+    כל עיטור ב-<img> נפרד, ולכן מזהי הגרדיאנט שחוזרים בכמה מהם
+    (url(#cg), url(#ag)) לא מתנגשים."""
     sys.path.insert(0, MODA)
     import orn
-    corner = lib("corner_filigree", orn.corner())
-    div = lib("divider_classical", orn.divider())
-    mid = lib("fleuron", orn.midpiece())
+    import arch
     return (html
-            .replace("url('PATTERN')", "url('%s')" % svg_uri(orn.bg_pattern()))
-            .replace('src="CORNER"', 'src="%s"' % svg_uri(corner))
-            .replace('src="RULE"', 'src="%s"' % svg_uri(lib("title_flourish", orn.rule_small())))
-            .replace('src="DIVIDER"', 'src="%s"' % svg_uri(div))
-            .replace('src="MIDH"', 'src="%s"' % svg_uri(mid))
-            .replace('src="MIDV"', 'src="%s"' % svg_uri(mid))
-            .replace('src="WATERMARK"', 'src="%s"'
-                     % svg_uri(io.open(os.path.join(MODA, "gate-white.svg"),
-                                       encoding="utf-8").read())))
+            .replace('src="ARCH"', 'src="%s"' % svg_uri(arch.arch()))
+            .replace('src="COLUMN"', 'src="%s"' % svg_uri(arch.column()))
+            .replace('src="BASEORN"', 'src="%s"' % svg_uri(arch.base_orn()))
+            .replace('src="CORNER"', 'src="%s"'
+                     % svg_uri(lib("corner_filigree", orn.corner())))
+            .replace('src="RULE"', 'src="%s"'
+                     % svg_uri(lib("title_flourish", orn.rule_small())))
+            .replace('src="DIVIDER"', 'src="%s"'
+                     % svg_uri(lib("divider_classical", orn.divider()))))
 
 
 def inline_assets(html):
