@@ -121,15 +121,28 @@ FOOTER_MARKS = [
     r"\n--\s*\n",          # מפריד החתימה התקני שגוגל גרופס מוסיפה
 ]
 FOOTER = re.compile("|".join(FOOTER_MARKS))
-QUOTED = re.compile(r"(?m)^\s*(>|בתאריך .{0,80}מאת|On .{0,60}wrote:).*$")
+#
+# הציטוט של ההודעה הקודמת הוא הדליפה המסוכנת כאן: הוא גורר איתו את
+# השם, המייל והטלפון של מי שכתב קודם. בכרטיס הראשון שפורסם הופיעו
+# כך מספר טלפון וכתובת מייל פרטיים. הסרה שורה-שורה לא הספיקה, כי
+# "On <date> <name> <address> wrote:" נשבר על פני כמה שורות.
+# לכן חותכים מתחילת הציטוט ואילך, בדיוק כמו בחתימה.
+QUOTE_MARKS = [
+    r"\n\s*>",                              # ציטוט מסומן
+    r"\n[‎‏‪-‮]*בתאריך[^\n]{0,40}\n?[^\n]{0,120}מאת",
+    r"\nOn\s[^\n]{0,80}\n?[^\n]{0,120}wrote:",
+    r"\n-{5,}\s*הודעה מועברת",
+    r"\n-{2,}\s*Forwarded message",
+]
+QUOTED = re.compile("|".join(QUOTE_MARKS))
 
 
 def clean_body(txt):
     txt = txt.replace("\r\n", "\n").replace("\xa0", " ")
-    m = FOOTER.search(txt)
-    if m:
-        txt = txt[:m.start()]
-    txt = QUOTED.sub("", txt)
+    for pat in (FOOTER, QUOTED):
+        m = pat.search(txt)
+        if m:
+            txt = txt[:m.start()]
     txt = re.sub(r"\n{3,}", "\n\n", txt)
     txt = re.sub(r"[ \t]{2,}", " ", txt)
     txt = re.sub(r"^[\s.\-–—]+", "", txt)     # שאריות "..." ומקפים בראש
@@ -247,7 +260,29 @@ def fetch(hours):
         m.logout()
     except Exception:
         pass
-    return out
+    return dedupe(out)
+
+
+def dedupe(items):
+    """שרשור של תזכורות ("מישהו חוזר?" → "עדיין רלוונטי") מייצר כמה
+    הודעות עם אותה כותרת. בלוח החדשות זה נראה כמו תקלה. שומרים אחת
+    לכל נושא: המאוחרת ביותר, ואם היא ריקה — זו עם התוכן."""
+    best = {}
+    for it in items:
+        key = re.sub(r"\s+", " ", it["title"]).strip().lower()
+        if not key:
+            best[it["msg_id"]] = it
+            continue
+        cur = best.get(key)
+        if cur is None:
+            best[key] = it
+            continue
+        newer = (it["msg_date"] or "") > (cur["msg_date"] or "")
+        if len(it["body"]) > len(cur["body"]) * 2 or (newer and len(it["body"]) >= 20):
+            best[key] = it
+        elif newer and len(cur["body"]) < 20:
+            best[key] = it
+    return list(best.values())
 
 
 # ── כתיבה למסד ─────────────────────────────────────────────────────

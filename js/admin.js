@@ -239,6 +239,16 @@
       d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
     var body = String(n.body || '');
     var st = { 'new': 'ממתין', approved: 'מאושר', rejected: 'נדחה', expired: 'פג' };
+
+    /* טלפון או מייל בגוף ההודעה. לרוב זה מכוון — מי שמוכר רוצה
+     * שיתקשרו אליו — אבל זה הפרט שהכי מסוכן לפרסם בטעות, ולכן
+     * הוא מסומן כאן לפני הלחיצה ולא מתגלה אחריה באתר. */
+    var hay = (n.title || '') + ' ' + body;
+    var pii = [];
+    if (/0\d{1,2}[- ]?\d{7}|05\d[- ]?\d{3}[- ]?\d{4}/.test(hay)) pii.push('טלפון');
+    if (/[\w.+-]+@[\w-]+\.[\w.]+/.test(hay)) pii.push('מייל');
+    var piiTag = pii.length
+      ? '<span class="warn">מכיל ' + pii.join(' ו') + '</span>' : '';
     return '<article class="row nrow st-' + esc(n.status) + '" data-id="' + n.id + '">' +
       '<div class="main">' +
         '<div class="line1">' +
@@ -247,6 +257,7 @@
           '<span class="badge b-' + (n.status === 'approved' ? 'confirmed' :
             n.status === 'new' ? 'new' : 'cancelled') + '">' +
             esc(st[n.status] || n.status) + '</span>' +
+          piiTag +
           '<span class="when">' + esc(when) + '</span>' +
         '</div>' +
         (body ? '<p class="nbody">' + esc(body.slice(0, 700)) +
