@@ -243,6 +243,7 @@
     /* טלפון או מייל בגוף ההודעה. לרוב זה מכוון — מי שמוכר רוצה
      * שיתקשרו אליו — אבל זה הפרט שהכי מסוכן לפרסם בטעות, ולכן
      * הוא מסומן כאן לפני הלחיצה ולא מתגלה אחריה באתר. */
+    var imgs = Array.isArray(n.images) ? n.images : (n.image_url ? [n.image_url] : []);
     var hay = (n.title || '') + ' ' + body;
     var pii = [];
     if (/0\d{1,2}[- ]?\d{7}|05\d[- ]?\d{3}[- ]?\d{4}/.test(hay)) pii.push('טלפון');
@@ -262,6 +263,11 @@
         '</div>' +
         (body ? '<p class="nbody">' + esc(body.slice(0, 700)) +
                 (body.length > 700 ? '…' : '') + '</p>' : '') +
+        /* המודעה עצמה. אי אפשר להחליט אם לפרסם תמונה בלי לראות אותה. */
+        (imgs.length ? '<div class="nimgs">' + imgs.map(function (u) {
+          return '<a href="' + esc(u) + '" target="_blank" rel="noopener">' +
+            '<img src="' + esc(u) + '" alt="" loading="lazy"></a>';
+        }).join('') + '</div>' : '') +
       '</div>' +
       '<div class="acts">' +
         '<button type="button" class="btn btn-g small" data-nact="approved">פרסום</button>' +

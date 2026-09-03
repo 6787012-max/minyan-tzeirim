@@ -39,7 +39,12 @@ CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
 
 sys.path.insert(0, HERE)
-import sb  # noqa: E402  — אותו קובץ סודות, אותה שכבת HTTP
+import sb       # noqa: E402  — אותו קובץ סודות, אותה שכבת HTTP
+import ocr      # noqa: E402
+import storage  # noqa: E402
+
+# חתימות, לוגואים וספייסרים של גוגל. מודעה אמיתית שוקלת הרבה יותר.
+MIN_IMAGE = 8000
 
 
 # ── לוג ─────────────────────────────────────────────────────────────
@@ -75,6 +80,24 @@ def decode(s):
         else:
             out.append(part)
     return "".join(out)
+
+
+def images_of(msg):
+    """התמונות המצורפות, בלי הקישוטים.
+    inline קטן הוא כמעט תמיד לוגו בחתימה, לא מודעה."""
+    out = []
+    for part in msg.walk():
+        ct = (part.get_content_type() or "").lower()
+        if not ct.startswith("image/"):
+            continue
+        try:
+            data = part.get_payload(decode=True) or b""
+        except Exception:
+            continue
+        if len(data) < MIN_IMAGE:
+            continue
+        out.append((ct, data))
+    return out[:4]        # תקרה שפויה; מודעה אחת לא מגיעה לארבע תמונות
 
 
 def body_of(msg):
@@ -245,7 +268,9 @@ def fetch(hours):
 
         subject = clean_subject(decode(msg.get("Subject")))
         body = clean_body(body_of(msg))
-        if not subject and not body:
+        imgs = images_of(msg)
+        # מודעה סרוקה מגיעה בלי גוף בכלל — היא עדיין הודעה
+        if not subject and not body and not imgs:
             continue
 
         out.append({
@@ -254,6 +279,7 @@ def fetch(hours):
             "body": body[:4000],
             "sender": decode(msg.get("From"))[:200],
             "msg_date": when.isoformat() if when else None,
+            "_imgs": imgs,
         })
     try:
         m.close()
@@ -278,6 +304,11 @@ def dedupe(items):
             best[key] = it
             continue
         newer = (it["msg_date"] or "") > (cur["msg_date"] or "")
+        # הודעה עם מודעה מצורפת גוברת תמיד: היא זו שנושאת את התוכן
+        if bool(it.get("_imgs")) != bool(cur.get("_imgs")):
+            if it.get("_imgs"):
+                best[key] = it
+            continue
         if len(it["body"]) > len(cur["body"]) * 2 or (newer and len(it["body"]) >= 20):
             best[key] = it
         elif newer and len(cur["body"]) < 20:
@@ -287,11 +318,106 @@ def dedupe(items):
 
 # ── כתיבה למסד ─────────────────────────────────────────────────────
 
+def existing_ids():
+    """מזהי ההודעות שכבר במסד. חשוב שזה יקרה *לפני* ה-OCR: כל תמונה
+    עולה כ-20 שניות, והמשימה רצה כל שעה על חלון חופף. בלי הבדיקה
+    הזו אותה מודעה הייתה עוברת OCR שוב ושוב עד שתפוג."""
+    c = sb.creds()
+    req = urllib.request.Request(
+        "https://%s.supabase.co/rest/v1/news?select=msg_id&limit=5000" % c["ref"])
+    for k, v in {"apikey": c["service"], "Authorization": "Bearer " + c["service"],
+                 "Accept-Profile": "minyan"}.items():
+        req.add_header(k, v)
+    try:
+        r = urllib.request.urlopen(req, context=CTX, timeout=60)
+        return set(x["msg_id"] for x in json.loads(r.read()) if x.get("msg_id"))
+    except Exception as e:
+        log("  לא ניתן לשלוף מזהים קיימים: %s" % e)
+        return set()
+
+
+def handle_images(it, dry=False):
+    """מעלה את התמונות ומחלץ מהן טקסט.
+    מודעה סרוקה היא לרוב *כל* ההודעה — הגוף במייל ריק והתוכן כולו
+    בתמונה. לכן הטקסט נכנס לגוף עצמו ולא רק לשדה צדדי: אחרת הכרטיס
+    בלוח הוא כותרת ותמונה, ואי אפשר לחפש בו כלום."""
+    imgs = it.pop("_imgs", []) or []
+    it["images"] = []
+    if not imgs:
+        return
+    ocr_parts = []
+    for idx, (mime, data) in enumerate(imgs):
+        if dry:
+            ocr_parts.append("[יבש: OCR ל-%d KB]" % (len(data) // 1024))
+            continue
+        url, err = storage.upload(data, mime, prefix="mail/")
+        if err:
+            log("  העלאת תמונה נכשלה: %s" % err)
+            continue
+        it["images"].append(url)
+        txt, oerr = ocr.image_to_text(data, mime, name="news-ocr")
+        if oerr:
+            log("  OCR נכשל (%s): %s" % (idx, oerr))
+        elif txt.strip():
+            ocr_parts.append(clean_ocr(txt))
+
+    if it["images"]:
+        it["image_url"] = it["images"][0]
+    if not ocr_parts:
+        return
+
+    joined = "\n\n".join(p for p in ocr_parts if p)
+    it["ocr_text"] = joined[:6000]
+    body = (it.get("body") or "").strip()
+    if not body:
+        it["body"] = joined[:4000]
+    else:
+        it["body"] = (body + "\n\n— מתוך המודעה —\n" + joined)[:4000]
+    # כותרת שהיא רק "מודעה" או ריקה — השורה הראשונה של המודעה עדיפה
+    if len(it.get("title") or "") < 4:
+        first = next((l.strip() for l in joined.split("\n") if len(l.strip()) > 3), "")
+        if first:
+            it["title"] = first[:200]
+
+
+def clean_ocr(txt):
+    """פלט OCR מגיע עם שורות קצרות שנשברו לפי פריסת המודעה ולא לפי
+    המשפט. איחוד שורות קצרות רצופות הופך את זה לפסקה קריאה."""
+    lines = [l.strip() for l in txt.replace("\r\n", "\n").split("\n")]
+    out, buf = [], ""
+    for l in lines:
+        if not l:
+            if buf:
+                out.append(buf)
+                buf = ""
+            continue
+        # שורה שנגמרת בסימן סיום, או ארוכה — עומדת בפני עצמה
+        if buf and (len(buf) > 60 or re.search(r"[.!?:•]$", buf)):
+            out.append(buf)
+            buf = l
+        else:
+            buf = (buf + " " + l).strip() if buf else l
+    if buf:
+        out.append(buf)
+    txt = "\n".join(out)
+    txt = re.sub(r"\n{3,}", "\n\n", txt)
+    return txt.strip()
+
+
 def push(items, dry=False):
     c = sb.creds()
     base = "https://%s.supabase.co/rest/v1/news" % c["ref"]
+    seen = set() if dry else existing_ids()
     added = 0
+    skipped = 0
     for it in items:
+        if it["msg_id"] in seen:
+            skipped += 1
+            it.pop("_imgs", None)
+            continue
+
+        handle_images(it, dry)
+
         cat = categorize(it["title"], it["body"])
         ttl = TTL_HOURS.get(cat, TTL_DEFAULT)
         base_dt = dt.datetime.now(dt.timezone.utc)
@@ -305,7 +431,9 @@ def push(items, dry=False):
         row["expires_at"] = (base_dt + dt.timedelta(hours=ttl)).isoformat()
 
         if dry:
-            log("  [יבש] %s | %s" % (cat, row["title"][:60]))
+            log("  [יבש] %s | %s%s" % (
+                cat, row["title"][:60],
+                " | %d תמונות" % len(row.get("images") or []) if row.get("images") else ""))
             added += 1
             continue
 
@@ -325,6 +453,8 @@ def push(items, dry=False):
         except urllib.error.HTTPError as e:
             if e.code != 409:
                 log("  שגיאה %s: %s" % (e.code, e.read().decode()[:180]))
+    if skipped:
+        log("  דילוג על %d הודעות שכבר במסד (לא בוזבז OCR)" % skipped)
     return added
 
 

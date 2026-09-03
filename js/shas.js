@@ -218,6 +218,42 @@
     }
   }
 
+  /* כרכים שהגבאי כבר אישר בפאנל.
+   * data/shas.json הוא רשימת הכרכים, לא מצב החלוקה — הוא מתעדכן ידנית
+   * ובפועל לא התעדכן. לכן אישור בפאנל לא שינה כלום בטבלה, והכרך המשיך
+   * להופיע פנוי אחרי שכבר נלקח. כאן נשלפים הרישומים המאושרים והם
+   * גוברים על הקובץ. השרת מחזיר ל-anon רק מזהה כרך ושם. */
+  function mergeApproved() {
+    fetch('data/site.json', { cache: 'no-cache' })
+      .then(function (r) { return r.json(); })
+      .then(function (c) {
+        return fetch(c.api.url + '/rest/v1/shas_taken?select=ref_key,name', {
+          headers: {
+            'apikey': c.api.anon,
+            'Authorization': 'Bearer ' + c.api.anon,
+            'Accept-Profile': 'minyan'
+          }
+        });
+      })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var n = 0;
+        rows.forEach(function (row) {
+          var key = String(row.ref_key || '').replace(/^vol-/, '');
+          var v = S.volumes.filter(function (x) { return String(x.n) === key; })[0];
+          if (!v || taken(v)) return;
+          v.by = row.name;
+          v.fromServer = true;
+          n++;
+        });
+        if (!n) return;
+        renderStats();
+        renderFilters();
+        renderGrid();
+      })
+      .catch(function (e) { console.warn('shas_taken', e); });
+  }
+
   /* ── הפעלה ───────────────────────────────────────────────────── */
   Promise.all([
     fetch('data/shas.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
@@ -232,12 +268,13 @@
     renderStats();
     renderFilters();
     renderGrid();
+    mergeApproved();
 
     var n = CFG.nedarim || {};
     $('#note').innerHTML = 'התשלום מתבצע באתר המאובטח של <b>נדרים פלוס</b> (מוסד ' +
       esc(n.mosad) + '). ' + esc(S.priceNote || '') +
-      ' רשימת הכרכים מתעדכנת ידנית — אם לקחתם כרך והוא עדיין מופיע כפנוי, ' +
-      'זה רק עניין של עדכון.';
+      ' כרך שנלקח מסומן כאן ' +
+      'אוטומטית אחרי שהגבאי מאשר את הרישום.';
     $('#footGive').innerHTML = '<a href="' + esc(n.url) + '" target="_blank" rel="noopener">' +
       'תרומה כללית למניין</a>';
 

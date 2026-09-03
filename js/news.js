@@ -32,6 +32,7 @@
   function card(n) {
     var body = String(n.body || '');
     var longer = body.length > 300;
+    var imgs = Array.isArray(n.images) ? n.images : (n.image_url ? [n.image_url] : []);
     return '<article class="nw" data-cat="' + esc(n.category || '') + '">' +
       '<div class="nw-top">' +
         (n.category ? '<span class="cat">' + esc(n.category) + '</span>' : '') +
@@ -40,8 +41,10 @@
       '<h3>' + esc(n.title || '') + '</h3>' +
       (body ? '<p class="body' + (longer ? ' clamp' : '') + '">' + esc(body) + '</p>' : '') +
       (longer ? '<button type="button" class="more">להמשך</button>' : '') +
-      (n.image_url ? '<img class="nw-img" src="' + esc(n.image_url) +
-                     '" alt="" loading="lazy">' : '') +
+      (imgs.length ? '<div class="nw-imgs">' + imgs.map(function (u) {
+        return '<a href="' + esc(u) + '" target="_blank" rel="noopener">' +
+          '<img src="' + esc(u) + '" alt="המודעה המצורפת" loading="lazy"></a>';
+      }).join('') + '</div>' : '') +
     '</article>';
   }
 

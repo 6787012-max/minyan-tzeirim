@@ -52,3 +52,11 @@
   margin-top: 11px; width: 100%; height: auto; border-radius: 9px;
   border: 1px solid var(--line);
 }
+
+/* מודעות מצורפות. לחיצה פותחת בגודל מלא — טקסט במודעה סרוקה
+   קטן מכדי לקרוא בכרטיס. */
+.nw-imgs { margin-top: 11px; display: grid; gap: 8px; }
+.nw-imgs img {
+  width: 100%; height: auto; display: block; border-radius: 9px;
+  border: 1px solid var(--line); background: #fff;
+}
