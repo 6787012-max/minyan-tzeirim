@@ -31,7 +31,11 @@
 
 /* ── מסגרת הפאנל ──────────────────────────────────────────────── */
 .adm-main { padding: 26px 0 60px; }
-.adm-sec { margin-bottom: 40px; }
+.adm-sec {
+  /* main.css נותן ל-section ריפוד אנכי גדול שמתאים לדף שיווקי.
+     כאן זה יצר 140px של אוויר בין כל שני בלוקים במסך עבודה. */
+  padding: 0; margin-bottom: 40px;
+}
 .adm-sec .head { margin-bottom: 16px; }
 .adm-sec .head h2 { font-size: 24px; margin: 2px 0 4px; }
 .adm-sec .head p { color: var(--muted); font-size: 14.5px; margin: 0; }

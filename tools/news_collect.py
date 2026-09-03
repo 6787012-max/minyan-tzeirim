@@ -107,21 +107,32 @@ def body_of(msg):
 
 # החתימה שגוגל גרופס מוסיפה לכל הודעה. בלי הסרה היא תופסת
 # יותר מקום בכרטיס מאשר ההודעה עצמה.
-FOOTER = re.compile(
-    r"(--\s*\n)?קיבלת את ההודעה הזו מפני שאתה רשום לקבוצה.*$|"
-    r"You received this message because you are subscribed.*$|"
-    r"--\s*\nכדי לבטל את הרישום לקבוצה.*$",
-    re.S,
-)
+#
+# אין נוסח אחד. הכרטיס הראשון שפורסם באתר הראה את החתימה במקום את
+# ההודעה, כי ניסיתי להתאים "מפני שאתה רשום לקבוצה" בעוד שגוגל כותבת
+# גם "מכיוון שאתה מנוי לקבוצה". לכן חותכים במקום הראשון שבו מופיע
+# *אחד* מכמה סימנים, ולא מנסים לנחש ניסוח מדויק.
+FOOTER_MARKS = [
+    r"קיבלת את ההודעה הזו",
+    r"כדי לבטל את הרישום",
+    r"You received this message",
+    r"To unsubscribe from this group",
+    r"groups\.google\.com",
+    r"\n--\s*\n",          # מפריד החתימה התקני שגוגל גרופס מוסיפה
+]
+FOOTER = re.compile("|".join(FOOTER_MARKS))
 QUOTED = re.compile(r"(?m)^\s*(>|בתאריך .{0,80}מאת|On .{0,60}wrote:).*$")
 
 
 def clean_body(txt):
     txt = txt.replace("\r\n", "\n").replace("\xa0", " ")
-    txt = FOOTER.sub("", txt)
+    m = FOOTER.search(txt)
+    if m:
+        txt = txt[:m.start()]
     txt = QUOTED.sub("", txt)
     txt = re.sub(r"\n{3,}", "\n\n", txt)
     txt = re.sub(r"[ \t]{2,}", " ", txt)
+    txt = re.sub(r"^[\s.\-–—]+", "", txt)     # שאריות "..." ומקפים בראש
     return txt.strip()
 
 
