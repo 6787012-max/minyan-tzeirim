@@ -1,12 +1,12 @@
 /* network-first על ה-shell עם נפילה ל-cache. מעלים את V ביד בכל דיפלוי — וגם את ?v= בתגיות ה-script/link
    בשלושת קבצי ה-HTML, אחרת דפדפן שכבר ביקר יגיש JS ישן מה-cache שלו. */
-var V = 'mt-v17';
+var V = 'mt-v18';
 var SHELL = [
-  './', './index.html', './shas.html', './hok.html',
-  './css/main.css', './css/shas.css', './css/hok.css',
-  './js/app.js', './js/luach.js', './js/motion.js', './js/shas.js', './js/hok.js',
+  './', './index.html', './shas.html', './hok.html', './kibud.html',
+  './css/main.css', './css/shas.css', './css/hok.css', './css/kibud.css',
+  './js/app.js', './js/luach.js', './js/motion.js', './js/shas.js', './js/hok.js', './js/kibud.js',
   './data/config.json', './data/shabbat.json', './data/shas.json',
-  './data/hok.json', './data/yamim_noraim.json', './manifest.json', './favicon.ico',
+  './data/hok.json', './data/kibud.json', './data/yamim_noraim.json', './manifest.json', './favicon.ico',
   './img/mark@64.png', './img/logo-gate@680.png', './img/logo-h-white.svg',
   './fonts/frank-medium.woff2', './fonts/frank-black.woff2',
   './fonts/assistant-regular.woff2', './fonts/assistant-semibold.woff2',

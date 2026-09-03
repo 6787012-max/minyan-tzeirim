@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>כיבוד ללומדים · מניין הצעירים</title>
+<meta name="description" content="מיזם הכיבוד ללומדי חלקי בקהילתי במעלה עמוס — לוח ערבי הלימוד, מי כבר לקחה, ואיך להצטרף.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://docs.google.com; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#12233F">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="manifest" href="manifest.json">
+<link rel="canonical" href="https://minyan.mokad.co.il/kibud.html">
+<meta property="og:title" content="כיבוד ללומדי חלקי בקהילתי">
+<meta property="og:description" content="ערב אחד בחודש. עוגה, סלט או פירות — ועשרים לומדים מקבלים כוח.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://minyan.mokad.co.il/kibud.html">
+<link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/main.css?v=18">
+<link rel="stylesheet" href="css/kibud.css?v=18">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <img src="img/mark@64.png" alt="" width="30" height="30">
+      <b>מניין הצעירים<span class="dot"> · </span><span class="pl">מעלה עמוס</span></b>
+    </a>
+    <nav class="nav">
+      <a href="./">לדף הבית</a>
+      <a class="give" href="#lu">ללוח הערבים</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="kb-hero">
+    <div class="wrap">
+      <div class="kb-hero-in">
+        <div>
+          <div class="eyebrow" id="kbEyebrow">לקחת חלק</div>
+          <h1 id="kbTitle">כיבוד ללומדים</h1>
+          <p class="lead" id="kbIntro"></p>
+          <p class="slogan" id="kbSlogan"></p>
+        </div>
+        <div class="kb-art">
+          <img src="img/kehilati@560.png" alt="חלקי בקהילתי" width="560" height="128">
+        </div>
+      </div>
+
+      <div class="kb-progress" id="kbProg" hidden>
+        <div class="row"><span id="kbProgLabel"></span><b id="kbProgVal"></b></div>
+        <div class="track"><i class="fill" id="kbFill"></i></div>
+        <div class="cap" id="kbCap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="lu">
+    <div class="wrap">
+      <div class="head">
+        <div class="eyebrow">ערבי הלימוד</div>
+        <h2 id="kbMonth">לוח החודש</h2>
+        <p>ערב פנוי — לחיצה אחת ואת רשומה. בסוף אפשר להוריד תזכורת ליומן,
+          כדי שלא תישכח.</p>
+      </div>
+      <div class="kb-grid" id="kbGrid"></div>
+      <div class="kb-actions">
+        <button type="button" class="btn btn-s" id="kbShare">שיתוף התאריכים הפנויים</button>
+        <a class="btn btn-s" id="kbSheet" href="#" target="_blank" rel="noopener" hidden>הגיליון החודשי</a>
+      </div>
+      <p class="note" id="kbNote"></p>
+    </div>
+  </section>
+
+</main>
+
+<!-- חלונית הרשמה -->
+<div class="modal" id="kbModal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="kbMTitle">
+    <button type="button" class="x" id="kbClose" aria-label="סגירה">×</button>
+    <div class="eyebrow">לקחת ערב</div>
+    <h3 id="kbMTitle"></h3>
+    <p id="kbMSub"></p>
+
+    <label class="fld"><span>שם</span><input id="kbName" autocomplete="name"></label>
+    <label class="fld"><span>טלפון (לא חובה)</span><input id="kbPhone" inputmode="tel" autocomplete="tel"></label>
+
+    <div class="fld">
+      <span>מה תביאי?</span>
+      <div class="chips" id="kbChips"></div>
+      <input id="kbOther" placeholder="פירוט נוסף (לא חובה)" style="margin-top:9px">
+    </div>
+
+    <div class="m-actions">
+      <button type="button" class="btn btn-g" id="kbSend">שליחה לרכזת</button>
+      <button type="button" class="btn btn-s" id="kbIcs">תזכורת ליומן</button>
+    </div>
+    <p class="hint" id="kbHint"></p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bot" style="border:0;padding-top:0">
+      <span><a href="./">← חזרה לדף הבית</a></span>
+      <span id="kbFoot"></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/luach.js?v=18"></script>
+<script src="js/motion.js?v=18"></script>
+<script src="js/kibud.js?v=18"></script>
+</body>
+</html>

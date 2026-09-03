@@ -1,0 +1,74 @@
+/* kibud.css — מיזם הכיבוד. נטען אחרי main.css. */
+
+.kb-hero{padding:clamp(40px,5vw,64px) 0 clamp(30px,3.6vw,44px)}
+.kb-hero-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,280px);
+  gap:clamp(24px,3.4vw,48px);align-items:center;margin-bottom:clamp(24px,3vw,36px)}
+.kb-hero .eyebrow{color:var(--gold);font-weight:600;font-size:14.5px;letter-spacing:2.4px;
+  margin-bottom:8px}
+.kb-hero h1{font-size:clamp(32px,5vw,52px);margin-bottom:12px;letter-spacing:-.4px}
+.kb-hero .lead{color:var(--muted);font-size:19.5px;line-height:1.62;max-width:56ch;margin:0}
+.kb-hero .slogan{font-family:'Frank',serif;font-size:21px;color:var(--gold);margin:16px 0 0}
+.kb-art img{width:100%;max-width:260px;height:auto;display:block;margin-inline:auto}
+@media(max-width:820px){.kb-hero-in{grid-template-columns:1fr}.kb-art{order:-1}}
+
+.kb-progress .track{height:11px;border-radius:11px;background:rgba(176,141,62,.18);
+  overflow:hidden}
+.kb-progress .fill{display:block;height:100%;border-radius:11px;width:0;
+  background:linear-gradient(90deg,var(--gold),var(--gold-lt));
+  transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.kb-progress .row{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:9px;font-size:16px;color:var(--muted)}
+.kb-progress .row b{font-family:'Num','Asst',sans-serif;font-weight:900;font-size:26px;
+  color:var(--navy);font-variant-numeric:tabular-nums}
+.kb-progress .cap{font-size:15.5px;color:var(--muted);margin-top:9px}
+
+.kb-grid{display:grid;gap:11px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.kb-day{display:flex;flex-direction:column;gap:7px;text-align:start;width:100%;font:inherit;
+  background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 17px;
+  color:var(--ink);box-shadow:var(--shadow);
+  transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease}
+button.kb-day{cursor:pointer}
+button.kb-day:hover{border-color:var(--gold);transform:translateY(-2px);
+  box-shadow:0 10px 24px rgba(18,35,63,.1)}
+.kb-day .d{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kb-day .d b{font-family:'Frank',serif;font-weight:500;font-size:19px}
+.kb-day .hb{font-size:14.5px;color:var(--muted)}
+.kb-day .gr{font-family:'Num','Asst',sans-serif;font-weight:900;font-size:14px;
+  color:var(--gold);margin-inline-start:auto;font-variant-numeric:tabular-nums}
+.kb-day .free{font-size:15.5px;color:var(--gold);font-weight:600}
+.kb-day .who{font-family:'Frank',serif;font-size:18px;color:var(--navy)}
+.kb-day .br{font-size:14px;color:var(--muted)}
+
+.kb-day.taken{background:rgba(176,141,62,.08);border-style:solid;border-color:var(--gold)}
+.kb-day.past{opacity:.42}
+.kb-day.locked{background:var(--cream-2);border-style:dashed;opacity:.7}
+
+.kb-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:22px}
+
+/* חלונית — משתמשת בסגנון של shas.css אם נטען, אחרת מגדירה כאן */
+.modal{position:fixed;inset:0;z-index:80;background:rgba(18,35,63,.55);
+  backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .sheet{background:var(--cream);border:1px solid var(--gold);border-radius:20px;
+  padding:28px 26px 22px;max-width:460px;width:100%;position:relative;
+  box-shadow:0 24px 60px rgba(18,35,63,.3);max-height:90vh;overflow-y:auto}
+.modal .x{position:absolute;inset-inline-start:14px;top:12px;width:34px;height:34px;border:0;
+  background:transparent;font-size:26px;line-height:1;color:var(--muted);cursor:pointer;
+  border-radius:50%}
+.modal .x:hover{background:rgba(176,141,62,.15);color:var(--navy)}
+.modal .eyebrow{color:var(--gold);font-weight:600;font-size:13.5px;letter-spacing:2px;
+  margin-bottom:6px}
+.modal h3{font-family:'Frank',serif;font-weight:500;font-size:25px;line-height:1.2;margin:0}
+.modal > .sheet > p{color:var(--muted);font-size:15.5px;margin:8px 0 18px}
+.modal .fld{display:block;margin-bottom:14px}
+.modal .fld > span{display:block;font-size:14.5px;color:var(--muted);margin-bottom:6px}
+.modal .fld input{display:block;width:100%;font:inherit;font-size:16.5px;color:var(--ink);
+  background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 14px}
+.modal .fld input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font:inherit;font-size:15px;cursor:pointer;background:#fff;border:1px solid var(--line);
+  border-radius:20px;padding:7px 14px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--cream);
+  font-weight:600}
+.m-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.m-actions .btn{flex:1 1 auto;justify-content:center;text-align:center}
+.modal .hint{font-size:14.5px;color:var(--muted);margin:12px 0 0;line-height:1.5;min-height:1em}
