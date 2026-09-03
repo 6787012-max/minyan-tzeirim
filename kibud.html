@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>כיבוד ללומדים · מניין הצעירים</title>
 <meta name="description" content="מיזם הכיבוד ללומדי חלקי בקהילתי במעלה עמוס — לוח ערבי הלימוד, מי כבר לקחה, ואיך להצטרף.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://docs.google.com; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://docs.google.com https://script.google.com https://script.googleusercontent.com; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#12233F">
 <link rel="icon" href="img/favicon.ico" sizes="any">
@@ -16,8 +16,8 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://minyan.mokad.co.il/kibud.html">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/main.css?v=18">
-<link rel="stylesheet" href="css/kibud.css?v=18">
+<link rel="stylesheet" href="css/main.css?v=19">
+<link rel="stylesheet" href="css/kibud.css?v=19">
 </head>
 <body>
 
@@ -55,6 +55,7 @@
         <div class="track"><i class="fill" id="kbFill"></i></div>
         <div class="cap" id="kbCap"></div>
       </div>
+      <div class="kb-sync" id="kbSync" hidden></div>
     </div>
   </section>
 
@@ -97,6 +98,7 @@
     <div class="m-actions">
       <button type="button" class="btn btn-g" id="kbSend">שליחה לרכזת</button>
       <button type="button" class="btn btn-s" id="kbIcs">תזכורת ליומן</button>
+      <button type="button" class="btn btn-cancel" id="kbCancel" hidden>לא אוכל — ביטול</button>
     </div>
     <p class="hint" id="kbHint"></p>
   </div>
@@ -111,8 +113,8 @@
   </div>
 </footer>
 
-<script src="js/luach.js?v=18"></script>
-<script src="js/motion.js?v=18"></script>
-<script src="js/kibud.js?v=18"></script>
+<script src="js/luach.js?v=19"></script>
+<script src="js/motion.js?v=19"></script>
+<script src="js/kibud.js?v=19"></script>
 </body>
 </html>
