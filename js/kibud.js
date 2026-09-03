@@ -186,15 +186,32 @@
         '?subject=' + encodeURIComponent('כיבוד ' + CUR.greg + ' — ' + nm) +
         '&body=' + encodeURIComponent(body);
     }
-    /* עדכון מיידי על המסך, ובמקביל כתיבה לגיליון */
+    /* עדכון מיידי על המסך, ובמקביל שמירה בשרת וכתיבה לגיליון */
     var rec = { name: nm, brings: brings(), phone: $('#kbPhone').value.trim() };
     K.signups = K.signups || {};
     K.signups[CUR.iso] = rec;
     var ev = CUR;
     render(new Date());
 
-    $('#kbHint').innerHTML = '<b>נשלח לרכזת.</b> כדאי להוריד תזכורת ליומן ' +
-      'כדי שלא תישכח — הכפתור לידך.';
+    $('#kbHint').innerHTML = 'שומר…';
+
+    /* השמירה בשרת היא מה שקובע. הוואטסאפ/מייל שנפתחו הם גיבוי
+     * למקרה שהשרת לא זמין — לא הם שמחזיקים את הרישום. */
+    if (window.Forms) {
+      Forms.send({
+        kind: 'kibud', name: nm, phone: rec.phone,
+        ref_key: ev.iso, ref_label: 'יום ' + ev.dow + ' · ' + ev.heb + ' · ' + ev.greg,
+        details: rec.brings ? { 'מביאה': rec.brings } : {}
+      }).then(function (res) {
+        $('#kbHint').innerHTML = res.saved
+          ? '<b>הרישום נשמר.</b> ' + (res.mailed ? 'נשלחה הודעה לגבאי. ' : '') +
+            'כדאי להוריד תזכורת ליומן — הכפתור לידך.'
+          : '<b style="color:#9B1E1E">' + Forms.explain(res) + '</b> ' +
+            'ההודעה לרכזת נשלחה בכל מקרה.';
+      });
+    } else {
+      $('#kbHint').innerHTML = '<b>נשלח לרכזת.</b> כדאי להוריד תזכורת ליומן.';
+    }
 
     postToSheet('add', {
       iso: ev.iso, dow: ev.dow, heb: ev.heb, greg: ev.greg,
@@ -239,8 +256,24 @@
         '&body=' + encodeURIComponent(body);
     }
     var ev = CUR;
-    $('#kbHint').innerHTML = '<b>הודעת הביטול נשלחה לרכזת.</b> ' +
-      'התאריך יסומן כפנוי אחרי שתעדכן.';
+    $('#kbHint').innerHTML = 'שולח ביטול…';
+
+    if (window.Forms) {
+      Forms.send({
+        kind: 'kibud', name: who || 'לא צוין',
+        ref_key: 'cancel:' + ev.iso,
+        ref_label: 'ביטול — יום ' + ev.dow + ' · ' + ev.heb + ' · ' + ev.greg,
+        details: { 'סוג': 'ביטול', 'תאריך שהתפנה': ev.greg }
+      }).then(function (res) {
+        $('#kbHint').innerHTML = res.saved
+          ? '<b>הביטול נקלט.</b> ' + (res.mailed ? 'הגבאי קיבל הודעה. ' : '') +
+            'התאריך יסומן כפנוי.'
+          : '<b>הודעת הביטול נשלחה לרכזת.</b> התאריך יסומן כפנוי אחרי שתעדכן.';
+      });
+    } else {
+      $('#kbHint').innerHTML = '<b>הודעת הביטול נשלחה לרכזת.</b> ' +
+        'התאריך יסומן כפנוי אחרי שתעדכן.';
+    }
 
     postToSheet('cancel', {
       iso: ev.iso, dow: ev.dow, heb: ev.heb, greg: ev.greg, name: who

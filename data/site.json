@@ -1,0 +1,7 @@
+{
+  "_": "תצורה ציבורית. מפתח anon מוגן ע\"י RLS — אין לו אף policy בסכימת minyan, ולכן הוא לא קורא ולא כותב כלום. כל כתיבה עוברת דרך פונקציית forms שמחזיקה את מפתח השרת בצד השרת.",
+  "api": {
+    "url": "https://cmsusfmwjtpfewbydzpi.supabase.co",
+    "anon": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtc3VzZm13anRwZmV3YnlkenBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NjE1NzUsImV4cCI6MjEwMzQzNzU3NX0.bVI6dRLXfjCkVgdDNZPbzEk-897IOzZCaNocqtNkg9w"
+  }
+}

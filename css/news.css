@@ -1,0 +1,54 @@
+/* news.css — לוח ההודעות. צפוף ומהיר לסריקה: רוב הקריאות כאן
+   הן "מה חדש היום", לא קריאה מעמיקה. */
+
+.nw-hero { padding: 46px 0 30px; }
+.nw-hero h1 { font-size: clamp(30px, 5vw, 42px); margin: 4px 0 8px; }
+.nw-hero .lead { max-width: 62ch; color: var(--muted); }
+
+.toolbar { display: flex; gap: 11px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+.toolbar .filters { display: flex; gap: 7px; flex-wrap: wrap; }
+.toolbar .chip {
+  font: inherit; font-size: 14px; padding: 6px 13px; cursor: pointer;
+  border: 1.5px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted);
+}
+.toolbar .chip i { font-style: normal; opacity: .55; font-size: 12.5px; }
+.toolbar .chip.on { border-color: var(--navy); background: var(--navy); color: #fff; }
+.toolbar .chip.on i { opacity: .7; }
+.toolbar input[type=search] {
+  flex: 1 1 200px; font: inherit; font-size: 15px; padding: 9px 13px;
+  border: 1.5px solid var(--line); border-radius: 10px; background: #fff;
+}
+
+#nwList { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+
+.nw {
+  background: #fff; border: 1px solid var(--line); border-radius: 13px;
+  padding: 15px 17px; display: flex; flex-direction: column;
+}
+.nw-top { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; }
+.nw .cat {
+  font-size: 12.5px; color: var(--gold);
+  border: 1px solid rgba(176, 141, 62, .4); border-radius: 999px; padding: 1px 9px;
+}
+.nw .ago { font-size: 12.5px; color: var(--muted); opacity: .8; margin-inline-start: auto; }
+.nw h3 {
+  font-family: 'Frank', serif; font-weight: 500; font-size: 19px;
+  color: var(--navy); margin: 7px 0 5px; line-height: 1.35;
+}
+.nw .body {
+  margin: 0; font-size: 15px; color: #4a443c; line-height: 1.6;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.nw .body.clamp {
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nw .more {
+  align-self: flex-start; margin-top: 7px; font: inherit; font-size: 14px;
+  background: none; border: 0; color: var(--gold); cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.nw-img {
+  margin-top: 11px; width: 100%; height: auto; border-radius: 9px;
+  border: 1px solid var(--line);
+}

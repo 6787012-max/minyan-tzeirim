@@ -2,11 +2,13 @@
    בשלושת קבצי ה-HTML, אחרת דפדפן שכבר ביקר יגיש JS ישן מה-cache שלו. */
 var V = 'mt-v19';
 var SHELL = [
-  './', './index.html', './shas.html', './hok.html', './kibud.html',
-  './css/main.css', './css/shas.css', './css/hok.css', './css/kibud.css',
-  './js/app.js', './js/luach.js', './js/motion.js', './js/shas.js', './js/hok.js', './js/kibud.js',
+  './', './index.html', './shas.html', './hok.html', './kibud.html', './news.html',
+  './css/main.css', './css/shas.css', './css/hok.css', './css/kibud.css', './css/news.css',
+  './js/app.js', './js/luach.js', './js/motion.js', './js/shas.js', './js/hok.js',
+  './js/kibud.js', './js/forms.js', './js/news.js',
   './data/config.json', './data/shabbat.json', './data/shas.json',
-  './data/hok.json', './data/kibud.json', './data/yamim_noraim.json', './manifest.json', './favicon.ico',
+  './data/hok.json', './data/kibud.json', './data/yamim_noraim.json', './data/site.json',
+  './manifest.json', './favicon.ico',
   './img/mark@64.png', './img/logo-gate@680.png', './img/logo-h-white.svg',
   './fonts/frank-medium.woff2', './fonts/frank-black.woff2',
   './fonts/assistant-regular.woff2', './fonts/assistant-semibold.woff2',
@@ -28,7 +30,14 @@ self.addEventListener('activate', function (e) {
 
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
-  if (e.request.url.indexOf('matara.pro') >= 0) return;   // מגבית חיה — לא לשמור
+
+  /* רק המקור שלנו נכנס ל-cache. קודם נשמר כאן כל GET, וזה אומר
+     שתשובות מאומתות של אזור הניהול ישבו ב-CacheStorage של המכשיר
+     וימשיכו להיות זמינות גם אחרי יציאה. וגם: הגיליון החי של הרכזת
+     נשמר ואז הוגש ישן, כלומר לוח שקרי. שניהם נסגרים בשורה אחת. */
+  var u = new URL(e.request.url);
+  if (u.origin !== self.location.origin) return;
+  if (u.pathname.indexOf('/admin') === 0 || u.pathname.indexOf('/js/admin') === 0) return;
   e.respondWith(
     fetch(e.request).then(function (r) {
       var copy = r.clone();

@@ -190,7 +190,32 @@
         '?subject=' + encodeURIComponent('נטילת כרך ' + CUR.n + ' — ' + nm) +
         '&body=' + encodeURIComponent(body);
     }
-    $('#mHint').innerHTML = '<b>נשלח לגבאי.</b> הכרך יסומן על שמך אחרי אישורו.';
+    $('#mHint').innerHTML = 'שומר…';
+
+    /* השמירה בשרת היא הרישום. הוואטסאפ/מייל הם גיבוי בלבד. */
+    if (window.Forms) {
+      Forms.send({
+        kind: 'shas', name: nm, phone: ph,
+        ref_key: 'vol-' + CUR.n,
+        ref_label: 'כרך ' + CUR.n + ' — ' + CUR.name + ' (' + CUR.seder + ')',
+        amount: S.pricePerVolume,
+        details: { 'סדר': CUR.seder, 'תשלום': 'מול הגבאי' }
+      }).then(function (res) {
+        if (res.saved) {
+          $('#mHint').innerHTML = '<b>הרישום נשמר.</b> ' +
+            (res.mailed ? 'הגבאי קיבל הודעה. ' : '') +
+            'הכרך יסומן על שמך אחרי אישורו.';
+        } else if (res.error === 'taken') {
+          $('#mHint').innerHTML = '<b style="color:#9B1E1E">הכרך הזה כבר נלקח.</b> ' +
+            'כדאי לבחור כרך אחר.';
+        } else {
+          $('#mHint').innerHTML = '<b style="color:#9B1E1E">' + Forms.explain(res) +
+            '</b> ההודעה לגבאי נשלחה בכל מקרה.';
+        }
+      });
+    } else {
+      $('#mHint').innerHTML = '<b>נשלח לגבאי.</b> הכרך יסומן על שמך אחרי אישורו.';
+    }
   }
 
   /* ── הפעלה ───────────────────────────────────────────────────── */

@@ -484,9 +484,33 @@
         '?subject=' + encodeURIComponent('הזמנת מקומות לימים הנוראים — ' + $('ordName').value.trim()) +
         '&body=' + encodeURIComponent(body);
     }
-    $('seatsNote').innerHTML = 'ההזמנה נשלחה לגבאי. ' +
-      (HAS_KEVA ? 'שותפים בהוראת קבע — אין צורך בתשלום נוסף.'
-                : 'אפשר לשלם עכשיו או מאוחר יותר מול הגבאי.');
+    $('seatsNote').innerHTML = 'שומר…';
+
+    if (window.Forms) {
+      Forms.send({
+        kind: 'seats',
+        name: $('ordName').value.trim(),
+        phone: $('ordPhone').value.trim(),
+        qty: PLACES,
+        amount: seatsTotal(),
+        ref_label: PLACES + ' מקומות',
+        details: {
+          'הוראת קבע': HAS_KEVA ? 'כן — פטור מתשלום' : 'לא',
+          'הערה': $('ordNote').value.trim()
+        }
+      }).then(function (res) {
+        $('seatsNote').innerHTML = res.saved
+          ? '<b>ההזמנה נשמרה.</b> ' + (res.mailed ? 'הגבאי קיבל הודעה. ' : '') +
+            (HAS_KEVA ? 'שותפים בהוראת קבע — אין צורך בתשלום נוסף.'
+                      : 'אפשר לשלם עכשיו או מאוחר יותר מול הגבאי.')
+          : '<b style="color:#9B1E1E">' + Forms.explain(res) + '</b> ' +
+            'ההודעה לגבאי נשלחה בכל מקרה.';
+      });
+    } else {
+      $('seatsNote').innerHTML = 'ההזמנה נשלחה לגבאי. ' +
+        (HAS_KEVA ? 'שותפים בהוראת קבע — אין צורך בתשלום נוסף.'
+                  : 'אפשר לשלם עכשיו או מאוחר יותר מול הגבאי.');
+    }
   }
 
 

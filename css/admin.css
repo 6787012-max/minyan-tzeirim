@@ -1,0 +1,112 @@
+/* admin.css — אזור הניהול. אותה שפה כמו האתר, בצפיפות גבוהה יותר:
+   זה מסך עבודה שנפתח בטלפון בין מנחה למעריב, לא דף שיווקי. */
+
+.adm { background: var(--cream); }
+
+/* ── מסך כניסה ─────────────────────────────────────────────────── */
+.gate {
+  min-height: 100dvh; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(120% 90% at 50% 0%, #16294A 0%, #12233F 55%, #0E1B31 100%);
+}
+.gate-box {
+  width: min(400px, 100%); background: #fff; border-radius: 18px;
+  padding: 30px 26px 26px; text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+}
+.gate-box img { margin: 0 auto 10px; display: block; height: auto; }
+.gate-box .eyebrow { color: var(--gold); }
+.gate-box h1 { font-size: 26px; margin: 2px 0 6px; }
+.gate-box .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+.gate-box .fld { display: block; text-align: start; margin-bottom: 13px; }
+.gate-box .fld span {
+  display: block; font-size: 13.5px; color: var(--muted); margin-bottom: 5px;
+}
+.gate-box input {
+  width: 100%; font: inherit; font-size: 16px; padding: 11px 13px;
+  border: 1.5px solid var(--line); border-radius: 10px; background: var(--cream);
+}
+.gate-box input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+.btn.wide { width: 100%; margin-top: 6px; }
+.gate-box .hint { min-height: 20px; font-size: 14px; margin: 11px 0 0; }
+
+/* ── מסגרת הפאנל ──────────────────────────────────────────────── */
+.adm-main { padding: 26px 0 60px; }
+.adm-sec { margin-bottom: 40px; }
+.adm-sec .head { margin-bottom: 16px; }
+.adm-sec .head h2 { font-size: 24px; margin: 2px 0 4px; }
+.adm-sec .head p { color: var(--muted); font-size: 14.5px; margin: 0; }
+.top .who { font-size: 13.5px; color: var(--muted); }
+.btn.small { padding: 6px 12px; font-size: 13.5px; }
+
+/* ── כרטיסי דיווח ─────────────────────────────────────────────── */
+.cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.card {
+  background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 15px 16px;
+}
+.card .k { font-size: 13px; color: var(--muted); letter-spacing: .04em; }
+.card .n { font-family: 'Num', 'Asst', sans-serif; font-weight: 900; font-size: 30px; color: var(--navy); line-height: 1.1; }
+.card .m { font-size: 13.5px; color: var(--muted); margin-top: 3px; }
+.card .m .pend { color: #8A5A16; font-weight: 700; }
+.card .w { font-size: 12.5px; color: var(--muted); opacity: .8; margin-top: 5px; }
+
+/* ── סרגל סינון ───────────────────────────────────────────────── */
+.toolbar { display: flex; gap: 11px; flex-wrap: wrap; align-items: center; margin-bottom: 15px; }
+.toolbar .filters { display: flex; gap: 7px; flex-wrap: wrap; }
+.toolbar .chip {
+  font: inherit; font-size: 14px; padding: 6px 13px; cursor: pointer;
+  border: 1.5px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted);
+}
+.toolbar .chip.on { border-color: var(--navy); background: var(--navy); color: #fff; }
+.toolbar input[type=search] {
+  flex: 1 1 200px; font: inherit; font-size: 15px; padding: 9px 13px;
+  border: 1.5px solid var(--line); border-radius: 10px; background: #fff;
+}
+
+/* ── שורת רישום ───────────────────────────────────────────────── */
+.row {
+  display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  padding: 13px 15px; margin-bottom: 9px; flex-wrap: wrap;
+}
+.row.busy { opacity: .5; pointer-events: none; }
+.row.err { border-color: #9B1E1E; }
+.row .main { flex: 1 1 260px; min-width: 0; }
+.row .line1 { display: flex; gap: 9px; align-items: baseline; flex-wrap: wrap; }
+.row .line1 b { font-family: 'Frank', serif; font-size: 18px; color: var(--navy); }
+.row .kind {
+  font-size: 12.5px; color: var(--gold); border: 1px solid rgba(176, 141, 62, .4);
+  border-radius: 999px; padding: 1px 9px;
+}
+.row .tel { font-family: 'Num', 'Asst', sans-serif; font-size: 14px; color: var(--muted); }
+.row .line2 {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-top: 5px;
+  font-size: 13.5px; color: var(--muted);
+}
+.row .ref { color: var(--navy); font-weight: 600; }
+.row .dt i { font-style: normal; opacity: .65; }
+.row .when { margin-inline-start: auto; opacity: .7; font-size: 12.5px; }
+.row .anote {
+  margin-top: 7px; font-size: 13.5px; background: var(--cream-2);
+  border-radius: 8px; padding: 6px 10px;
+}
+.row .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-x {
+  background: transparent; color: #9B1E1E; border: 1.5px solid rgba(155, 30, 30, .32);
+}
+.btn-x:hover { background: rgba(155, 30, 30, .07); border-color: #9B1E1E; }
+
+.badge { font-size: 12.5px; border-radius: 999px; padding: 2px 10px; font-weight: 600; }
+.b-new { background: rgba(176, 141, 62, .14); color: #8A5A16; }
+.b-confirmed, .b-paid { background: rgba(44, 95, 63, .12); color: #2C5F3F; }
+.b-cancelled, .b-duplicate { background: rgba(155, 30, 30, .1); color: #9B1E1E; }
+.row .warn { font-size: 12.5px; color: #9B1E1E; }
+
+/* רישום שכבר טופל נשאר קריא אבל מפסיק למשוך את העין */
+.row.st-cancelled, .row.st-duplicate { opacity: .62; }
+.row.st-new { border-inline-start: 3px solid var(--gold); }
+
+@media (max-width: 560px) {
+  .row .acts { width: 100%; }
+  .row .acts .btn { flex: 1; }
+  .row .when { margin-inline-start: 0; width: 100%; }
+}
