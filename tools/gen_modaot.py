@@ -131,8 +131,10 @@ def crest(kind):
     sys.path.insert(0, MODA)
     import orn
     if kind == "אירוע":
-        return ('<img class="crest" src="%s" style="width:26mm">'
-                % svg_uri(orn.on_dark(orn.pomegranate())))
+        # גביע קידוש ולא רימון: הרימון הוא סמל של ראש השנה בכלל,
+        # והגביע אומר בדיוק על מה המודעה.
+        return ('<img class="crest" src="%s" style="width:30mm">'
+                % svg_uri(orn.on_dark(orn.kos())))
     return ('<img class="crest" src="%s" style="width:40mm">'
             % svg_uri(orn.on_dark(orn.crown())))
 

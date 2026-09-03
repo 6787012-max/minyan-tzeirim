@@ -108,16 +108,40 @@ def shofar(w=230):
 </svg>'''
 
 
+def kos(w=130):
+    """גביע קידוש. מחליף את הרימון במודעת הקידוש — רימון הוא סמל
+    של ראש השנה בכלל, וגביע אומר בדיוק על מה המודעה."""
+    return f'''<svg viewBox="0 0 130 168" width="{w}" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="kg" x1="0" y1="0" x2=".4" y2="1">
+  <stop offset="0" stop-color="{GOLD_L}"/><stop offset=".35" stop-color="{GOLD}"/>
+  <stop offset=".7" stop-color="{GOLD}"/><stop offset="1" stop-color="{GOLD_D}"/>
+</linearGradient></defs>
+<g stroke="url(#kg)" stroke-width="2.8" fill="none"
+   stroke-linecap="round" stroke-linejoin="round">
+  <path d="M30 34 H100 L94 84 Q90 104 65 106 Q40 104 36 84 Z"
+        fill="{GOLD}" fill-opacity=".12"/>
+  <path d="M26 34 H104" stroke-width="3.6"/>
+  <path d="M65 106 V128"/>
+  <path d="M65 128 Q40 128 34 146 H96 Q90 128 65 128 Z"
+        fill="{GOLD}" fill-opacity=".12"/>
+  <path d="M28 152 H102" stroke-width="3.4"/>
+  <path d="M44 50 Q65 58 86 50" stroke-width="1.4" opacity=".55"/>
+  <path d="M48 66 Q65 72 82 66" stroke-width="1.1" opacity=".4"/>
+</g>
+<g fill="url(#kg)">
+  <circle cx="65" cy="120" r="4.6"/>
+  <circle cx="42" cy="24" r="3.4" opacity=".7"/>
+  <circle cx="88" cy="24" r="3.4" opacity=".7"/>
+  <circle cx="65" cy="18" r="4.4" opacity=".85"/>
+</g>
+</svg>'''
+
+
 def pomegranate(w=120):
-    """רימון. הגרסה הראשונה נקראה כחיפושית — הקו האנכי במרכז והנקודות
-    הסימטריות עשו את זה. כאן: כתר עלי גביע מפוצל למעלה, גוף אגסי,
-    וקווי נפח לצדדים במקום נקודות."""
+    """רימון — סימן של שנה טובה."""
     return f'''<svg viewBox="0 0 130 148" width="{w}" xmlns="http://www.w3.org/2000/svg">
-<path d="M65 40
-         C 30 40, 18 66, 18 88
-         C 18 118, 40 136, 65 136
-         C 90 136, 112 118, 112 88
-         C 112 66, 100 40, 65 40 Z"
+<path d="M65 40 C 30 40, 18 66, 18 88 C 18 118, 40 136, 65 136
+         C 90 136, 112 118, 112 88 C 112 66, 100 40, 65 40 Z"
       fill="{GOLD}" fill-opacity=".13" stroke="{GOLD}" stroke-width="2.6"/>
 <g stroke="{GOLD}" stroke-width="2.4" fill="none"
    stroke-linecap="round" stroke-linejoin="round">

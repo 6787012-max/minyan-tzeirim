@@ -21,6 +21,7 @@ sys.path.insert(0, HERE)
 import gen_modaot as g  # noqa: E402
 
 PAGE_PX = 1123          # A4 לאורך ב-96dpi
+SAFE = 78               # מרווח ביטחון — ראה הערה ב-measure()
 PROBE = """
 <script>document.addEventListener('DOMContentLoaded',function(){
   /* .mid הוא flex:1 — ה-scrollHeight שלו הוא מה שהוקצה לו, לא מה
@@ -67,7 +68,9 @@ def measure(path):
     os.remove(tmp)
     m = re.search(r"<title>M(\d+)/(\d+)</title>",
                   r.stdout.decode("utf-8", "replace"))
-    return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
+    if not m:
+        return (0, 0)
+    return int(m.group(1)) + SAFE, int(m.group(2))
 
 
 def scaled(html, factor):
@@ -76,7 +79,7 @@ def scaled(html, factor):
     return html.replace("</style>", tag, 1)
 
 
-def fit_one(name, lo=0.40, hi=1.0, rounds=9):
+def fit_one(name, lo=0.52, hi=1.0, rounds=9):
     """חיפוש בינארי על הסקלר. שבעה סבבים מספיקים לדיוק של פחות מאחוז,
     וזה פחות מסבב ידני אחד."""
     src = os.path.join(g.OUT, name + ".html")
