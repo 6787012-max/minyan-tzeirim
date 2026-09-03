@@ -110,3 +110,12 @@
   .row .acts .btn { flex: 1; }
   .row .when { margin-inline-start: 0; width: 100%; }
 }
+
+/* חדשות ממתינות — הגוף חייב להיות קריא כדי להחליט אם לפרסם */
+.nrow .nbody {
+  margin: 7px 0 0; font-size: 14.5px; color: #4a443c; line-height: 1.6;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  max-height: 8.5em; overflow: auto;
+}
+.nrow.st-approved { border-inline-start: 3px solid #2C5F3F; }
+.nrow.st-rejected { opacity: .55; }

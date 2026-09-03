@@ -17,6 +17,7 @@
   var KEY = 'mt-admin-session';
   var API = '', ANON = '';
   var SES = null, PAGE = 0, PER = 30, FILTER = 'all', Q = '';
+  var NEWSF = 'new';
 
   var KIND = {
     kibud: 'כיבוד', shas: 'ש״ס', seats: 'מקומות', contact: 'פנייה', other: 'אחר'
@@ -211,7 +212,8 @@
   }
 
   function news() {
-    return db('news?select=*&order=created_at.desc&limit=30')
+    return db('news?select=*&order=msg_date.desc&limit=60' +
+       (NEWSF === 'all' ? '' : '&status=eq.' + NEWSF))
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (rows) {
         if (rows === null) {
@@ -225,14 +227,57 @@
           $('#newsNote').textContent = 'אין כרגע הודעות שממתינות לאישור.';
           return;
         }
-        $('#news').innerHTML = rows.map(function (n) {
-          return '<article class="row"><div class="main">' +
-            '<div class="line1"><b>' + esc(n.title || '(ללא כותרת)') + '</b></div>' +
-            '<div class="line2"><span class="ref">' + esc((n.body || '').slice(0, 180)) + '</span></div>' +
-          '</div></article>';
-        }).join('');
-        $('#newsNote').textContent = '';
+        $('#news').innerHTML = rows.map(newsHtml).join('');
+        $('#newsNote').textContent = rows.length + ' הודעות. מה שיאושר יופיע ' +
+          'מיד בדף החדשות באתר.';
       });
+  }
+
+  function newsHtml(n) {
+    var d = n.msg_date ? new Date(n.msg_date) : null;
+    var when = d ? d.toLocaleDateString('he-IL') + ' · ' +
+      d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
+    var body = String(n.body || '');
+    var st = { 'new': 'ממתין', approved: 'מאושר', rejected: 'נדחה', expired: 'פג' };
+    return '<article class="row nrow st-' + esc(n.status) + '" data-id="' + n.id + '">' +
+      '<div class="main">' +
+        '<div class="line1">' +
+          (n.category ? '<span class="kind">' + esc(n.category) + '</span>' : '') +
+          '<b>' + esc(n.title || '(ללא כותרת)') + '</b>' +
+          '<span class="badge b-' + (n.status === 'approved' ? 'confirmed' :
+            n.status === 'new' ? 'new' : 'cancelled') + '">' +
+            esc(st[n.status] || n.status) + '</span>' +
+          '<span class="when">' + esc(when) + '</span>' +
+        '</div>' +
+        (body ? '<p class="nbody">' + esc(body.slice(0, 700)) +
+                (body.length > 700 ? '…' : '') + '</p>' : '') +
+      '</div>' +
+      '<div class="acts">' +
+        '<button type="button" class="btn btn-g small" data-nact="approved">פרסום</button>' +
+        '<button type="button" class="btn btn-x small" data-nact="rejected">דחייה</button>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function setNews(id, status, el) {
+    el.closest('.row').classList.add('busy');
+    return db('news?id=eq.' + id, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: status }),
+      prefer: 'return=representation'
+    }).then(function (r) {
+      return r.text().then(function (t) {
+        var row = el.closest('.row');
+        row.classList.remove('busy');
+        if (!r.ok) { row.classList.add('err'); return; }
+        /* בסינון "ממתינות" פריט שטופל כבר לא שייך לרשימה —
+         * להשאיר אותו שם היה מייצר תור שנראה כאילו לא התקצר. */
+        if (NEWSF === 'new') { row.remove(); return; }
+        var x = null;
+        try { x = JSON.parse(t)[0]; } catch (e) { /* ריק */ }
+        if (x) row.outerHTML = newsHtml(x);
+      });
+    });
   }
 
   function boot() {
@@ -246,6 +291,14 @@
       .map(function (f) {
         return '<button type="button" class="chip' + (f[0] === FILTER ? ' on' : '') +
           '" data-f="' + f[0] + '" aria-pressed="' + (f[0] === FILTER) + '">' +
+          f[1] + '</button>';
+      }).join('');
+
+    $('#newsFilters').innerHTML =
+      [['new', 'ממתינות'], ['approved', 'מפורסמות'], ['rejected', 'שנדחו'], ['all', 'הכול']]
+      .map(function (f) {
+        return '<button type="button" class="chip' + (f[0] === NEWSF ? ' on' : '') +
+          '" data-nf="' + f[0] + '" aria-pressed="' + (f[0] === NEWSF) + '">' +
           f[1] + '</button>';
       }).join('');
 
@@ -319,6 +372,24 @@
   });
 
   $('#more').addEventListener('click', function () { load(false); });
+
+  $('#news').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-nact]');
+    if (!b) return;
+    setNews(b.closest('.row').dataset.id, b.dataset.nact, b);
+  });
+
+  $('#newsFilters').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    NEWSF = b.dataset.nf;
+    [].forEach.call(this.children, function (c) {
+      var on = c === b;
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-pressed', String(on));
+    });
+    news();
+  });
 
   /* ── התחלה ──────────────────────────────────────────────────── */
   loadCfg().then(function () {
