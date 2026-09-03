@@ -115,11 +115,13 @@
   .row .when { margin-inline-start: 0; width: 100%; }
 }
 
-/* חדשות ממתינות — הגוף חייב להיות קריא כדי להחליט אם לפרסם */
+/* חדשות ממתינות — הגוף חייב להיות קריא כדי להחליט אם לפרסם.
+   היה כאן max-height של 8.5em עם גלילה פנימית, ומאז שהטקסט של
+   המודעה נכנס לגוף זה חתך בדיוק את מה שצריך לקרוא. */
 .nrow .nbody {
   margin: 7px 0 0; font-size: 14.5px; color: #4a443c; line-height: 1.6;
   white-space: pre-wrap; overflow-wrap: anywhere;
-  max-height: 8.5em; overflow: auto;
+  max-height: 22em; overflow: auto;
 }
 .nrow.st-approved { border-inline-start: 3px solid #2C5F3F; }
 .nrow.st-rejected { opacity: .55; }
@@ -128,6 +130,8 @@
    גדולה מספיק כדי להחליט. לחיצה פותחת בגודל מלא. */
 .nimgs { margin-top: 9px; display: flex; gap: 8px; flex-wrap: wrap; }
 .nimgs img {
-  max-height: 190px; width: auto; max-width: 100%; display: block;
+  /* מודעה סרוקה בגובה 190 לא ניתנת לקריאה, וזה בדיוק מה שצריך
+     לשפוט כאן. לחיצה עדיין פותחת בגודל מלא. */
+  max-height: 420px; width: auto; max-width: 100%; display: block;
   border-radius: 8px; border: 1px solid var(--line); background: #fff;
 }
