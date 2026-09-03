@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 80" width="400" height="80">
+  <defs>
+    <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d4b87a" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#6b521b"/>
+      <stop offset="100%" stop-color="#d4b87a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#tg)" stroke-width="1.4" stroke-linecap="round">
+    <!-- Main flourish curves emanating from center -->
+    <path d="M 200 40 Q 180 30 150 35 Q 120 40 100 30 Q 80 20 60 25 Q 40 30 30 40"/>
+    <path d="M 200 40 Q 220 30 250 35 Q 280 40 300 30 Q 320 20 340 25 Q 360 30 370 40"/>
+
+    <!-- Secondary curves below -->
+    <path d="M 200 40 Q 180 50 150 45 Q 120 40 100 50 Q 80 60 60 55 Q 40 50 30 40" stroke-width="0.7" opacity="0.6"/>
+    <path d="M 200 40 Q 220 50 250 45 Q 280 40 300 50 Q 320 60 340 55 Q 360 50 370 40" stroke-width="0.7" opacity="0.6"/>
+
+    <!-- Center crown/diamond -->
+    <path d="M 188 40 Q 200 22 212 40 L 206 44 L 200 38 L 194 44 Z" stroke-width="1.2" fill="#b8923f" fill-opacity="0.3"/>
+    <circle cx="200" cy="40" r="2.5" fill="#6b521b" stroke="none"/>
+
+    <!-- Spiral ends left -->
+    <path d="M 30 40 Q 20 40 18 35 Q 18 30 24 30 Q 28 32 28 36"/>
+    <path d="M 30 40 Q 20 40 18 45 Q 18 50 24 50 Q 28 48 28 44"/>
+
+    <!-- Spiral ends right -->
+    <path d="M 370 40 Q 380 40 382 35 Q 382 30 376 30 Q 372 32 372 36"/>
+    <path d="M 370 40 Q 380 40 382 45 Q 382 50 376 50 Q 372 48 372 44"/>
+
+    <!-- Decorative leaves along curves -->
+    <path d="M 130 32 Q 135 28 142 32 Q 140 38 132 36 Z" fill="#b8923f" fill-opacity="0.25"/>
+    <path d="M 270 32 Q 265 28 258 32 Q 260 38 268 36 Z" fill="#b8923f" fill-opacity="0.25"/>
+    <path d="M 80 28 Q 85 24 92 28 Q 90 34 82 32 Z" fill="#b8923f" fill-opacity="0.25"/>
+    <path d="M 320 28 Q 315 24 308 28 Q 310 34 318 32 Z" fill="#b8923f" fill-opacity="0.25"/>
+
+    <!-- Small dots -->
+    <circle cx="158" cy="36" r="1" fill="#b8923f" stroke="none"/>
+    <circle cx="242" cy="36" r="1" fill="#b8923f" stroke="none"/>
+    <circle cx="108" cy="34" r="1" fill="#b8923f" stroke="none"/>
+    <circle cx="292" cy="34" r="1" fill="#b8923f" stroke="none"/>
+    <circle cx="50" cy="34" r="0.8" fill="#b8923f" stroke="none"/>
+    <circle cx="350" cy="34" r="0.8" fill="#b8923f" stroke="none"/>
+  </g>
+</svg>

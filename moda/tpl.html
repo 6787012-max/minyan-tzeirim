@@ -65,12 +65,12 @@ body {
 /* קרטושי אמצע — מסגרת מודפסת שוברת את הקו באמצע כל צלע.
    בלי זה המלבן נקרא כמו border ולא כמו מסגרת. */
 .mid-t, .mid-b, .mid-r, .mid-l { position:absolute; pointer-events:none; z-index:1; }
-.mid-t, .mid-b { width:34mm; left:50%; transform:translateX(-50%); }
-.mid-t { top:4.6mm; }
-.mid-b { bottom:4.6mm; }
-.mid-r, .mid-l { width:26mm; top:50%; }
-.mid-r { right:-6.2mm; transform:translateY(-50%) rotate(90deg); }
-.mid-l { left:-6.2mm; transform:translateY(-50%) rotate(90deg); }
+.mid-t, .mid-b { width:13mm; left:50%; transform:translateX(-50%); }
+.mid-t { top:3.2mm; }
+.mid-b { bottom:3.2mm; }
+.mid-r, .mid-l { width:11mm; top:50%; }
+.mid-r { right:3.2mm; transform:translateY(-50%); }
+.mid-l { left:3.2mm; transform:translateY(-50%); }
 
 /* סימן מים — הלוגו עצמו, דהוי כמעט עד היעלמות. נותן לנייר עומק
    בלי להתחרות באף שורת טקסט. */
@@ -243,8 +243,13 @@ h1.zt em {
   font-family:'Keter',serif; font-size:19pt; color:var(--navy); font-weight:700;
   letter-spacing:.01em;
 }
+.foot-row {
+  display:flex; align-items:center; justify-content:center; gap:6mm;
+  margin-top:2.4mm;
+}
+.yishuv { width:26mm; height:auto; display:block; opacity:.72; }
 .bot .site {
-  font-size:9pt; color:var(--muted); margin-top:2mm; letter-spacing:.14em;
+  font-size:9pt; color:var(--muted); letter-spacing:.14em;
 }
 .seal { position:absolute; bottom:-2mm; inset-inline-end:2mm; opacity:.5; }
 
@@ -277,12 +282,14 @@ h1.zt { font-size:24pt; margin-bottom:1.2mm; }
 .bot { padding-top:2.2mm; }
 .bot .orn { margin:0 auto 1.6mm; }
 .bot .slogan { font-size:15pt; }
-.bot .site { font-size:8pt; margin-top:1.2mm; }
+.bot .site { font-size:8pt; }
+.yishuv { width:23mm; }
+.foot-row { gap:5mm; margin-top:1.8mm; }
 
 /* מודעות ההודיה נכנסות בקלות; רק הקידוש חרג במעט */
-.body p { font-size:13pt; margin-bottom:4mm; }
-.body p.strong { font-size:16pt; margin-bottom:5mm; }
-.sign { margin-top:7mm; font-size:14pt; }
+.body p { font-size:12.6pt; line-height:1.78; margin-bottom:3.4mm; }
+.body p.strong { font-size:15.5pt; margin-bottom:4.4mm; }
+.sign { margin-top:6mm; font-size:14pt; }
 </style>
 </head>
 <body>
@@ -309,7 +316,13 @@ h1.zt { font-size:24pt; margin-bottom:1.2mm; }
   <div class="bot">
     <img class="orn" src="DIVIDER" alt="" style="width:74mm">
     <div class="slogan" id="slogan">שנה טובה ומבורכת</div>
-    <div class="site">minyan.mokad.co.il</div>
+    <!-- לוגו היישוב. מודעה של בית כנסת ביישוב שנושאת רק את סמל
+         המניין נראית כמו פנייה פרטית; סמל היישוב הוא מה שנותן לה
+         את המעמד של הודעה קהילתית. -->
+    <div class="foot-row">
+      <img class="yishuv" src="yishuv.svg" alt="מעלה עמוס">
+      <span class="site">minyan.mokad.co.il</span>
+    </div>
   </div>
 
 </div>

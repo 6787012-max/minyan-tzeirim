@@ -57,18 +57,37 @@ def svg_uri(svg):
     return "data:image/svg+xml;base64," + base64.b64encode(svg.encode("utf-8")).decode()
 
 
+def lib(name, fallback=None):
+    """עיטור מספריית העיצוב של יוסף (Z:\עיצוב_ויצירה), שהועתקה
+    ל-moda/orn-lib. עדיף על מה שאני מצייר: אלה נכסים שכבר נבחרו
+    לשימוש במוסד, והם עקביים עם שאר החומרים שיוצאים משם.
+    fallback הוא הציור המקומי, למקרה שהקובץ חסר."""
+    p = os.path.join(MODA, "orn-lib", name + ".svg")
+    if os.path.exists(p):
+        try:
+            return io.open(p, encoding="utf-8").read()
+        except Exception:
+            pass
+    return fallback
+
+
 def inject_ornaments(html):
     """העיטורים נכנסים כ-data URI. Chrome ב---headless לא טוען אמינות
-    קבצים יחסיים בהדפסה, ו-SVG חיצוני היה נעלם בלי שגיאה."""
+    קבצים יחסיים בהדפסה, ו-SVG חיצוני היה נעלם בלי שגיאה.
+    כל עיטור בתוך <img> נפרד, ולכן מזהי הגרדיאנט (url(#g)) שחוזרים
+    בכמה מהקבצים לא מתנגשים זה בזה."""
     sys.path.insert(0, MODA)
     import orn
+    corner = lib("corner_filigree", orn.corner())
+    div = lib("divider_classical", orn.divider())
+    mid = lib("fleuron", orn.midpiece())
     return (html
             .replace("url('PATTERN')", "url('%s')" % svg_uri(orn.bg_pattern()))
-            .replace('src="CORNER"', 'src="%s"' % svg_uri(orn.corner()))
-            .replace('src="RULE"', 'src="%s"' % svg_uri(orn.rule_small()))
-            .replace('src="DIVIDER"', 'src="%s"' % svg_uri(orn.divider()))
-            .replace('src="MIDH"', 'src="%s"' % svg_uri(orn.midpiece()))
-            .replace('src="MIDV"', 'src="%s"' % svg_uri(orn.midpiece()))
+            .replace('src="CORNER"', 'src="%s"' % svg_uri(corner))
+            .replace('src="RULE"', 'src="%s"' % svg_uri(lib("title_flourish", orn.rule_small())))
+            .replace('src="DIVIDER"', 'src="%s"' % svg_uri(div))
+            .replace('src="MIDH"', 'src="%s"' % svg_uri(mid))
+            .replace('src="MIDV"', 'src="%s"' % svg_uri(mid))
             .replace('src="WATERMARK"', 'src="%s"'
                      % svg_uri(io.open(os.path.join(MODA, "gate-white.svg"),
                                        encoding="utf-8").read())))

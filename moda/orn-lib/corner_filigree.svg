@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4b87a"/>
+      <stop offset="50%" stop-color="#b8923f"/>
+      <stop offset="100%" stop-color="#6b521b"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#g)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Main outer flourish -->
+    <path d="M 8 192 Q 8 80 35 50 Q 60 25 110 18 Q 150 14 192 8"/>
+    <!-- Secondary inner curve -->
+    <path d="M 18 192 Q 18 100 45 70 Q 70 48 120 38 Q 155 32 192 25" stroke-width="0.8" opacity="0.7"/>
+    <!-- Spiral 1 (top-right area) -->
+    <path d="M 150 25 Q 165 20 170 35 Q 165 45 155 42 Q 150 38 152 30 Q 158 25 162 30"/>
+    <!-- Spiral 2 (corner) -->
+    <path d="M 38 50 Q 25 45 28 30 Q 38 22 48 30 Q 50 38 42 42 Q 35 40 38 35"/>
+    <!-- Acanthus leaf 1 -->
+    <path d="M 65 45 Q 80 30 95 45 Q 100 60 85 65 Q 70 60 65 45 Z"/>
+    <path d="M 80 50 Q 85 55 80 60" stroke-width="0.6" opacity="0.8"/>
+    <!-- Acanthus leaf 2 -->
+    <path d="M 105 35 Q 125 25 140 35 Q 140 50 122 50 Q 105 45 105 35 Z"/>
+    <path d="M 122 38 Q 128 42 122 46" stroke-width="0.6" opacity="0.8"/>
+    <!-- Acanthus leaf 3 -->
+    <path d="M 50 80 Q 35 95 50 110 Q 65 105 65 90 Q 60 80 50 80 Z"/>
+    <path d="M 55 90 Q 58 95 55 100" stroke-width="0.6" opacity="0.8"/>
+    <!-- Decorative dots -->
+    <circle cx="48" cy="32" r="1.8" fill="url(#g)"/>
+    <circle cx="120" cy="28" r="1.5" fill="url(#g)"/>
+    <circle cx="165" cy="35" r="1.2" fill="url(#g)"/>
+    <circle cx="85" cy="55" r="1.5" fill="url(#g)"/>
+    <circle cx="55" cy="95" r="1.2" fill="url(#g)"/>
+    <circle cx="40" cy="130" r="1" fill="url(#g)"/>
+    <circle cx="30" cy="160" r="0.8" fill="url(#g)"/>
+    <circle cx="135" cy="42" r="1" fill="url(#g)"/>
+    <circle cx="155" cy="52" r="0.8" fill="url(#g)"/>
+    <!-- Small radiating lines -->
+    <path d="M 48 32 L 48 22 M 48 32 L 56 28 M 48 32 L 40 28" stroke-width="0.5" opacity="0.6"/>
+    <path d="M 120 28 L 120 18 M 120 28 L 128 24 M 120 28 L 112 24" stroke-width="0.5" opacity="0.6"/>
+  </g>
+</svg>

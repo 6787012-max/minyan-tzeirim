@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60">
+  <defs>
+    <radialGradient id="fg">
+      <stop offset="0%" stop-color="#d4b87a"/>
+      <stop offset="100%" stop-color="#6b521b"/>
+    </radialGradient>
+  </defs>
+  <g fill="url(#fg)" stroke="#6b521b" stroke-width="0.6" stroke-linecap="round">
+    <!-- Center -->
+    <circle cx="30" cy="30" r="2"/>
+    <!-- 4 petals -->
+    <path d="M 30 8 Q 36 18 30 28 Q 24 18 30 8 Z"/>
+    <path d="M 30 52 Q 36 42 30 32 Q 24 42 30 52 Z"/>
+    <path d="M 8 30 Q 18 24 28 30 Q 18 36 8 30 Z"/>
+    <path d="M 52 30 Q 42 24 32 30 Q 42 36 52 30 Z"/>
+    <!-- Diagonal rays as outline -->
+    <g fill="none">
+      <path d="M 14 14 Q 24 22 26 26"/>
+      <path d="M 46 14 Q 36 22 34 26"/>
+      <path d="M 14 46 Q 24 38 26 34"/>
+      <path d="M 46 46 Q 36 38 34 34"/>
+    </g>
+    <!-- Outer dots -->
+    <circle cx="14" cy="14" r="1" stroke="none"/>
+    <circle cx="46" cy="14" r="1" stroke="none"/>
+    <circle cx="14" cy="46" r="1" stroke="none"/>
+    <circle cx="46" cy="46" r="1" stroke="none"/>
+  </g>
+</svg>
