@@ -66,7 +66,12 @@ def inject_ornaments(html):
             .replace("url('PATTERN')", "url('%s')" % svg_uri(orn.bg_pattern()))
             .replace('src="CORNER"', 'src="%s"' % svg_uri(orn.corner()))
             .replace('src="RULE"', 'src="%s"' % svg_uri(orn.rule_small()))
-            .replace('src="DIVIDER"', 'src="%s"' % svg_uri(orn.divider())))
+            .replace('src="DIVIDER"', 'src="%s"' % svg_uri(orn.divider()))
+            .replace('src="MIDH"', 'src="%s"' % svg_uri(orn.midpiece()))
+            .replace('src="MIDV"', 'src="%s"' % svg_uri(orn.midpiece()))
+            .replace('src="WATERMARK"', 'src="%s"'
+                     % svg_uri(io.open(os.path.join(MODA, "gate-white.svg"),
+                                       encoding="utf-8").read())))
 
 
 def inline_assets(html):
@@ -105,11 +110,14 @@ def inline_assets(html):
 # ── בניית הגוף לכל סוג מודעה ────────────────────────────────────────
 
 def crest(kind):
+    """העיטור שבראש הלוחית. תמיד בגרסת on_dark — הלוחית כחולה."""
     sys.path.insert(0, MODA)
     import orn
     if kind == "אירוע":
-        return '<img class="crest" src="%s" style="width:26mm">' % svg_uri(orn.pomegranate())
-    return '<img class="crest" src="%s" style="width:40mm">' % svg_uri(orn.crown())
+        return ('<img class="crest" src="%s" style="width:26mm">'
+                % svg_uri(orn.on_dark(orn.pomegranate())))
+    return ('<img class="crest" src="%s" style="width:40mm">'
+            % svg_uri(orn.on_dark(orn.crown())))
 
 
 def body_text(m):
@@ -168,7 +176,7 @@ def body_zmanim(z):
          '<img class="crest" src="%s" style="width:30mm">'
          '<h1 class="zt">%s <em>%s</em></h1>'
          '<div class="lead">%s</div></div>'
-         % (svg_uri(orn.shofar()), esc(z["title"]),
+         % (svg_uri(orn.on_dark(orn.shofar())), esc(z["title"]),
             esc(z.get("year", "")), esc(z.get("sub", "")))]
     if z.get("note"):
         h.append('<div class="z-note">%s</div>' % esc(z["note"]))

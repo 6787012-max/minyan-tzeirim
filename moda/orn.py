@@ -12,25 +12,38 @@ GOLD_D = "#8A6B24"
 NAVY = "#12233F"
 
 
-def corner(size=170, flip_x=False, flip_y=False):
-    """פינה מעוטרת בסגנון ערבסקה — הקו הראשי, ספירלה פנימית,
-    ושלוש נקודות שמונעות מהפינה להיראות קטועה."""
-    t = []
-    if flip_x:
-        t.append("scale(-1,1) translate(-%d,0)" % size)
-    if flip_y:
-        t.append("scale(1,-1) translate(0,-%d)" % size)
-    tr = ' transform="%s"' % " ".join(t) if t else ""
+def corner(size=200):
+    """פינה מעוטרת. הגרסה הראשונה הייתה קו זווית עם ספירלה קטנה —
+    נקייה אבל דלה. כאן ערבסקה של ממש: קשת ראשית, קשת משנה, שני
+    עלים נגדיים, סלסול פנימי, ופנינים לאורך. זה מה שנותן למודעה
+    את המשקל של מסגרת מודפסת ולא של גבול CSS."""
     return f'''<svg viewBox="0 0 {size} {size}" width="{size}" height="{size}" xmlns="http://www.w3.org/2000/svg" fill="none">
-<g{tr} stroke="{GOLD}" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M4 {size-4} L4 46 Q4 4 46 4 L{size-4} 4" stroke-width="2.4" opacity=".95"/>
-  <path d="M13 {size-30} L13 50 Q13 13 50 13 L{size-30} 13" stroke-width="1" opacity=".55"/>
-  <path d="M24 62 Q24 24 62 24" stroke-width="1.5" opacity=".8"/>
-  <path d="M24 62 Q40 62 46 52 Q52 42 62 42 Q72 42 74 52" stroke-width="1.4" opacity=".75"/>
-  <path d="M34 78 Q34 34 78 34" stroke-width=".8" opacity=".4"/>
-  <circle cx="46" cy="46" r="4.5" fill="{GOLD}" stroke="none" opacity=".9"/>
-  <circle cx="{size-26}" cy="13" r="2.6" fill="{GOLD}" stroke="none" opacity=".6"/>
-  <circle cx="13" cy="{size-26}" r="2.6" fill="{GOLD}" stroke="none" opacity=".6"/>
+<g stroke="{GOLD}" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6 {size-6} L6 54 Q6 6 54 6 L{size-6} 6" stroke-width="3"/>
+  <path d="M17 {size-40} L17 58 Q17 17 58 17 L{size-40} 17" stroke-width="1.1" opacity=".5"/>
+
+  <path d="M30 74 Q30 30 74 30" stroke-width="1.9" opacity=".9"/>
+
+  <path d="M30 74 Q30 52 52 52 Q74 52 74 30" stroke-width="1.3" opacity=".6"/>
+
+  <path d="M52 96 Q52 74 68 66 Q84 58 96 52" stroke-width="1.5" opacity=".8"/>
+  <path d="M52 96 Q66 96 74 86 Q82 76 96 76 Q108 76 110 88"
+        stroke-width="1.5" opacity=".75"/>
+
+  <path d="M96 52 Q114 44 118 28 Q104 30 96 40 Q90 47 96 52 Z"
+        fill="{GOLD}" fill-opacity=".16" stroke-width="1.3"/>
+  <path d="M52 96 Q44 114 28 118 Q30 104 40 96 Q47 90 52 96 Z"
+        fill="{GOLD}" fill-opacity=".16" stroke-width="1.3"/>
+
+  <path d="M40 122 Q40 68 92 62" stroke-width=".9" opacity=".38"/>
+</g>
+<g fill="{GOLD}">
+  <circle cx="58" cy="58" r="5.2"/>
+  <circle cx="58" cy="58" r="9.4" fill="none" stroke="{GOLD}" stroke-width="1.1" opacity=".6"/>
+  <circle cx="{size-34}" cy="17" r="2.8" opacity=".55"/>
+  <circle cx="17" cy="{size-34}" r="2.8" opacity=".55"/>
+  <circle cx="110" cy="90" r="2.4" opacity=".7"/>
+  <circle cx="90" cy="110" r="2.4" opacity=".7"/>
 </g></svg>'''
 
 
@@ -134,3 +147,41 @@ def rule_small(w=150):
 <path d="M{w//2+13} 6 H{w}" stroke="{GOLD}" stroke-width="1.3" opacity=".8"/>
 <path d="M{w//2} 0 L{w//2+7} 6 L{w//2} 12 L{w//2-7} 6 Z" fill="{GOLD}"/>
 </svg>'''
+
+
+def midpiece(w=120, vertical=False):
+    """קרטוש אמצע-מסגרת. מסגרת מודפסת כמעט תמיד שוברת את הקו
+    באמצע כל צלע — בלי זה המלבן נראה כמו border ולא כמו מסגרת."""
+    rot = ' transform="rotate(90 60 18)"' if vertical else ''
+    return f'''<svg viewBox="0 0 120 36" width="{w}" xmlns="http://www.w3.org/2000/svg" fill="none">
+<g{rot} stroke="{GOLD}" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M0 18 H30" stroke-width="1.4" opacity=".8"/>
+  <path d="M90 18 H120" stroke-width="1.4" opacity=".8"/>
+  <path d="M60 4 L74 18 L60 32 L46 18 Z" fill="{GOLD}" fill-opacity=".14" stroke-width="1.6"/>
+  <path d="M60 11 L67 18 L60 25 L53 18 Z" fill="{GOLD}" stroke="none"/>
+  <path d="M38 18 Q32 10 30 18 Q32 26 38 18" stroke-width="1.2" opacity=".7"/>
+  <path d="M82 18 Q88 10 90 18 Q88 26 82 18" stroke-width="1.2" opacity=".7"/>
+</g></svg>'''
+
+
+def plaque_frame(w=760, h=250):
+    """מסגרת פנימית ללוחית הכהה — קו זהב עם פינות קטומות."""
+    c = 16
+    return f'''<svg viewBox="0 0 {w} {h}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" fill="none">
+<path d="M{c} 4 H{w-c} L{w-4} {c} V{h-c} L{w-c} {h-4} H{c} L4 {h-c} V{c} Z"
+      stroke="{GOLD_L}" stroke-width="1.4" opacity=".55"/>
+</svg>'''
+
+
+def on_dark(svg):
+    """גרסת עיטור לרקע הכהה של הלוחית.
+    המילוי החלקי שנראה טוב על שמנת הופך על כחול-כהה לכתם שחור —
+    הרימון יצא ככדור אטום. כאן המילוי מוסר לגמרי והקו מתחלף לזהב
+    בהיר, שהוא מה שקריא על רקע כהה."""
+    return (svg
+            .replace('fill-opacity=".13"', 'fill-opacity="0"')
+            .replace('fill-opacity=".16"', 'fill-opacity="0"')
+            .replace('fill-opacity=".10"', 'fill-opacity="0"')
+            .replace('fill="%s" fill-opacity="0"' % GOLD, 'fill="none"')
+            .replace('stroke="%s"' % GOLD, 'stroke="%s"' % GOLD_L)
+            .replace('fill="%s"' % GOLD, 'fill="%s"' % GOLD_L))

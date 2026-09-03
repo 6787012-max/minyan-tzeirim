@@ -62,6 +62,24 @@ body {
 .c-br { bottom:8.4mm; right:8.4mm; transform:scaleY(-1); }
 .c-bl { bottom:8.4mm; left:8.4mm; transform:scale(-1,-1); }
 
+/* קרטושי אמצע — מסגרת מודפסת שוברת את הקו באמצע כל צלע.
+   בלי זה המלבן נקרא כמו border ולא כמו מסגרת. */
+.mid-t, .mid-b, .mid-r, .mid-l { position:absolute; pointer-events:none; z-index:1; }
+.mid-t, .mid-b { width:34mm; left:50%; transform:translateX(-50%); }
+.mid-t { top:4.6mm; }
+.mid-b { bottom:4.6mm; }
+.mid-r, .mid-l { width:26mm; top:50%; }
+.mid-r { right:-6.2mm; transform:translateY(-50%) rotate(90deg); }
+.mid-l { left:-6.2mm; transform:translateY(-50%) rotate(90deg); }
+
+/* סימן מים — הלוגו עצמו, דהוי כמעט עד היעלמות. נותן לנייר עומק
+   בלי להתחרות באף שורת טקסט. */
+.wm {
+  position:absolute; top:52%; left:50%; transform:translate(-50%,-50%);
+  width:150mm; opacity:.055; z-index:0; pointer-events:none;
+  filter:grayscale(1) brightness(.45);
+}
+
 .inner {
   position:relative; z-index:2; flex:1;
   display:flex; flex-direction:column; padding:16mm 16mm 11mm;
@@ -273,6 +291,11 @@ h1.zt { font-size:24pt; margin-bottom:1.2mm; }
 <div class="corner c-tl"><img src="CORNER" alt=""></div>
 <div class="corner c-br"><img src="CORNER" alt=""></div>
 <div class="corner c-bl"><img src="CORNER" alt=""></div>
+<img class="mid-t" src="MIDH" alt="">
+<img class="mid-b" src="MIDH" alt="">
+<img class="mid-r" src="MIDV" alt="">
+<img class="mid-l" src="MIDV" alt="">
+<img class="wm" src="WATERMARK" alt="">
 
 <div class="inner">
 
