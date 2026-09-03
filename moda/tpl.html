@@ -27,7 +27,7 @@
 @font-face { font-family:'Num';   src:url('../fonts/heebo-black.woff2') format('woff2'); font-weight:900; }
 
 :root {
-  --navy:#0E1B31; --navy2:#16294A;
+  --navy:#2A1416; --navy2:#4A2226; --navy3:#63313A;
   --gold:#B08D3E; --gold-l:#E3C883; --gold-d:#8A6B24;
   --cream:#FDFAF4; --cream2:#F6F0E4;
   --line:#E0D4BE; --muted:#6F6555; --ink:#3A342B;
@@ -111,7 +111,7 @@ body {
    הניגודיות היא מה שהופך אותה למודעה ולא למכתב. */
 .plaque {
   margin-inline:6mm;
-  background:linear-gradient(155deg, var(--navy2) 0%, var(--navy) 62%, #0A1526 100%);
+  background:linear-gradient(155deg, var(--navy3) 0%, var(--navy2) 55%, var(--navy) 100%);
   border:1.6px solid var(--gold); border-radius:2.4mm;
   padding:8mm 12mm 9mm; margin:0 0 8mm; position:relative;
   box-shadow:0 2mm 7mm rgba(14,27,49,.18);
@@ -195,7 +195,7 @@ h1.zt em {
 .zb.hl { border-color:var(--gold); border-width:1.8px; }
 
 .zb-h {
-  background:linear-gradient(150deg, var(--navy2), var(--navy));
+  background:linear-gradient(150deg, var(--navy3), var(--navy));
   color:#F3E7C9; font-family:'Shofar',serif; font-weight:700; font-size:1.230em;
   padding:2.6mm 3mm 2.2mm; text-align:center; line-height:1.2;
 }
@@ -244,7 +244,7 @@ h1.zt em {
 }
 
 /* ── תחתית ── */
-.bot { text-align:center; padding-top:3.5mm; position:relative; }
+  .bot { margin-bottom:-6mm; text-align:center; padding-top:3.5mm; position:relative; }
 .bot .orn { margin:0 auto 2.5mm; display:block; }
 .bot .slogan {
   font-family:'Keter','Shofar',serif; font-size:1.868em; color:var(--navy); font-weight:700;

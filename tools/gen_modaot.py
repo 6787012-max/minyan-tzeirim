@@ -152,7 +152,7 @@ def body_text(m):
     n = len(m.get("title", ""))
     cls = " long" if n > 30 else (" mid-len" if n > 20 else "")
 
-    plaque = [crest(m.get("kind", "")),
+    plaque = [
               '<div class="eyebrow">%s</div>' % esc(m.get("eyebrow", "")),
               '<h1 class="%s">%s</h1>' % (cls.strip(), esc(m["title"]))]
     if m.get("lead"):
@@ -199,11 +199,9 @@ def body_zmanim(z):
     sys.path.insert(0, MODA)
     import orn
     h = ['<div class="plaque tight">'
-         '<img class="crest" src="%s" style="width:8.8em">'
          '<h1 class="zt">%s <em>%s</em></h1>'
          '<div class="lead">%s</div></div>'
-         % (svg_uri(orn.on_dark(orn.shofar())), esc(z["title"]),
-            esc(z.get("year", "")), esc(z.get("sub", "")))]
+         % (esc(z["title"]), esc(z.get("year", "")), esc(z.get("sub", "")))]
     if z.get("note"):
         h.append('<div class="z-note">%s</div>' % esc(z["note"]))
     h.append('<div class="z-grid">%s</div>' % "".join(zblock(b) for b in z["blocks"]))
