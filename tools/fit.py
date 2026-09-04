@@ -21,35 +21,34 @@ sys.path.insert(0, HERE)
 import gen_modaot as g  # noqa: E402
 
 PAGE_PX = 1123          # A4 לאורך ב-96dpi
-SAFE = 78               # מרווח ביטחון — ראה הערה ב-measure()
+SAFE = 0                # ה-body בגובה 297mm קבוע, ולכן scrollHeight
+                        # לעולם אינו קטן מ-1123; כל תוספת הופכת כל
+                        # מודעה ל«גולשת». הגלישה מזוהה מעצם החריגה.
 PROBE = """
-<script>document.addEventListener('DOMContentLoaded',function(){
-  /* .mid הוא flex:1 — ה-scrollHeight שלו הוא מה שהוקצה לו, לא מה
-     שהוא צריך. מדידה נאיבית שלו תמיד תחזיר את אותו מספר, וזה בדיוק
-     מה שגרם לסקלר להיראות כאילו אין לו השפעה. סוכמים את הילדים. */
-  var p=document.querySelector('.panel');
-  var need=0;
-  [].forEach.call(p.children,function(c){
-    if (c.classList.contains('pc')) return;          /* פינות — absolute */
-    if (c.classList.contains('mid')) {
-      var cs=getComputedStyle(c);
-      need+=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
-      [].forEach.call(c.children,function(k){
-        var ks=getComputedStyle(k);
-        need+=k.getBoundingClientRect().height
-             +parseFloat(ks.marginTop)+parseFloat(ks.marginBottom);
-      });
-    } else {
-      need+=c.getBoundingClientRect().height;
-    }
-  });
-  var ps=getComputedStyle(p);
-  need+=parseFloat(ps.paddingTop)+parseFloat(ps.paddingBottom);
-  /* המגבלה היא גובה העמוד ולא clientHeight של הפנל: כשהפנל אינו
-     absolute הוא גדל עם התוכן, ואז המדידה תמיד מדווחת «נכנס». */
-  document.title='M'+Math.round(need)+'/'+Math.round(
-    p.classList.contains('inner') ? 1123 - 0
-      : p.clientHeight+parseFloat(ps.paddingTop)+parseFloat(ps.paddingBottom));
+<script>window.addEventListener('load',function(){
+  /* מדידה ישירה של גובה המסמך, ולא סכימה של הילדים.
+     הסכימה פספסה גלישה אמיתית: הלוגו הנוסף ב-.bot הוסיף גובה
+     שלא נספר, ו-zmanim דווח «נכנס» ב-1123 בעוד שהוא גלש ל-1402.
+     window.load ולא DOMContentLoaded — ה-SVG-ים ב-data URI טרם
+     נמדדו בשלב הקודם. */
+  var need = Math.max(document.body.scrollHeight,
+                      document.documentElement.scrollHeight);
+  /* גובה המסמך לבדו אינו מספיק: overflow:hidden על ה-body חותך את
+     מה שחורג, וה-scrollHeight נשאר 1123 בעוד ש«גוט שבת» כבר יצא
+     מהעמוד. הסגלגל שבמסגרת ממורכז סביב 1055 והשורה חייבת להיגמר
+     לפניו — 1108 הוא הקצה שנמדד כבטוח. */
+  /* מיקום «גוט שבת» אינו נשלט ע"י הסקלר: .bot מיושר לתחתית ה-flex
+     ונשאר במקומו בכל גודל. הקטנת הסקלר בגללו רק כיווצה את הטקסט
+     בלי להזיז דבר, ולכן הוא ממוקם absolute בתבנית ולא נבדק כאן. */
+  /* «גוט שבת» מקובע absolute ולכן אינו תלוי בסקלר, אבל החתימה
+     שמעליו כן: היא בזרימת .mid, ובמודעות הצפופות היא ירדה עד 1105
+     ונחתה על הסגלגל. 1030 הוא הקצה שמעליו היא בטוחה. */
+  var sg = document.querySelector('.sign');
+  if (sg) {
+    var gb = sg.getBoundingClientRect().bottom;
+    if (gb > 1030) need = Math.max(need, 1123 + (gb - 1030));
+  }
+  document.title = 'M' + Math.round(need) + '/' + 1123;
 });</script>
 """
 

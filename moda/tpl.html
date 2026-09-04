@@ -87,7 +87,7 @@ body {
      העליונה מכרסמת במרכז, ולכן הריפוד העליון נדיב יותר. */
   position:relative; z-index:2; flex:1; min-height:0;
   display:flex; flex-direction:column;
-  padding:38mm 26mm 24mm;
+  padding:38mm 26mm 34mm;
 }
 
 /* ── כותרת עליונה ── */
@@ -244,7 +244,13 @@ h1.zt em {
 }
 
 /* ── תחתית ── */
-  .bot { margin-bottom:-6mm; text-align:center; padding-top:3.5mm; position:relative; }
+/* התחתית יוצאת מזרימת ה-flex ומקובעת על מרכז הסגלגל שבמסגרת.
+   בזרימה היא נדדה לפי גובה התוכן — «גוט שבת» נחת בין 1085 ל-1123
+   לפי המודעה, ובחלקן מתחת לסגלגל לגמרי. */
+.bot {
+  position:absolute; left:0; right:0; bottom:10mm; z-index:6;
+  text-align:center; padding-top:0;
+}
 .bot .orn { margin:0 auto 2.5mm; display:block; }
 .bot .slogan {
   font-family:'Keter','Shofar',serif; font-size:1.868em; color:var(--navy); font-weight:700;
@@ -414,7 +420,7 @@ p.close {
 /* לוגו שותף בתחתית — בית הכנסת המרכזי או «חלקי בקהילתי», לפי
    הווריאנט. יושב מתחת לברכה ובתוך הסגלגל שבמסגרת. */
 .colog:empty { display:none; }
-.colog img { height:auto; display:block; margin:1.6mm auto 0; opacity:.85; }
+.colog img { height:auto; display:block; margin:0 auto 2.4mm; opacity:.85; }
 .colog.zech img { width:34mm; }
 .colog.keh img  { width:44mm; }
 
@@ -439,8 +445,8 @@ body.alt .slogan { font-family:'Drug',serif; }
 
   <div class="bot">
     <img class="orn" src="DIVIDER" alt="" style="width:74mm">
-    <div class="slogan" id="slogan">שנה טובה ומבורכת</div>
     <div class="colog" id="colog"></div>
+    <div class="slogan" id="slogan">גוט שבת</div>
     <!-- לוגו היישוב. מודעה של בית כנסת ביישוב שנושאת רק את סמל
          המניין נראית כמו פנייה פרטית; סמל היישוב הוא מה שנותן לה
          את המעמד של הודעה קהילתית. -->
