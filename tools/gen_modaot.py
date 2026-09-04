@@ -253,13 +253,23 @@ def body_zmanim(z):
     return "".join(h)
 
 
-def render(name, mid_html, slogan=None):
+def render(name, mid_html, slogan=None, colog=None, alt_font=False):
     tpl = io.open(os.path.join(MODA, "tpl.html"), encoding="utf-8").read()
     html = tpl.replace('<div class="mid" id="mid"></div>',
                        '<div class="mid" id="mid">%s</div>' % mid_html)
     if slogan:
         html = html.replace('id="slogan">שנה טובה ומבורכת<',
                             'id="slogan">%s<' % esc(slogan))
+    if colog:
+        p = os.path.join(MODA, "logo-%s.svg" % colog)
+        if os.path.exists(p):
+            cls = {"zecharia": "zech", "kehilati": "keh"}.get(colog, "")
+            html = html.replace(
+                '<div class="colog" id="colog"></div>',
+                '<div class="colog %s" id="colog"><img src="%s" alt=""></div>'
+                % (cls, svg_uri(io.open(p, encoding="utf-8").read())))
+    if alt_font:
+        html = html.replace("<body>", '<body class="alt">')
     html = inject_ornaments(html)
     html = inline_assets(html)
 
@@ -297,6 +307,18 @@ def main():
         print(("  " + m["id"]).ljust(20), " | ".join(render(m["id"], body_text(m))))
         if m.get("_todo"):
             todos.append((m["id"], m["_todo"]))
+
+    # שלושה וריאנטים של המודעה הכללית — לוגו בית זכריה, לוגו «חלקי
+    # בקהילתי», וגרסה בגופן דרוגולין. אותו תוכן, בחירה של יוסף.
+    kl = [m for m in d["modaot"] if m["id"] == "klali"]
+    if kl:
+        body = body_text(kl[0])
+        for suffix, colog, alt in (("-zecharia", "zecharia", False),
+                                   ("-kehilati", "kehilati", False),
+                                   ("-drug", None, True)):
+            nm = "klali" + suffix
+            print(("  " + nm).ljust(20),
+                  " | ".join(render(nm, body, colog=colog, alt_font=alt)))
 
     z = d["zmanim"]
     print("  zmanim".ljust(20), " | ".join(

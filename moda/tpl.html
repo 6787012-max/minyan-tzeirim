@@ -410,6 +410,20 @@ p.close {
   font-family:'Frank',serif; font-size:1.02em; line-height:1.72;
   color:var(--ink); max-width:136mm; margin:4.6mm auto 0; text-align:center;
 }
+
+/* לוגו שותף בתחתית — בית הכנסת המרכזי או «חלקי בקהילתי», לפי
+   הווריאנט. יושב מתחת לברכה ובתוך הסגלגל שבמסגרת. */
+.colog:empty { display:none; }
+.colog img { height:auto; display:block; margin:1.6mm auto 0; opacity:.85; }
+.colog.zech img { width:34mm; }
+.colog.keh img  { width:44mm; }
+
+/* גופן חלופי: דרוגולין לכותרות — דפוס עברי מסורתי, אותיות רחבות
+   וסימטריות יותר מ«שופר». */
+body.alt h1 { font-family:'Drug','Shofar',serif; }
+body.alt .lead { font-family:'Keter','Drug',serif; font-size:1.16em; }
+body.alt .pr b { font-family:'Drug',serif; }
+body.alt .slogan { font-family:'Drug',serif; }
 </style>
 </head>
 <body>
@@ -426,10 +440,10 @@ p.close {
   <div class="bot">
     <img class="orn" src="DIVIDER" alt="" style="width:74mm">
     <div class="slogan" id="slogan">שנה טובה ומבורכת</div>
+    <div class="colog" id="colog"></div>
     <!-- לוגו היישוב. מודעה של בית כנסת ביישוב שנושאת רק את סמל
          המניין נראית כמו פנייה פרטית; סמל היישוב הוא מה שנותן לה
          את המעמד של הודעה קהילתית. -->
-    <div class="site">minyan.mokad.co.il</div>
   </div>
 
 </div>
