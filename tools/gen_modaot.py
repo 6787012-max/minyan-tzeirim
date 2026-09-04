@@ -164,6 +164,18 @@ def body_text(m):
     h.append('<div class="body">%s</div>' % "".join(
         '<p%s>%s</p>' % (' class="strong"' if i == 0 and len(paras) > 1 else '', esc(p))
         for i, p in enumerate(paras)))
+    # רשימת השמות במודעה הכללית. כל שם עם הנימוק שלו — מודעת תודה
+    # שמונה שמות בלי לומר על מה, לא אומרת כלום.
+    roll = m.get("roll")
+    if roll:
+        rows = "".join(
+            '<div class="pr"><b>%s</b><span>%s</span></div>' % (esc(a), esc(b))
+            for a, b in roll["people"])
+        h.append('<div class="roll"><div class="rh">%s</div>%s</div>'
+                 % (esc(roll.get("head", "")), rows))
+    for c in m.get("close", []):
+        h.append('<p class="close">%s</p>' % esc(c))
+
     # מסלולי התרומה — הלשון והמבנה לקוחים מסקשן «בוא תהיה שותף»
     # שבאתר, כדי שמי שראה שם יזהה את אותו דבר על הלוח.
     tr = m.get("tracks")
