@@ -419,10 +419,18 @@ p.close {
 
 /* לוגו שותף בתחתית — בית הכנסת המרכזי או «חלקי בקהילתי», לפי
    הווריאנט. יושב מתחת לברכה ובתוך הסגלגל שבמסגרת. */
+.colog {
+  position:absolute; left:0; right:0; bottom:34mm; z-index:6;
+  display:flex; align-items:center; justify-content:center; gap:8mm;
+}
 .colog:empty { display:none; }
-.colog img { height:auto; display:block; margin:0 auto 2.4mm; opacity:.85; }
-.colog.zech img { width:34mm; }
-.colog.keh img  { width:44mm; }
+/* שני לוגואים זה לצד זה — כשמופיעים יחד כל אחד מוקטן כדי שהשורה
+   תישאר מאוזנת ולא תגלוש אל הסגלגל. */
+.colog.both img { width:26mm; }
+.colog.both img.keh { width:34mm; }
+.colog img { height:auto; display:block; opacity:.88; }
+.colog.zech img { width:30mm; }
+.colog.keh img  { width:40mm; }
 
 /* גופן חלופי: דרוגולין לכותרות — דפוס עברי מסורתי, אותיות רחבות
    וסימטריות יותר מ«שופר». */
@@ -430,6 +438,13 @@ body.alt h1 { font-family:'Drug','Shofar',serif; }
 body.alt .lead { font-family:'Keter','Drug',serif; font-size:1.16em; }
 body.alt .pr b { font-family:'Drug',serif; }
 body.alt .slogan { font-family:'Drug',serif; }
+
+.tracks:has(.trk:nth-child(2):last-child) {
+  grid-template-columns:1fr 1fr; max-width:112mm; gap:5mm;
+}
+.tracks:has(.trk:nth-child(2):last-child) .trk { padding:5mm 3mm 5.6mm; }
+.tracks:has(.trk:nth-child(2):last-child) .amt { font-size:2.3em; }
+.tracks:has(.trk:nth-child(2):last-child) b { font-size:1.42em; }
 </style>
 </head>
 <body>
@@ -443,9 +458,9 @@ body.alt .slogan { font-family:'Drug',serif; }
 
   <div class="mid" id="mid"></div>
 
+  <div class="colog" id="colog"></div>
   <div class="bot">
     <img class="orn" src="DIVIDER" alt="" style="width:74mm">
-    <div class="colog" id="colog"></div>
     <div class="slogan" id="slogan">גוט שבת</div>
     <!-- לוגו היישוב. מודעה של בית כנסת ביישוב שנושאת רק את סמל
          המניין נראית כמו פנייה פרטית; סמל היישוב הוא מה שנותן לה

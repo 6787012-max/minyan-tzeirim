@@ -107,7 +107,8 @@ def main():
     names = sys.argv[1:] or ["sparka", "reich-glazer", "simons",
                              "kiddush", "magbit", "klali",
                              "klali-zecharia", "klali-kehilati",
-                             "klali-drug", "zmanim"]
+                             "klali-drug", "klali-both",
+                             "dafyomi", "zmanim"]
     out = {}
     for n in names:
         f, need, avail = fit_one(n)

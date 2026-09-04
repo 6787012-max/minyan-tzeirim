@@ -261,13 +261,22 @@ def render(name, mid_html, slogan=None, colog=None, alt_font=False):
         html = html.replace('id="slogan">שנה טובה ומבורכת<',
                             'id="slogan">%s<' % esc(slogan))
     if colog:
-        p = os.path.join(MODA, "logo-%s.svg" % colog)
-        if os.path.exists(p):
-            cls = {"zecharia": "zech", "kehilati": "keh"}.get(colog, "")
+        # colog יכול להיות שם אחד או רשימה — שניים מוצגים זה לצד זה
+        names = colog if isinstance(colog, (list, tuple)) else [colog]
+        imgs, cls = [], []
+        for nm in names:
+            p = os.path.join(MODA, "logo-%s.svg" % nm)
+            if not os.path.exists(p):
+                continue
+            k = {"zecharia": "zech", "kehilati": "keh"}.get(nm, "")
+            cls.append(k)
+            imgs.append('<img class="%s" src="%s" alt="">'
+                        % (k, svg_uri(io.open(p, encoding="utf-8").read())))
+        if imgs:
+            wrap = " ".join(cls) + (" both" if len(imgs) > 1 else "")
             html = html.replace(
                 '<div class="colog" id="colog"></div>',
-                '<div class="colog %s" id="colog"><img src="%s" alt=""></div>'
-                % (cls, svg_uri(io.open(p, encoding="utf-8").read())))
+                '<div class="colog %s" id="colog">%s</div>' % (wrap, "".join(imgs)))
     if alt_font:
         html = html.replace("<body>", '<body class="alt">')
     html = inject_ornaments(html)
@@ -315,7 +324,8 @@ def main():
         body = body_text(kl[0])
         for suffix, colog, alt in (("-zecharia", "zecharia", False),
                                    ("-kehilati", "kehilati", False),
-                                   ("-drug", None, True)):
+                                   ("-drug", None, True),
+                                   ("-both", ["zecharia", "kehilati"], False)):
             nm = "klali" + suffix
             print(("  " + nm).ljust(20),
                   " | ".join(render(nm, body, colog=colog, alt_font=alt)))
