@@ -346,26 +346,36 @@
 
   function congHtml(c) {
     var st = c.campaign_status || 'new';
-    return '<article class="row st-' + (st === 'new' ? 'new' : st === 'declined' ? 'cancelled' : 'confirmed') +
-      '" data-id="' + c.id + '">' +
-      '<div class="main">' +
-        '<div class="line1">' +
-          '<b>' + esc(c.full_name || c.surname) + '</b>' +
-          '<span class="badge b-' + (st === 'new' ? 'new' : st === 'declined' ? 'cancelled' : 'paid') + '">' +
-            esc(CONG_STATUS[st] || st) + '</span>' +
-        '</div>' +
-        '<div class="line2">' +
-          (c.phone ? '<a class="tel" href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span class="warn">אין טלפון</span>') +
-          (c.email ? '<a class="tel" href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '<span class="warn">אין מייל</span>') +
-          (c.match_note ? '<span class="dt"><i>הערה</i> ' + esc(c.match_note) + '</span>' : '') +
-        '</div>' +
-      '</div>' +
-      '<div class="acts">' +
-        '<button type="button" class="btn btn-g small" data-cact="sent">סומן כנשלח</button>' +
-        '<button type="button" class="btn btn-s small" data-cact="responded">הגיב</button>' +
-        '<button type="button" class="btn btn-x small" data-cact="declined">סירב</button>' +
-      '</div>' +
-    '</article>';
+    return '<tr data-id="' + c.id + '">' +
+      '<td class="name">' + esc(c.full_name || c.surname) + '</td>' +
+      '<td>' + (c.phone ? '<a class="tel" href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '—') + '</td>' +
+      '<td>' + (c.email ? '<a class="tel" href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '—') + '</td>' +
+      '<td class="note">' + esc(c.match_note || '') + '</td>' +
+      '<td><span class="badge b-' + (st === 'new' ? 'new' : st === 'declined' ? 'cancelled' : 'paid') + '">' +
+        esc(CONG_STATUS[st] || st) + '</span></td>' +
+      '<td class="acts">' +
+        '<button type="button" class="btn btn-g small" data-cact="sent" title="סומן כנשלח">נשלח</button>' +
+        '<button type="button" class="btn btn-s small" data-cact="responded" title="הגיב">הגיב</button>' +
+        '<button type="button" class="btn btn-x small" data-cact="declined" title="סירב">סירב</button>' +
+      '</td>' +
+    '</tr>';
+  }
+
+  var CONG_CACHE = [];
+
+  function congKpi(rows) {
+    var noPhone = rows.filter(function (c) { return !c.phone; }).length;
+    var noEmail = rows.filter(function (c) { return !c.email; }).length;
+    var sent = rows.filter(function (c) { return c.campaign_status && c.campaign_status !== 'new'; }).length;
+    $('#congKpi').innerHTML = [
+      ['סה״כ מתפללים', rows.length, ''],
+      ['ללא טלפון', noPhone, noPhone ? 'pend' : ''],
+      ['ללא מייל', noEmail, noEmail ? 'pend' : ''],
+      ['נשלח/הגיב', sent + ' / ' + rows.length, '']
+    ].map(function (k) {
+      return '<div class="card"><div class="k">' + k[0] + '</div>' +
+        '<div class="n"' + (k[2] ? ' style="color:#8A5A16"' : '') + '>' + k[1] + '</div></div>';
+    }).join('');
   }
 
   function congregants() {
@@ -375,21 +385,38 @@
     return db(q).then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) {
         rows = rows.filter(function (c) { return c.full_name || c.phone || c.email; });
+        CONG_CACHE = rows;
         $('#congregants').innerHTML = rows.map(congHtml).join('');
         $('#congNote').textContent = rows.length + ' מתפללים מוצגים.';
+        if (CONGF === 'all' && !CONGQ) congKpi(rows);
       });
   }
 
+  function congExportCsv() {
+    var head = ['שם', 'טלפון', 'מייל', 'הערה', 'סטטוס'];
+    var lines = [head.join(',')];
+    CONG_CACHE.forEach(function (c) {
+      var row = [c.full_name || c.surname, c.phone || '', c.email || '',
+        (c.match_note || '').replace(/,/g, ';'), CONG_STATUS[c.campaign_status] || c.campaign_status || ''];
+      lines.push(row.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','));
+    });
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'מתפללים.csv';
+    a.click();
+  }
+
   function setCong(id, status, el) {
-    el.closest('.row').classList.add('busy');
+    var row = el.closest('tr');
+    row.style.opacity = '.5';
     return db('congregants?id=eq.' + id, {
       method: 'PATCH', body: JSON.stringify({ campaign_status: status }),
       prefer: 'return=representation'
     }).then(function (r) {
       return r.text().then(function (t) {
-        var row = el.closest('.row');
-        row.classList.remove('busy');
-        if (!r.ok) { row.classList.add('err'); return; }
+        row.style.opacity = '';
+        if (!r.ok) { row.style.background = '#FBE9E9'; return; }
         var x = null;
         try { x = JSON.parse(t)[0]; } catch (e) { /* ריק */ }
         if (x) row.outerHTML = congHtml(x);
@@ -525,6 +552,8 @@
     });
     donations();
   });
+
+  $('#congExport').addEventListener('click', congExportCsv);
 
   $('#congregants').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-cact]');

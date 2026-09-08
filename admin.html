@@ -11,7 +11,7 @@
 <link rel="icon" href="img/favicon.ico" sizes="any">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css?v=20">
-<link rel="stylesheet" href="css/admin.css?v=20">
+<link rel="stylesheet" href="css/admin.css?v=21">
 </head>
 <body class="adm">
 
@@ -98,11 +98,20 @@
         <h2>מתפללים</h2>
         <p>33 בתי-אב, עם טלפון ומייל שאותרו — ומעקב סטטוס הפנייה.</p>
       </div>
-      <div class="toolbar">
+      <div class="cards" id="congKpi"></div>
+      <div class="toolbar" style="margin-top:16px">
         <div class="filters" id="congFilters"></div>
         <input type="search" id="congQ" placeholder="חיפוש שם…" aria-label="חיפוש">
+        <button type="button" class="btn btn-s small" id="congExport">ייצוא CSV</button>
       </div>
-      <div id="congregants"></div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="congTable">
+          <thead><tr>
+            <th>שם</th><th>טלפון</th><th>מייל</th><th>הערה</th><th>סטטוס</th><th></th>
+          </tr></thead>
+          <tbody id="congregants"></tbody>
+        </table>
+      </div>
       <p class="note" id="congNote"></p>
     </section>
 
@@ -130,6 +139,6 @@
   </footer>
 </div>
 
-<script src="js/admin.js?v=22"></script>
+<script src="js/admin.js?v=23"></script>
 </body>
 </html>
