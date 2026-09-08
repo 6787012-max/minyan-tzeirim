@@ -18,6 +18,7 @@
   var API = '', ANON = '';
   var SES = null, PAGE = 0, PER = 30, FILTER = 'all', Q = '';
   var NEWSF = 'new';
+  var DONF = 'all';
 
   var KIND = {
     kibud: 'כיבוד', shas: 'ש״ס', seats: 'מקומות', contact: 'פנייה', other: 'אחר'
@@ -109,26 +110,38 @@
     if (msg) $('#lgHint').innerHTML = '<b style="color:#9B1E1E">' + esc(msg) + '</b>';
   }
 
+  function donCard(d) {
+    if (!d) return '';
+    return '<div class="card">' +
+      '<div class="k">תרומות · נדרים פלוס</div>' +
+      '<div class="n">₪' + Number(d.total_sum).toLocaleString('he-IL') + '</div>' +
+      '<div class="m">' + d.total + ' עסקאות · ' + d.keva_count + ' בהוראת קבע</div>' +
+      '<div class="w">₪' + Number(d.last_30d_sum).toLocaleString('he-IL') + ' ב-30 הימים האחרונים</div>' +
+    '</div>';
+  }
+
   function stats() {
-    return db('stats?select=*').then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (rows) {
-        if (!rows.length) {
-          $('#stats').innerHTML = '<p class="note">עדיין אין רישומים במערכת.</p>';
-          return;
-        }
-        $('#stats').innerHTML = rows.map(function (s) {
-          return '<div class="card">' +
-            '<div class="k">' + esc(KIND[s.kind] || s.kind) + '</div>' +
-            '<div class="n">' + s.total + '</div>' +
-            '<div class="m">' +
-              (s.pending ? '<span class="pend">' + s.pending + ' ממתינים</span> · ' : '') +
-              s.approved + ' אושרו' +
-              (Number(s.paid_sum) > 0 ? ' · ₪' + Number(s.paid_sum).toLocaleString('he-IL') : '') +
-            '</div>' +
-            '<div class="w">' + s.last_week + ' בשבוע האחרון</div>' +
-          '</div>';
-        }).join('');
+    return Promise.all([
+      db('stats?select=*').then(function (r) { return r.ok ? r.json() : []; }),
+      db('donations_stats?select=*').then(function (r) { return r.ok ? r.json() : []; })
+    ]).then(function (res) {
+      var rows = res[0], don = res[1] && res[1][0];
+      var cards = rows.map(function (s) {
+        return '<div class="card">' +
+          '<div class="k">' + esc(KIND[s.kind] || s.kind) + '</div>' +
+          '<div class="n">' + s.total + '</div>' +
+          '<div class="m">' +
+            (s.pending ? '<span class="pend">' + s.pending + ' ממתינים</span> · ' : '') +
+            s.approved + ' אושרו' +
+            (Number(s.paid_sum) > 0 ? ' · ₪' + Number(s.paid_sum).toLocaleString('he-IL') : '') +
+          '</div>' +
+          '<div class="w">' + s.last_week + ' בשבוע האחרון</div>' +
+        '</div>';
       });
+      cards.unshift(donCard(don));
+      $('#stats').innerHTML = cards.join('') ||
+        '<p class="note">עדיין אין רישומים במערכת.</p>';
+    });
   }
 
   function rowHtml(x) {
@@ -297,6 +310,37 @@
     });
   }
 
+  function donationHtml(d) {
+    var when = d.transaction_time ? new Date(d.transaction_time) : null;
+    var whenStr = when ? when.toLocaleDateString('he-IL') + ' · ' +
+      when.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
+    return '<article class="row">' +
+      '<div class="main">' +
+        '<div class="line1">' +
+          '<span class="kind">' + (d.kind === 'keva' ? 'הוראת קבע' : 'חד-פעמי') + '</span>' +
+          '<b>' + esc(d.client_name) + '</b>' +
+          '<span class="badge b-paid">₪' + Number(d.amount).toLocaleString('he-IL') + '</span>' +
+        '</div>' +
+        '<div class="line2">' +
+          (d.kabala_id ? '<span class="dt"><i>קבלה</i> ' + esc(d.kabala_id) + '</span>' : '') +
+          '<span class="when">' + esc(whenStr) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function donations() {
+    var q = 'donations?select=*&order=transaction_time.desc&limit=200';
+    if (DONF !== 'all') q += '&kind=eq.' + DONF;
+    return db(q).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rows) {
+        if (rows === null) { $('#donations').innerHTML = ''; $('#donNote').textContent = ''; return; }
+        $('#donations').innerHTML = rows.map(donationHtml).join('');
+        $('#donNote').textContent = rows.length ? 'מוצגות ' + rows.length + ' תרומות.'
+          : 'אין תרומות שתואמות לסינון.';
+      });
+  }
+
   function boot() {
     $('#gate').hidden = true;
     $('#panel').hidden = false;
@@ -319,8 +363,17 @@
           f[1] + '</button>';
       }).join('');
 
+    $('#donFilters').innerHTML =
+      [['all', 'הכול'], ['once', 'חד-פעמי'], ['keva', 'הוראת קבע']]
+      .map(function (f) {
+        return '<button type="button" class="chip' + (f[0] === DONF ? ' on' : '') +
+          '" data-df="' + f[0] + '" aria-pressed="' + (f[0] === DONF) + '">' +
+          f[1] + '</button>';
+      }).join('');
+
     stats();
     load(true);
+    donations();
     news();
   }
 
@@ -394,6 +447,18 @@
     var b = e.target.closest('button[data-nact]');
     if (!b) return;
     setNews(b.closest('.row').dataset.id, b.dataset.nact, b);
+  });
+
+  $('#donFilters').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    DONF = b.dataset.df;
+    [].forEach.call(this.children, function (c) {
+      var on = c === b;
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-pressed', String(on));
+    });
+    donations();
   });
 
   $('#newsFilters').addEventListener('click', function (e) {
