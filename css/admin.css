@@ -40,6 +40,29 @@
 .adm-sec .head h2 { font-size: 24px; margin: 2px 0 4px; }
 .adm-sec .head p { color: var(--muted); font-size: 14.5px; margin: 0; }
 .top .who { font-size: 13.5px; color: var(--muted); }
+
+/* ── ניווט מהיר — קפיצה ישירה לכל מקטע ────────────────────────── */
+.quicknav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  border-top: 1px solid var(--line); margin-top: 10px; padding: 10px 0 12px;
+}
+.quicknav a {
+  font-size: 13.5px; font-weight: 600; color: var(--navy); text-decoration: none;
+  padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff;
+}
+.quicknav a:hover { border-color: var(--gold); background: var(--cream); }
+
+/* ── טופס הוספה מהירה ─────────────────────────────────────────── */
+.add-form {
+  display: flex; gap: 9px; flex-wrap: wrap; align-items: center;
+  background: #fff; border: 1px solid var(--gold-lt); border-radius: 12px;
+  padding: 14px; margin-bottom: 15px;
+}
+.add-form input {
+  font: inherit; font-size: 14.5px; padding: 8px 12px; flex: 1 1 160px;
+  border: 1.5px solid var(--line); border-radius: 9px; background: var(--cream);
+}
+.add-form .hint { font-size: 13px; color: #9B1E1E; flex-basis: 100%; }
 .btn.small { padding: 6px 12px; font-size: 13.5px; }
 
 /* ── כרטיסי דיווח ─────────────────────────────────────────────── */

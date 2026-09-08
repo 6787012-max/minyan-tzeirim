@@ -25,17 +25,21 @@ create unique index if not exists congregants_surname_uq on minyan.congregants (
 
 alter table minyan.congregants enable row level security;
 
-drop policy if exists congregants_admin_read  on minyan.congregants;
-drop policy if exists congregants_admin_write on minyan.congregants;
+drop policy if exists congregants_admin_read   on minyan.congregants;
+drop policy if exists congregants_admin_write  on minyan.congregants;
+drop policy if exists congregants_admin_insert on minyan.congregants;
 create policy congregants_admin_read  on minyan.congregants
   for select to authenticated using (minyan.is_admin());
 create policy congregants_admin_write on minyan.congregants
   for update to authenticated using (minyan.is_admin()) with check (minyan.is_admin());
--- אין policy ל-anon. הכנסת השורות הראשונית נעשית דרך service_role (סקריפט מקומי), לא מהאתר.
+-- הוספה ידנית מהפאנל (08/09) — לא רק מ-service_role כמו המילוי הראשוני.
+create policy congregants_admin_insert on minyan.congregants
+  for insert to authenticated with check (minyan.is_admin());
+-- אין policy ל-anon בכלל.
 
 grant usage on schema minyan to service_role;
 grant all on minyan.congregants to service_role;
-grant select on minyan.congregants to authenticated;
+grant select, insert on minyan.congregants to authenticated;
 grant update (tier, tier_amount, campaign_status, phone, email, full_name) on minyan.congregants to authenticated;
 revoke all on minyan.congregants from anon;
 

@@ -555,6 +555,41 @@
 
   $('#congExport').addEventListener('click', congExportCsv);
 
+  $('#congAddOpen').addEventListener('click', function () {
+    $('#congAddForm').hidden = false;
+    $('#congAddOpen').hidden = true;
+    $('#caName').focus();
+  });
+  $('#congAddCancel').addEventListener('click', function () {
+    $('#congAddForm').hidden = true;
+    $('#congAddOpen').hidden = false;
+    $('#congAddForm').reset();
+    $('#congAddHint').textContent = '';
+  });
+  $('#congAddForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('#caName').value.trim();
+    if (!name) return;
+    var body = {
+      surname: name.split(' ')[0], full_name: name,
+      phone: $('#caPhone').value.trim() || null,
+      email: $('#caEmail').value.trim() || null,
+      match_note: 'נוסף ידנית מהפאנל'
+    };
+    $('#congAddHint').style.color = '#5E5E5E';
+    $('#congAddHint').textContent = 'שומר…';
+    db('congregants', { method: 'POST', body: JSON.stringify(body), prefer: 'return=minimal' })
+      .then(function (r) {
+        if (!r.ok) {
+          $('#congAddHint').style.color = '#9B1E1E';
+          $('#congAddHint').textContent = 'שגיאה בשמירה — ' + r.status;
+          return;
+        }
+        $('#congAddCancel').click();
+        congregants();
+      });
+  });
+
   $('#congregants').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-cact]');
     if (!b) return;

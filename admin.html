@@ -11,7 +11,7 @@
 <link rel="icon" href="img/favicon.ico" sizes="any">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css?v=20">
-<link rel="stylesheet" href="css/admin.css?v=21">
+<link rel="stylesheet" href="css/admin.css?v=22">
 </head>
 <body class="adm">
 
@@ -48,12 +48,19 @@
         <button type="button" class="btn btn-s small" id="logout">יציאה</button>
       </nav>
     </div>
+    <div class="wrap quicknav">
+      <a href="#statsSec">דיווחים</a>
+      <a href="#rowsSec">רישומים · ש״ס</a>
+      <a href="#donSec">תרומות</a>
+      <a href="#congSec">מתפללים</a>
+      <a href="#newsSec">חדשות</a>
+    </div>
   </header>
 
   <main class="wrap adm-main">
 
     <!-- דיווחים -->
-    <section class="adm-sec">
+    <section class="adm-sec" id="statsSec">
       <div class="head">
         <div class="eyebrow">מבט על</div>
         <h2>דיווחים</h2>
@@ -62,7 +69,7 @@
     </section>
 
     <!-- רישומים -->
-    <section class="adm-sec">
+    <section class="adm-sec" id="rowsSec">
       <div class="head">
         <div class="eyebrow">אישורים</div>
         <h2>רישומים</h2>
@@ -103,7 +110,16 @@
         <div class="filters" id="congFilters"></div>
         <input type="search" id="congQ" placeholder="חיפוש שם…" aria-label="חיפוש">
         <button type="button" class="btn btn-s small" id="congExport">ייצוא CSV</button>
+        <button type="button" class="btn btn-g small" id="congAddOpen">+ הוספת מתפלל</button>
       </div>
+      <form class="add-form" id="congAddForm" hidden>
+        <input id="caName" placeholder="שם מלא" required>
+        <input id="caPhone" placeholder="טלפון" inputmode="tel">
+        <input id="caEmail" placeholder="מייל" type="email">
+        <button type="submit" class="btn btn-g small">שמירה</button>
+        <button type="button" class="btn btn-s small" id="congAddCancel">ביטול</button>
+        <span class="hint" id="congAddHint"></span>
+      </form>
       <div class="tbl-wrap">
         <table class="tbl" id="congTable">
           <thead><tr>
@@ -139,6 +155,6 @@
   </footer>
 </div>
 
-<script src="js/admin.js?v=23"></script>
+<script src="js/admin.js?v=24"></script>
 </body>
 </html>
