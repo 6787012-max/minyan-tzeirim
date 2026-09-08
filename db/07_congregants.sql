@@ -41,7 +41,7 @@ grant usage on schema minyan to service_role;
 grant all on minyan.congregants to service_role;
 grant select, insert on minyan.congregants to authenticated;
 grant usage, select on sequence minyan.congregants_id_seq to authenticated;  -- bigserial צריך גם את זה, לא רק INSERT על הטבלה
-grant update (tier, tier_amount, campaign_status, phone, email, full_name) on minyan.congregants to authenticated;
+grant update (tier, tier_amount, campaign_status, phone, email, full_name, match_note) on minyan.congregants to authenticated;
 revoke all on minyan.congregants from anon;
 
 drop trigger if exists congregants_touch on minyan.congregants;

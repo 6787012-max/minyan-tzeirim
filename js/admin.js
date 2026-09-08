@@ -634,7 +634,12 @@
       }).then(function (r) {
         return r.text().then(function (t) {
           row.style.opacity = '';
-          if (!r.ok) { row.style.background = '#FBE9E9'; return; }
+          if (!r.ok) {
+            alert('שמירה נכשלה (' + r.status + '). השינויים לא נשמרו.');
+            var orig = CONG_CACHE.filter(function (x) { return x.id === +id; })[0];
+            if (orig) row.outerHTML = congHtml(orig);
+            return;
+          }
           var x = null;
           try { x = JSON.parse(t)[0]; } catch (er) { /* ריק */ }
           if (x) {
