@@ -614,3 +614,33 @@
     });
   }
 })();
+
+/* רצועת "לוח הקהילה" — 3 החדשות המאושרות האחרונות. נשארת מוסתרת
+ * אם אין אף הודעה מאושרת, כדי שלא יופיע קטע ריק. אותו news_public
+ * כמו news.js — אין דרך להגיע דרך זה למה שלא אושר. */
+(function () {
+  'use strict';
+  var strip = document.getElementById('newsStrip');
+  if (!strip) return;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  fetch('data/site.json', { cache: 'no-cache' })
+    .then(function (r) { return r.json(); })
+    .then(function (c) {
+      return fetch(c.api.url + '/rest/v1/news_public?select=title,msg_date,created_at&order=msg_date.desc&limit=3', {
+        headers: { 'apikey': c.api.anon, 'Authorization': 'Bearer ' + c.api.anon, 'Accept-Profile': 'minyan' }
+      });
+    })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (rows) {
+      rows = (rows || []).filter(function (n) { return n.title; });
+      if (!rows.length) return;
+      document.getElementById('newsStripItems').innerHTML = rows.map(function (n) {
+        return '<span class="ns-item">' + esc(n.title) + '</span>';
+      }).join('');
+      strip.hidden = false;
+      requestAnimationFrame(function () { requestAnimationFrame(function () { strip.classList.add('show'); }); });
+    })
+    .catch(function () { /* בלי רשת — הרצועה פשוט נשארת מוסתרת */ });
+})();
