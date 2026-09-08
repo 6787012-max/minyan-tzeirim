@@ -19,6 +19,9 @@
   var SES = null, PAGE = 0, PER = 30, FILTER = 'all', Q = '';
   var NEWSF = 'new';
   var DONF = 'all';
+  var CONGF = 'all', CONGQ = '';
+  var CONG_STATUS = { 'new': 'טרם נשלח', drafted: 'טיוטה', sent: 'נשלח',
+    responded: 'הגיב', declined: 'סירב' };
 
   var KIND = {
     kibud: 'כיבוד', shas: 'ש״ס', seats: 'מקומות', contact: 'פנייה', other: 'אחר'
@@ -341,6 +344,59 @@
       });
   }
 
+  function congHtml(c) {
+    var st = c.campaign_status || 'new';
+    return '<article class="row st-' + (st === 'new' ? 'new' : st === 'declined' ? 'cancelled' : 'confirmed') +
+      '" data-id="' + c.id + '">' +
+      '<div class="main">' +
+        '<div class="line1">' +
+          '<b>' + esc(c.full_name || c.surname) + '</b>' +
+          '<span class="badge b-' + (st === 'new' ? 'new' : st === 'declined' ? 'cancelled' : 'paid') + '">' +
+            esc(CONG_STATUS[st] || st) + '</span>' +
+        '</div>' +
+        '<div class="line2">' +
+          (c.phone ? '<a class="tel" href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span class="warn">אין טלפון</span>') +
+          (c.email ? '<a class="tel" href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '<span class="warn">אין מייל</span>') +
+          (c.match_note ? '<span class="dt"><i>הערה</i> ' + esc(c.match_note) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="acts">' +
+        '<button type="button" class="btn btn-g small" data-cact="sent">סומן כנשלח</button>' +
+        '<button type="button" class="btn btn-s small" data-cact="responded">הגיב</button>' +
+        '<button type="button" class="btn btn-x small" data-cact="declined">סירב</button>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function congregants() {
+    var q = 'congregants?select=*&order=surname.asc&limit=100';
+    if (CONGF !== 'all') q += '&campaign_status=eq.' + CONGF;
+    if (CONGQ) q += '&or=(surname.ilike.*' + CONGQ + '*,full_name.ilike.*' + CONGQ + '*)';
+    return db(q).then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        rows = rows.filter(function (c) { return c.full_name || c.phone || c.email; });
+        $('#congregants').innerHTML = rows.map(congHtml).join('');
+        $('#congNote').textContent = rows.length + ' מתפללים מוצגים.';
+      });
+  }
+
+  function setCong(id, status, el) {
+    el.closest('.row').classList.add('busy');
+    return db('congregants?id=eq.' + id, {
+      method: 'PATCH', body: JSON.stringify({ campaign_status: status }),
+      prefer: 'return=representation'
+    }).then(function (r) {
+      return r.text().then(function (t) {
+        var row = el.closest('.row');
+        row.classList.remove('busy');
+        if (!r.ok) { row.classList.add('err'); return; }
+        var x = null;
+        try { x = JSON.parse(t)[0]; } catch (e) { /* ריק */ }
+        if (x) row.outerHTML = congHtml(x);
+      });
+    });
+  }
+
   function boot() {
     $('#gate').hidden = true;
     $('#panel').hidden = false;
@@ -371,9 +427,18 @@
           f[1] + '</button>';
       }).join('');
 
+    $('#congFilters').innerHTML =
+      [['all', 'הכול'], ['new', 'טרם נשלח'], ['sent', 'נשלח'], ['responded', 'הגיב']]
+      .map(function (f) {
+        return '<button type="button" class="chip' + (f[0] === CONGF ? ' on' : '') +
+          '" data-cf="' + f[0] + '" aria-pressed="' + (f[0] === CONGF) + '">' +
+          f[1] + '</button>';
+      }).join('');
+
     stats();
     load(true);
     donations();
+    congregants();
     news();
   }
 
@@ -459,6 +524,31 @@
       c.setAttribute('aria-pressed', String(on));
     });
     donations();
+  });
+
+  $('#congregants').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-cact]');
+    if (!b) return;
+    setCong(b.closest('.row').dataset.id, b.dataset.cact, b);
+  });
+
+  $('#congFilters').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    CONGF = b.dataset.cf;
+    [].forEach.call(this.children, function (c) {
+      var on = c === b;
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-pressed', String(on));
+    });
+    congregants();
+  });
+
+  var cqt = null;
+  $('#congQ').addEventListener('input', function () {
+    var v = this.value.trim();
+    clearTimeout(cqt);
+    cqt = setTimeout(function () { CONGQ = v; congregants(); }, 300);
   });
 
   $('#newsFilters').addEventListener('click', function (e) {
