@@ -354,9 +354,23 @@
       '<td><span class="badge b-' + (st === 'new' ? 'new' : st === 'declined' ? 'cancelled' : 'paid') + '">' +
         esc(CONG_STATUS[st] || st) + '</span></td>' +
       '<td class="acts">' +
+        '<button type="button" class="btn btn-s small" data-cact="edit" title="עריכה">✎</button>' +
         '<button type="button" class="btn btn-g small" data-cact="sent" title="סומן כנשלח">נשלח</button>' +
         '<button type="button" class="btn btn-s small" data-cact="responded" title="הגיב">הגיב</button>' +
         '<button type="button" class="btn btn-x small" data-cact="declined" title="סירב">סירב</button>' +
+      '</td>' +
+    '</tr>';
+  }
+
+  function congEditHtml(c) {
+    return '<tr data-id="' + c.id + '" class="editing">' +
+      '<td><input class="ce-name" value="' + esc(c.full_name || c.surname) + '"></td>' +
+      '<td><input class="ce-phone" value="' + esc(c.phone || '') + '"></td>' +
+      '<td><input class="ce-email" value="' + esc(c.email || '') + '"></td>' +
+      '<td><input class="ce-note" value="' + esc(c.match_note || '') + '"></td>' +
+      '<td colspan="2" class="acts">' +
+        '<button type="button" class="btn btn-g small" data-cact="save">שמירה</button>' +
+        '<button type="button" class="btn btn-s small" data-cact="cancel-edit">ביטול</button>' +
       '</td>' +
     '</tr>';
   }
@@ -593,7 +607,46 @@
   $('#congregants').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-cact]');
     if (!b) return;
-    setCong(b.closest('.row').dataset.id, b.dataset.cact, b);
+    var row = b.closest('tr');
+    var id = row.dataset.id;
+    var act = b.dataset.cact;
+
+    if (act === 'edit') {
+      var c = CONG_CACHE.filter(function (x) { return String(x.id) === id; })[0];
+      if (c) row.outerHTML = congEditHtml(c);
+      return;
+    }
+    if (act === 'cancel-edit') {
+      var orig = CONG_CACHE.filter(function (x) { return String(x.id) === id; })[0];
+      if (orig) row.outerHTML = congHtml(orig);
+      return;
+    }
+    if (act === 'save') {
+      var patch = {
+        full_name: row.querySelector('.ce-name').value.trim(),
+        phone: row.querySelector('.ce-phone').value.trim() || null,
+        email: row.querySelector('.ce-email').value.trim() || null,
+        match_note: row.querySelector('.ce-note').value.trim() || null
+      };
+      row.style.opacity = '.5';
+      db('congregants?id=eq.' + id, {
+        method: 'PATCH', body: JSON.stringify(patch), prefer: 'return=representation'
+      }).then(function (r) {
+        return r.text().then(function (t) {
+          row.style.opacity = '';
+          if (!r.ok) { row.style.background = '#FBE9E9'; return; }
+          var x = null;
+          try { x = JSON.parse(t)[0]; } catch (er) { /* ריק */ }
+          if (x) {
+            var idx = CONG_CACHE.findIndex(function (y) { return y.id === x.id; });
+            if (idx >= 0) CONG_CACHE[idx] = x;
+            row.outerHTML = congHtml(x);
+          }
+        });
+      });
+      return;
+    }
+    setCong(id, act, b);
   });
 
   $('#congFilters').addEventListener('click', function (e) {

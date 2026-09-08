@@ -147,6 +147,11 @@
 .tbl td.acts { display: flex; gap: 5px; flex-wrap: nowrap; }
 .tbl td.acts .btn { padding: 4px 8px; font-size: 12px; }
 .tbl a.tel { display: block; font-family: 'Num', 'Asst', sans-serif; font-size: 13px; color: var(--muted); }
+.tbl tr.editing { background: var(--cream); }
+.tbl tr.editing input {
+  font: inherit; font-size: 13.5px; padding: 5px 8px; width: 100%; min-width: 90px;
+  border: 1.5px solid var(--gold-lt); border-radius: 7px; background: #fff;
+}
 
 @media (max-width: 560px) {
   .row .acts { width: 100%; }
