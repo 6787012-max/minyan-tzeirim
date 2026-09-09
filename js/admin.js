@@ -494,7 +494,7 @@
   var PANEL_KEY = 'mt-admin-panel';
 
   function showPanel(id) {
-    [].forEach.call(document.querySelectorAll('[data-panel]'), function (s) {
+    [].forEach.call(document.querySelectorAll('section[data-panel]'), function (s) {
       s.hidden = s.id !== id;
     });
     [].forEach.call($('#sideNav').children, function (b) {
