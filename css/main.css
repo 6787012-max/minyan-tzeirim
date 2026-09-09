@@ -352,28 +352,32 @@ footer a:hover{text-decoration:underline}
   .sb-side .num{font-size:42px}
 }
 
-/* ── רצועת חדשות — קדמת האתר, אבל צנועה: קרם על קרם, בלי צעקה ──
-   בכוונה לא חוזרת על הנייבי/זהב הבולט של באנר הש״ס — שני "הכי חשוב"
-   באותו עמוד מבטלים זה את זה. */
-.news-strip{background:var(--cream-2);border-bottom:1px solid var(--line);
-  opacity:0;transform:translateY(-8px);
+/* ── פאנל חדשות — פאנל ראשוני, קרוסלה מתחלפת אוטומטית ──
+   כרטיס נייבי מלא, מיד אחרי ה-hero. הזהב משמש כתבלין (נקודה, קו, דוטים) —
+   לא צובע את כל הכרטיס, כדי לא להתחרות בבאנר הש״ס שמתחתיו. */
+.news-panel{background:var(--navy);opacity:0;transform:translateY(-8px);
   transition:opacity .5s cubic-bezier(.22,.7,.25,1),transform .5s cubic-bezier(.22,.7,.25,1)}
-.news-strip.show{opacity:1;transform:none}
-.news-strip .wrap{display:flex;align-items:center;gap:22px;padding-block:16px;flex-wrap:wrap}
-.ns-k{flex:0 0 auto;font-weight:700;font-size:13px;color:var(--gold-dk,var(--gold));
-  letter-spacing:1.6px;border-inline-end:1px solid var(--line);padding-inline-end:18px}
-.ns-items{flex:1 1 320px;min-width:0;display:flex;gap:26px;overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);
-  mask-image:linear-gradient(90deg,#000 92%,transparent)}
-.ns-item{flex:0 0 auto;font-size:15px;color:var(--ink,#242424);white-space:nowrap;
-  display:flex;align-items:center;gap:8px}
-.ns-item::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold)}
-.ns-more{flex:0 0 auto;font-size:14px;font-weight:600;color:var(--navy);text-decoration:none;
-  white-space:nowrap}
-.ns-more:hover{text-decoration:underline}
+.news-panel.show{opacity:1;transform:none}
+.news-panel .wrap{padding-block:22px}
+.np-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.np-k{font-weight:700;font-size:13px;color:var(--gold-lt,var(--gold));letter-spacing:1.8px}
+.np-more{font-size:13.5px;font-weight:600;color:#fff;opacity:.75;text-decoration:none;white-space:nowrap}
+.np-more:hover{opacity:1;text-decoration:underline}
+.np-stage{position:relative;min-height:64px}
+.np-item{position:absolute;inset:0;display:flex;align-items:center;gap:12px;
+  opacity:0;transform:translateY(6px);pointer-events:none;will-change:opacity;
+  transition:opacity .55s cubic-bezier(.22,.7,.25,1),transform .55s cubic-bezier(.22,.7,.25,1)}
+.np-item.on{opacity:1;transform:none;pointer-events:auto;z-index:1}
+.np-item::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.np-item b{font-size:17px;font-weight:700;color:#fff;line-height:1.4}
+.np-item span{font-size:14px;color:#D6D2C8;line-height:1.5}
+.np-dots{display:flex;gap:7px;margin-top:16px}
+.np-dots b{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);
+  cursor:pointer;transition:background .25s,transform .25s;border:0;padding:0}
+.np-dots b.on{background:var(--gold);transform:scale(1.3)}
 @media(max-width:700px){
-  .ns-k{border-inline-end:0;padding-inline-end:0;flex-basis:100%}
-  .ns-items{-webkit-mask-image:none;mask-image:none;flex-wrap:wrap;gap:10px 20px}
+  .np-item b{font-size:15.5px}
+  .np-item span{display:none}
 }
 
 /* ── תנועה ─────────────────────────────────────────────────────

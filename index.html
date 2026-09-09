@@ -19,7 +19,7 @@
 <link rel="canonical" href="https://minyan.mokad.co.il/">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/assistant-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/main.css?v=21">
+<link rel="stylesheet" href="css/main.css?v=23">
 </head>
 <body>
 
@@ -63,6 +63,18 @@
     </div>
   </div>
 
+  <!-- חדשות הקהילה — פאנל ראשוני, קרוסלה מתחלפת. מוצג רק אם יש הודעה מאושרת. -->
+  <section class="news-panel" id="newsStrip" hidden>
+    <div class="wrap">
+      <div class="np-head">
+        <span class="np-k">לוח הקהילה</span>
+        <a class="np-more" href="news.html">כל החדשות ←</a>
+      </div>
+      <div class="np-stage" id="newsStripItems"></div>
+      <div class="np-dots" id="newsStripDots"></div>
+    </div>
+  </section>
+
   <!-- פס היום -->
   <div class="today">
     <div class="wrap" id="todayStrip">
@@ -87,15 +99,6 @@
       </div>
     </div>
   </a>
-
-  <!-- חדשות הקהילה — קצה, לא צועק. מוצג רק אם יש הודעה מאושרת. -->
-  <section class="news-strip" id="newsStrip" hidden>
-    <div class="wrap">
-      <span class="ns-k">לוח הקהילה</span>
-      <div class="ns-items" id="newsStripItems"></div>
-      <a class="ns-more" href="news.html">כל החדשות ←</a>
-    </div>
-  </section>
 
   <!-- מקומות לימים הנוראים -->
   <section id="seats" hidden>
@@ -287,6 +290,6 @@
 <script src="js/forms.js?v=20"></script>
 <script src="js/luach.js?v=20"></script>
 <script src="js/motion.js?v=20"></script>
-<script src="js/app.js?v=21"></script>
+<script src="js/app.js?v=23"></script>
 </body>
 </html>

@@ -445,6 +445,25 @@ body.alt .slogan { font-family:'Drug',serif; }
 .tracks:has(.trk:nth-child(2):last-child) .trk { padding:5mm 3mm 5.6mm; }
 .tracks:has(.trk:nth-child(2):last-child) .amt { font-size:2.3em; }
 .tracks:has(.trk:nth-child(2):last-child) b { font-size:1.42em; }
+
+/* לוח זמנים עם 4 בלוקים מלאים (ראש השנה) — התוכן הארוך ביותר
+   מבין כל סוגי המודעה, וה"מילוי העמוד" הכללי שמעליו הגדיל את
+   ה-z-* עד שהבלוק הרביעי גלש מתחת ל-297mm וממש מתחת ל-.bot
+   שמקובע absolute. נמדד בפועל: השורה האחרונה (מנחה/שקיעה)
+   נבלעה מאחורי «גוט שבת». הקטנה ממוקדת רק למקרה של 4 בלוקים,
+   כדי שלא לגעת בגרסת זמנים קצרה יותר. */
+.z-grid:has(.zb:nth-child(4)) { gap:2.4mm; }
+.z-grid:has(.zb:nth-child(4)) .zb-h { font-size:0.98em; padding:1.5mm 2.2mm 1.2mm; }
+.z-grid:has(.zb:nth-child(4)) .zb-h span { font-size:0.76em; margin-top:.4mm; }
+.z-grid:has(.zb:nth-child(4)) .z-row { padding:.85mm 2.6mm; font-size:0.86em; }
+.z-grid:has(.zb:nth-child(4)) .z-v { font-size:0.98em; }
+.z-grid:has(.zb:nth-child(4)) .z-v.big { font-size:1.08em; }
+.z-grid:has(.zb:nth-child(4)) .z-nt { font-size:0.78em; max-width:27mm; }
+.z-grid:has(.zb:nth-child(4)) .z-warn { font-size:0.80em; padding:1mm 2mm; }
+.mid:has(.z-grid .zb:nth-child(4)) .zb.tf { margin-top:1.6mm; }
+.mid:has(.z-grid .zb:nth-child(4)) .zb.tf .z-row { padding:.7mm 2.6mm; font-size:0.80em; }
+.mid:has(.z-grid .zb:nth-child(4)) .zb.tf .zb-h { font-size:0.98em; padding:1.5mm 2.2mm 1.2mm; }
+.mid:has(.z-grid .zb:nth-child(4)) .foot-note { margin-top:1.6mm; font-size:0.70em; }
 </style>
 </head>
 <body>

@@ -615,20 +615,25 @@
   }
 })();
 
-/* רצועת "לוח הקהילה" — 3 החדשות המאושרות האחרונות. נשארת מוסתרת
- * אם אין אף הודעה מאושרת, כדי שלא יופיע קטע ריק. אותו news_public
- * כמו news.js — אין דרך להגיע דרך זה למה שלא אושר. */
+/* פאנל "לוח הקהילה" — קרוסלה מתחלפת אוטומטית מ-4 החדשות המאושרות
+ * האחרונות. נשארת מוסתרת אם אין אף הודעה מאושרת, כדי שלא יופיע קטע
+ * ריק. אותו news_public כמו news.js — אין דרך להגיע דרך זה למה
+ * שלא אושר. */
 (function () {
   'use strict';
-  var strip = document.getElementById('newsStrip');
-  if (!strip) return;
+  var panel = document.getElementById('newsStrip');
+  if (!panel) return;
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function snippet(s, max) {
+    s = String(s == null ? '' : s).trim().replace(/\s+/g, ' ');
+    return s.length > max ? s.slice(0, max).trim() + '…' : s;
   }
   fetch('data/site.json', { cache: 'no-cache' })
     .then(function (r) { return r.json(); })
     .then(function (c) {
-      return fetch(c.api.url + '/rest/v1/news_public?select=title,msg_date,created_at&order=msg_date.desc&limit=3', {
+      return fetch(c.api.url + '/rest/v1/news_public?select=title,body,msg_date,created_at&order=msg_date.desc&limit=4', {
         headers: { 'apikey': c.api.anon, 'Authorization': 'Bearer ' + c.api.anon, 'Accept-Profile': 'minyan' }
       });
     })
@@ -636,11 +641,42 @@
     .then(function (rows) {
       rows = (rows || []).filter(function (n) { return n.title; });
       if (!rows.length) return;
-      document.getElementById('newsStripItems').innerHTML = rows.map(function (n) {
-        return '<span class="ns-item">' + esc(n.title) + '</span>';
+
+      var stage = document.getElementById('newsStripItems');
+      var dotsEl = document.getElementById('newsStripDots');
+      stage.innerHTML = rows.map(function (n, i) {
+        return '<div class="np-item' + (i === 0 ? ' on' : '') + '">' +
+          '<b>' + esc(n.title) + '</b>' +
+          (n.body ? '<span> — ' + esc(snippet(n.body, 90)) + '</span>' : '') +
+          '</div>';
       }).join('');
-      strip.hidden = false;
-      requestAnimationFrame(function () { requestAnimationFrame(function () { strip.classList.add('show'); }); });
+      dotsEl.innerHTML = rows.map(function (_, i) {
+        return '<button type="button" class="' + (i === 0 ? 'on' : '') + '" aria-label="פריט ' + (i + 1) + '"></button>';
+      }).join('');
+      dotsEl.hidden = rows.length < 2;
+
+      var items = stage.querySelectorAll('.np-item');
+      var dots = dotsEl.querySelectorAll('b, button');
+      var cur = 0, timer = null;
+      function go(i) {
+        items[cur].classList.remove('on');
+        dots[cur].classList.remove('on');
+        cur = i;
+        items[cur].classList.add('on');
+        dots[cur].classList.add('on');
+      }
+      function next() { go((cur + 1) % items.length); }
+      function restart() {
+        if (timer) clearInterval(timer);
+        if (items.length > 1) timer = setInterval(next, 5500);
+      }
+      Array.prototype.forEach.call(dots, function (d, i) {
+        d.addEventListener('click', function () { go(i); restart(); });
+      });
+      restart();
+
+      panel.hidden = false;
+      requestAnimationFrame(function () { requestAnimationFrame(function () { panel.classList.add('show'); }); });
     })
-    .catch(function () { /* בלי רשת — הרצועה פשוט נשארת מוסתרת */ });
+    .catch(function () { /* בלי רשת — הפאנל פשוט נשאר מוסתר */ });
 })();

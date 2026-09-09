@@ -258,7 +258,7 @@ def render(name, mid_html, slogan=None, colog=None, alt_font=False):
     html = tpl.replace('<div class="mid" id="mid"></div>',
                        '<div class="mid" id="mid">%s</div>' % mid_html)
     if slogan:
-        html = html.replace('id="slogan">שנה טובה ומבורכת<',
+        html = html.replace('id="slogan">גוט שבת<',
                             'id="slogan">%s<' % esc(slogan))
     if colog:
         # colog יכול להיות שם אחד או רשימה — שניים מוצגים זה לצד זה
