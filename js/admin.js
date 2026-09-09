@@ -481,7 +481,37 @@
     donations();
     congregants();
     news();
+
+    var startPanel = 'statsSec';
+    try {
+      var saved = sessionStorage.getItem(PANEL_KEY);
+      if (saved && document.getElementById(saved)) startPanel = saved;
+    } catch (e) { /* מצב פרטי */ }
+    showPanel(startPanel);
   }
+
+  /* ── מעבר בין פאנלים (סיידבר) ──────────────────────────────── */
+  var PANEL_KEY = 'mt-admin-panel';
+
+  function showPanel(id) {
+    [].forEach.call(document.querySelectorAll('[data-panel]'), function (s) {
+      s.hidden = s.id !== id;
+    });
+    [].forEach.call($('#sideNav').children, function (b) {
+      var on = b.dataset.panel === id;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-current', on ? 'page' : 'false');
+    });
+    try { sessionStorage.setItem(PANEL_KEY, id); } catch (e) { /* מצב פרטי */ }
+    $('.shell-main').scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  $('#sideNav').addEventListener('click', function (e) {
+    var b = e.target.closest('.side-link');
+    if (!b) return;
+    showPanel(b.dataset.panel);
+  });
 
   /* ── אירועים ────────────────────────────────────────────────── */
 

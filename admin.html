@@ -11,7 +11,7 @@
 <link rel="icon" href="img/favicon.ico" sizes="any">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css?v=20">
-<link rel="stylesheet" href="css/admin.css?v=23">
+<link rel="stylesheet" href="css/admin.css?v=24">
 </head>
 <body class="adm">
 
@@ -34,33 +34,32 @@
 </div>
 
 <!-- ══ הפאנל ══ -->
-<div id="panel" hidden>
+<div id="panel" hidden class="shell">
 
-  <header class="top">
-    <div class="wrap">
-      <a class="brand" href="./">
-        <img src="img/mark@64.png" alt="" width="30" height="30">
-        <b>ניהול<span class="dot"> · </span><span class="pl">מניין הצעירים</span></b>
-      </a>
-      <nav class="nav">
-        <a href="./">לאתר</a>
-        <span class="who" id="who"></span>
-        <button type="button" class="btn btn-s small" id="logout">יציאה</button>
-      </nav>
+  <nav class="sidebar">
+    <a class="brand" href="./">
+      <img src="img/mark@64.png" alt="" width="30" height="30">
+      <b>ניהול<span class="dot"> · </span><span class="pl">מניין הצעירים</span></b>
+    </a>
+    <div class="side-nav" id="sideNav">
+      <button type="button" class="side-link" data-panel="statsSec"><i>◇</i>דיווחים</button>
+      <button type="button" class="side-link" data-panel="rowsSec"><i>◈</i>רישומים · ש״ס</button>
+      <button type="button" class="side-link" data-panel="donSec"><i>❋</i>תרומות</button>
+      <button type="button" class="side-link" data-panel="congSec"><i>◎</i>מתפללים</button>
+      <button type="button" class="side-link" data-panel="newsSec"><i>▤</i>חדשות</button>
     </div>
-    <div class="wrap quicknav">
-      <a href="#statsSec">דיווחים</a>
-      <a href="#rowsSec">רישומים · ש״ס</a>
-      <a href="#donSec">תרומות</a>
-      <a href="#congSec">מתפללים</a>
-      <a href="#newsSec">חדשות</a>
+    <div class="side-foot">
+      <span class="who" id="who"></span>
+      <a href="./">← לאתר</a>
+      <button type="button" class="btn btn-s small wide" id="logout">יציאה</button>
     </div>
-  </header>
+  </nav>
 
+  <div class="shell-main">
   <main class="wrap adm-main">
 
     <!-- דיווחים -->
-    <section class="adm-sec" id="statsSec">
+    <section class="adm-sec" id="statsSec" data-panel>
       <div class="head">
         <div class="eyebrow">מבט על</div>
         <h2>דיווחים</h2>
@@ -69,7 +68,7 @@
     </section>
 
     <!-- רישומים -->
-    <section class="adm-sec" id="rowsSec">
+    <section class="adm-sec" id="rowsSec" data-panel hidden>
       <div class="head">
         <div class="eyebrow">אישורים</div>
         <h2>רישומים</h2>
@@ -87,7 +86,7 @@
     </section>
 
     <!-- תרומות -->
-    <section class="adm-sec" id="donSec">
+    <section class="adm-sec" id="donSec" data-panel hidden>
       <div class="head">
         <div class="eyebrow">נדרים פלוס · מוסד 8000707</div>
         <h2>תרומות</h2>
@@ -99,7 +98,7 @@
     </section>
 
     <!-- מתפללים -->
-    <section class="adm-sec" id="congSec">
+    <section class="adm-sec" id="congSec" data-panel hidden>
       <div class="head">
         <div class="eyebrow">CRM · קמפיין ראש השנה</div>
         <h2>מתפללים</h2>
@@ -132,7 +131,7 @@
     </section>
 
     <!-- חדשות -->
-    <section class="adm-sec" id="newsSec">
+    <section class="adm-sec" id="newsSec" data-panel hidden>
       <div class="head">
         <div class="eyebrow">ישר ולעניין</div>
         <h2>חדשות היישוב</h2>
@@ -148,13 +147,13 @@
   <footer>
     <div class="wrap">
       <div class="foot-bot" style="border:0;padding-top:0">
-        <span><a href="./">← לאתר</a></span>
         <span id="build"></span>
       </div>
     </div>
   </footer>
+  </div>
 </div>
 
-<script src="js/admin.js?v=26"></script>
+<script src="js/admin.js?v=27"></script>
 </body>
 </html>
