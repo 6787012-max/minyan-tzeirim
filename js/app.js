@@ -536,6 +536,24 @@
 
   /* ── אודות ותחתית ─────────────────────────────────────────────── */
 
+  /* ── הודעת גבאים ──────────────────────────────────────────────── */
+
+  function renderAnnouncement() {
+    var a = CFG.announcement;
+    var box = $('gabai');
+    if (!box || !a || !a.show) return;
+    $('gabaiTitle').textContent = a.title || '';
+    $('gabaiGrid').innerHTML = (a.items || []).map(function (it) {
+      return '<div class="gabai-row"><span class="lbl">' + esc(it.label) +
+        '</span><span class="tm">' + esc(it.time) + '</span></div>';
+    }).join('');
+    var noteEl = $('gabaiNoteText');
+    if (a.note) { noteEl.textContent = a.note; noteEl.hidden = false; }
+    var signEl = $('gabaiSignoff');
+    if (a.signoff) { signEl.textContent = a.signoff; signEl.hidden = false; }
+    box.hidden = false;
+  }
+
   function renderAbout() {
     var box = $('aboutText');
     box.innerHTML = '<div class="head" style="margin-bottom:18px">' +
@@ -583,6 +601,7 @@
     renderZmanim(now);
     renderShabbat(now);
     renderGive();
+    renderAnnouncement();
     renderAbout();
     renderFooter();
     renderShasBanner();

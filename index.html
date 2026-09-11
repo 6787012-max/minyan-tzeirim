@@ -19,7 +19,7 @@
 <link rel="canonical" href="https://minyan.mokad.co.il/">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/assistant-regular.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/main.css?v=23">
+<link rel="stylesheet" href="css/main.css?v=24">
 </head>
 <body>
 
@@ -62,6 +62,21 @@
       </div>
     </div>
   </div>
+
+  <!-- הודעת גבאים — קבועה, לא קרוסלה. מוצגת רק אם announcement.show ב-config.json. -->
+  <section class="gabai" id="gabai" hidden>
+    <div class="wrap">
+      <div class="gabai-in">
+        <div class="head">
+          <div class="eyebrow">הודעה מהגבאים</div>
+          <h2 id="gabaiTitle"></h2>
+        </div>
+        <div class="gabai-grid" id="gabaiGrid"></div>
+        <p class="gabai-note" id="gabaiNoteText" hidden></p>
+        <p class="gabai-signoff" id="gabaiSignoff" hidden></p>
+      </div>
+    </div>
+  </section>
 
   <!-- חדשות הקהילה — פאנל ראשוני, קרוסלה מתחלפת. מוצג רק אם יש הודעה מאושרת. -->
   <section class="news-panel" id="newsStrip" hidden>
@@ -290,6 +305,6 @@
 <script src="js/forms.js?v=20"></script>
 <script src="js/luach.js?v=20"></script>
 <script src="js/motion.js?v=20"></script>
-<script src="js/app.js?v=23"></script>
+<script src="js/app.js?v=24"></script>
 </body>
 </html>

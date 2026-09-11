@@ -355,6 +355,25 @@ footer a:hover{text-decoration:underline}
 /* ── פאנל חדשות — פאנל ראשוני, קרוסלה מתחלפת אוטומטית ──
    כרטיס נייבי מלא, מיד אחרי ה-hero. הזהב משמש כתבלין (נקודה, קו, דוטים) —
    לא צובע את כל הכרטיס, כדי לא להתחרות בבאנר הש״ס שמתחתיו. */
+/* ── הודעת גבאים ──────────────────────────────────────────────── */
+.gabai{padding:0 0 clamp(28px,3.4vw,44px)}
+.gabai-in{background:var(--cream-2);border:1px solid var(--line);
+  border-inline-start:5px solid var(--gold);border-radius:var(--r);
+  padding:clamp(24px,3vw,34px) clamp(22px,3.4vw,40px);box-shadow:var(--shadow)}
+.gabai-in .head{margin-bottom:18px}
+.gabai-in .head h2{font-size:clamp(21px,2.6vw,28px);letter-spacing:-.2px}
+.gabai-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px clamp(20px,3vw,36px);padding:18px 0;border-block:1px solid var(--line)}
+.gabai-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.gabai-row .lbl{font-size:16px;color:var(--ink)}
+.gabai-row .tm{font-family:'Num','Asst',sans-serif;font-weight:800;font-size:20px;
+  color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.gabai-note{margin:16px 0 0;font-size:15px;color:var(--muted);line-height:1.6}
+.gabai-signoff{margin:6px 0 0;font-family:'Drug',serif;font-size:19px;color:var(--gold)}
+@media (max-width:560px){
+  .gabai-row .lbl{font-size:15px}
+}
+
 .news-panel{background:var(--navy);opacity:0;transform:translateY(-8px);
   transition:opacity .5s cubic-bezier(.22,.7,.25,1),transform .5s cubic-bezier(.22,.7,.25,1)}
 .news-panel.show{opacity:1;transform:none}
