@@ -551,6 +551,8 @@
     if (a.note) { noteEl.textContent = a.note; noteEl.hidden = false; }
     var signEl = $('gabaiSignoff');
     if (a.signoff) { signEl.textContent = a.signoff; signEl.hidden = false; }
+    var updEl = $('gabaiUpdated');
+    if (a.updated) { updEl.textContent = a.updated; updEl.hidden = false; }
     box.hidden = false;
   }
 

@@ -370,6 +370,7 @@ footer a:hover{text-decoration:underline}
   color:var(--navy);font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
 .gabai-note{margin:16px 0 0;font-size:15px;color:var(--muted);line-height:1.6}
 .gabai-signoff{margin:6px 0 0;font-family:'Drug',serif;font-size:19px;color:var(--gold)}
+.gabai-updated{margin:14px 0 0;font-size:12.5px;color:var(--muted);opacity:.75}
 @media (max-width:560px){
   .gabai-row .lbl{font-size:15px}
 }
