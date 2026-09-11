@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""news_collect.py — אוסף הודעות מקבוצת «ישר ולעניין» לתור האישור.
+"""news_collect.py — אוסף הודעות מקבוצות «ישר ולעניין» ו«הצעירים מעלה עמוס»
+(ר' GROUPS למעלה) לתור האישור.
 
 רץ כל שעה כמשימה מתוזמנת. **לא מפרסם כלום** — כל פריט נכנס כ-'new'
-וממתין לאישור באזור הניהול. הקבוצה מלאה בטלפונים פרטיים, בבקשות
+וממתין לאישור באזור הניהול. הקבוצות מלאות בטלפונים פרטיים, בבקשות
 אישיות ובענייני בריאות, ופרסום אוטומטי לאתר ציבורי היה מדליף אותם.
 
 הכל דרך IMAP עם App Password שכבר קיים במערכת של יוסף. אין כאן
@@ -33,7 +34,10 @@ ROOT = os.path.dirname(HERE)
 SECRETS = r"C:\projects\personal-secretary\secrets.json"
 LOG = os.path.join(ROOT, "_news.log")
 
-GROUP = "yasharvelainyanma@googlegroups.com"
+GROUPS = [
+    "yasharvelainyanma@googlegroups.com",     # ישר ולעניין — יישוב מעלה עמוס
+    "hatzairimmaalaamos@googlegroups.com",    # הצעירים מעלה עמוס — קבוצת המניין עצמו
+]
 CTX = ssl.create_default_context()
 CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
@@ -237,6 +241,14 @@ TTL_HOURS = {"טרמפים": 20, "בקשות עזרה": 96}
 TTL_DEFAULT = 24 * 14
 
 
+def _or_clause(field, values):
+    """(TO "a") / OR (TO "a") (TO "b") / OR (TO "a") (OR (TO "b") (TO "c")) ...
+    IMAP OR לוקח בדיוק שני איברים — לרשימה ארוכה יותר מקננים רקורסיבית."""
+    if len(values) == 1:
+        return '(%s "%s")' % (field, values[0])
+    return 'OR (%s "%s") %s' % (field, values[0], _or_clause(field, values[1:]))
+
+
 def fetch(hours):
     user, pw = account()
     m = imaplib.IMAP4_SSL("imap.gmail.com", 993, ssl_context=CTX)
@@ -244,7 +256,7 @@ def fetch(hours):
     m.select('"[Gmail]/All Mail"', readonly=True)
 
     since = (dt.datetime.now() - dt.timedelta(hours=hours + 24)).strftime("%d-%b-%Y")
-    typ, data = m.search(None, '(SINCE "%s" TO "%s")' % (since, GROUP))
+    typ, data = m.search(None, '(SINCE "%s" %s)' % (since, _or_clause("TO", GROUPS)))
     ids = data[0].split() if data and data[0] else []
     log("IMAP: %d הודעות מאז %s" % (len(ids), since))
 
