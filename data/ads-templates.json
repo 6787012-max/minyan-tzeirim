@@ -1,0 +1,67 @@
+{
+  "_": "תבניות מוכנות לעורך המודעות. כל תבנית מכילה canvas + רשימת elements. יחידות: פיקסלים ביחס לגודל הקנבס.",
+  "templates": [
+    {
+      "id": "blank",
+      "name": "דף ריק · A4 לאורך",
+      "canvas": { "w": 1240, "h": 1754, "bg": "#F6F1E5" },
+      "elements": []
+    },
+    {
+      "id": "donation",
+      "name": "מודעת התרמה · A4",
+      "canvas": { "w": 1240, "h": 1754, "bg": "#F6F1E5" },
+      "elements": [
+        { "type": "text", "text": "בס״ד", "x": 1140, "y": 70, "w": 90, "h": 40, "font": "Frank, serif", "size": 26, "weight": 700, "color": "#12233F", "align": "right", "line": 1.2 },
+        { "type": "image", "src": "img/logo-h.svg", "x": 420, "y": 130, "w": 400, "h": 200 },
+        { "type": "text", "text": "מנין הצעירים", "x": 120, "y": 360, "w": 1000, "h": 100, "font": "Frank, serif", "size": 76, "weight": 900, "color": "#12233F", "align": "center", "line": 1.15 },
+        { "type": "text", "text": "מעלה עמוס", "x": 120, "y": 470, "w": 1000, "h": 80, "font": "Drug, serif", "size": 54, "weight": 700, "color": "#B08D3E", "align": "center", "line": 1.15 },
+        { "type": "text", "text": "אנא הצטרפו אלינו בעמל הקודש\nלהעמדת מקום קבע לצעירי היישוב", "x": 120, "y": 620, "w": 1000, "h": 180, "font": "Asst, sans-serif", "size": 34, "weight": 600, "color": "#12233F", "align": "center", "line": 1.5 },
+        { "type": "text", "text": "לתרומות · nedar.im/8000707", "x": 120, "y": 1400, "w": 1000, "h": 60, "font": "Asst, sans-serif", "size": 30, "weight": 700, "color": "#B08D3E", "align": "center", "line": 1.2 },
+        { "type": "text", "text": "מוסד 8000707 · תחת עמותת ״אי חסד״", "x": 120, "y": 1470, "w": 1000, "h": 50, "font": "Asst, sans-serif", "size": 20, "weight": 400, "color": "#7a7160", "align": "center", "line": 1.2 }
+      ]
+    },
+    {
+      "id": "announcement",
+      "name": "הודעה קצרה · A4",
+      "canvas": { "w": 1240, "h": 1754, "bg": "#F6F1E5" },
+      "elements": [
+        { "type": "text", "text": "בס״ד", "x": 1140, "y": 70, "w": 90, "h": 40, "font": "Frank, serif", "size": 26, "weight": 700, "color": "#12233F", "align": "right", "line": 1.2 },
+        { "type": "image", "src": "img/mark@64.png", "x": 552, "y": 130, "w": 136, "h": 136 },
+        { "type": "text", "text": "הודעה חשובה", "x": 120, "y": 320, "w": 1000, "h": 110, "font": "Frank, serif", "size": 84, "weight": 900, "color": "#12233F", "align": "center", "line": 1.15 },
+        { "type": "text", "text": "כאן יבוא הטקסט המרכזי של ההודעה.\nלערוך בלחיצה כפולה על כל פסקה.", "x": 120, "y": 550, "w": 1000, "h": 700, "font": "Asst, sans-serif", "size": 36, "weight": 600, "color": "#12233F", "align": "center", "line": 1.6 },
+        { "type": "text", "text": "מנין הצעירים · מעלה עמוס", "x": 120, "y": 1600, "w": 1000, "h": 50, "font": "Drug, serif", "size": 26, "weight": 700, "color": "#B08D3E", "align": "center", "line": 1.2 }
+      ]
+    },
+    {
+      "id": "shabbat",
+      "name": "לוח זמני שבת · A5",
+      "canvas": { "w": 874, "h": 1240, "bg": "#F6F1E5" },
+      "elements": [
+        { "type": "text", "text": "בס״ד", "x": 780, "y": 40, "w": 80, "h": 30, "font": "Frank, serif", "size": 20, "weight": 700, "color": "#12233F", "align": "right", "line": 1.2 },
+        { "type": "text", "text": "זמני שבת", "x": 60, "y": 120, "w": 754, "h": 90, "font": "Frank, serif", "size": 62, "weight": 900, "color": "#12233F", "align": "center", "line": 1.1 },
+        { "type": "text", "text": "פרשת ____", "x": 60, "y": 230, "w": 754, "h": 60, "font": "Drug, serif", "size": 38, "weight": 700, "color": "#B08D3E", "align": "center", "line": 1.2 },
+        { "type": "text", "text": "הדלקת נרות", "x": 60, "y": 360, "w": 754, "h": 55, "font": "Asst, sans-serif", "size": 30, "weight": 700, "color": "#12233F", "align": "center", "line": 1.2 },
+        { "type": "text", "text": "18:32", "x": 60, "y": 415, "w": 754, "h": 80, "font": "Heebo, sans-serif", "size": 60, "weight": 900, "color": "#B08D3E", "align": "center", "line": 1.1 },
+        { "type": "text", "text": "מנחה ערב שבת", "x": 60, "y": 560, "w": 754, "h": 55, "font": "Asst, sans-serif", "size": 30, "weight": 700, "color": "#12233F", "align": "center", "line": 1.2 },
+        { "type": "text", "text": "18:45", "x": 60, "y": 615, "w": 754, "h": 70, "font": "Heebo, sans-serif", "size": 48, "weight": 900, "color": "#12233F", "align": "center", "line": 1.1 },
+        { "type": "text", "text": "שחרית", "x": 60, "y": 750, "w": 754, "h": 55, "font": "Asst, sans-serif", "size": 30, "weight": 700, "color": "#12233F", "align": "center", "line": 1.2 },
+        { "type": "text", "text": "08:15", "x": 60, "y": 805, "w": 754, "h": 70, "font": "Heebo, sans-serif", "size": 48, "weight": 900, "color": "#12233F", "align": "center", "line": 1.1 },
+        { "type": "text", "text": "מנחה · צאת השבת", "x": 60, "y": 940, "w": 754, "h": 55, "font": "Asst, sans-serif", "size": 30, "weight": 700, "color": "#12233F", "align": "center", "line": 1.2 },
+        { "type": "text", "text": "17:50 · 19:35", "x": 60, "y": 995, "w": 754, "h": 70, "font": "Heebo, sans-serif", "size": 44, "weight": 900, "color": "#12233F", "align": "center", "line": 1.1 },
+        { "type": "text", "text": "מנין הצעירים · מעלה עמוס", "x": 60, "y": 1140, "w": 754, "h": 45, "font": "Drug, serif", "size": 22, "weight": 700, "color": "#B08D3E", "align": "center", "line": 1.2 }
+      ]
+    },
+    {
+      "id": "social-square",
+      "name": "ריבוע לוואטסאפ · 1080×1080",
+      "canvas": { "w": 1080, "h": 1080, "bg": "#12233F" },
+      "elements": [
+        { "type": "image", "src": "img/logo-h-white.svg", "x": 240, "y": 100, "w": 600, "h": 260 },
+        { "type": "text", "text": "כותרת המודעה", "x": 60, "y": 430, "w": 960, "h": 130, "font": "Frank, serif", "size": 92, "weight": 900, "color": "#F6F1E5", "align": "center", "line": 1.15 },
+        { "type": "text", "text": "תת-כותרת או תיאור קצר", "x": 60, "y": 580, "w": 960, "h": 90, "font": "Asst, sans-serif", "size": 42, "weight": 600, "color": "#CBA75B", "align": "center", "line": 1.3 },
+        { "type": "text", "text": "פרטים / קישור\nnedar.im/8000707", "x": 60, "y": 800, "w": 960, "h": 180, "font": "Asst, sans-serif", "size": 38, "weight": 600, "color": "#F6F1E5", "align": "center", "line": 1.5 }
+      ]
+    }
+  ]
+}
