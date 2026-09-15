@@ -152,6 +152,12 @@
             <button type="button" class="btn btn-s small" id="aeAddImg">+ תמונה/לוגו</button>
             <label class="btn btn-s small" for="aeUpload" style="cursor:pointer">העלאה…</label>
             <input type="file" id="aeUpload" accept="image/*" hidden>
+            <button type="button" class="btn btn-s small" id="aeAddRect" title="מלבן">▭</button>
+            <button type="button" class="btn btn-s small" id="aeAddCirc" title="עיגול">◯</button>
+            <button type="button" class="btn btn-s small" id="aeAddLine" title="קו">━</button>
+          </div>
+          <div class="ae-group">
+            <label class="ae-lbl"><input type="checkbox" id="aeSnap" checked> סנאפ לגריד</label>
           </div>
           <div class="ae-group">
             <button type="button" class="btn btn-s small" id="aeUndo" title="ביטול (Ctrl+Z)">↶</button>
@@ -273,6 +279,39 @@
                     <button type="button" class="btn btn-s small" id="aeLayerDown">↓</button>
                   </div>
                 </div>
+              </div>
+
+              <div class="ae-fld ae-fld-row">
+                <div>
+                  <label>שקיפות</label>
+                  <input id="aePropOpacity" type="range" min="0.05" max="1" step="0.05" value="1">
+                </div>
+                <div>
+                  <label>הצללה</label>
+                  <select id="aePropShadow">
+                    <option value="0">בלי</option>
+                    <option value="1">כן</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="ae-fld ae-fld-shape" hidden>
+                <label>מילוי צורה</label>
+                <input id="aePropFill" type="color">
+              </div>
+              <div class="ae-fld ae-fld-shape ae-fld-row" hidden>
+                <div>
+                  <label>מסגרת (עובי)</label>
+                  <input id="aePropStrokeW" type="number" min="0" max="40" step="1" value="0">
+                </div>
+                <div>
+                  <label>צבע מסגרת</label>
+                  <input id="aePropStroke" type="color" value="#12233F">
+                </div>
+              </div>
+              <div class="ae-fld ae-fld-shape" hidden>
+                <label>עיגול פינות (px)</label>
+                <input id="aePropRadius" type="number" min="0" max="200" step="1" value="0">
               </div>
 
               <div class="ae-fld ae-fld-row">

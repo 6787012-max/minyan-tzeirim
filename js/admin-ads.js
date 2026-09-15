@@ -21,13 +21,19 @@
     elements: [],
     selectedId: null,
     scale: 1,
+    userZoom: 1,
+    snap: true,
+    grid: 20,
     templates: [],
     history: [],
     hIdx: -1,
-    inited: false
+    inited: false,
+    isTouch: (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
   };
 
   var STORAGE_KEY = 'mt-ads-draft-v1';
+
+  function snap(v) { return state.snap ? Math.round(v / state.grid) * state.grid : Math.round(v); }
 
   /* ── עזרים ─────────────────────────────────────────────────── */
   function newId() { return 'el-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7); }
@@ -139,10 +145,11 @@
     cv.style.height = state.canvas.h + 'px';
     cv.style.background = state.canvas.bg;
 
-    // סקייל אוטומטי כדי שיתאים לחלון (משאיר שוליים 40px)
+    // סקייל אוטומטי כדי שיתאים לחלון (משאיר שוליים 40px), כפול זום משתמש
     var wAvail = wrap.clientWidth - 48;
     var hAvail = Math.max(600, window.innerHeight - 260);
-    var scale = Math.min(wAvail / state.canvas.w, hAvail / state.canvas.h, 1);
+    var fit = Math.min(wAvail / state.canvas.w, hAvail / state.canvas.h, 1);
+    var scale = fit * (state.userZoom || 1);
     state.scale = scale;
     cv.style.transform = 'scale(' + scale + ')';
     // גובה בפועל אחרי scale
@@ -168,6 +175,9 @@
     d.style.height = el.h + 'px';
     if (el.rotation) d.style.transform = 'rotate(' + el.rotation + 'deg)';
 
+    if (el.opacity != null) d.style.opacity = el.opacity;
+    if (el.shadow) d.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,.35))';
+
     if (el.type === 'text') {
       d.style.fontFamily = el.font || 'Asst, sans-serif';
       d.style.fontSize = (el.size || 32) + 'px';
@@ -175,6 +185,8 @@
       d.style.color = el.color || '#12233F';
       d.style.textAlign = el.align || 'right';
       d.style.lineHeight = el.line || 1.3;
+      if (el.italic) d.style.fontStyle = 'italic';
+      if (el.underline) d.style.textDecoration = 'underline';
       var t = document.createElement('div');
       t.className = 'txt';
       t.textContent = el.text || '';
@@ -184,6 +196,15 @@
       img.src = el.src || '';
       img.alt = '';
       d.appendChild(img);
+    } else if (el.type === 'shape') {
+      d.dataset.shape = el.shape || 'rect';
+      d.style.setProperty('--shp-fill', el.fill || '#12233F');
+      d.style.setProperty('--shp-stroke', el.stroke || '#000');
+      d.style.setProperty('--shp-stroke-w', (el.strokeW || 0) + 'px');
+      d.style.setProperty('--shp-radius', (el.radius || 0) + 'px');
+      var s = document.createElement('div');
+      s.className = 'shp';
+      d.appendChild(s);
     }
 
     // ידיות שינוי גודל
@@ -227,12 +248,29 @@
       y: Math.round(state.canvas.h * .3),
       w: Math.round(state.canvas.w * .4),
       h: Math.round(state.canvas.w * .4),
-      src: src || 'img/logo-h.svg', rotation: 0
+      src: src || 'img/logo-h.svg', rotation: 0, opacity: 1
     };
     state.elements.push(el);
     state.selectedId = el.id;
     render(); renderProps(); pushHistory();
     hint('נוספה תמונה.');
+  }
+
+  function addShape(shape) {
+    var el = {
+      id: newId(), type: 'shape', shape: shape || 'rect',
+      x: Math.round(state.canvas.w * .25),
+      y: Math.round(state.canvas.h * .35),
+      w: Math.round(state.canvas.w * .5),
+      h: shape === 'line' ? 8 : Math.round(state.canvas.w * .35),
+      fill: shape === 'line' ? '#00000000' : '#CBA75B',
+      stroke: '#12233F', strokeW: shape === 'line' ? 6 : 0, radius: 12,
+      rotation: 0, opacity: 1
+    };
+    state.elements.push(el);
+    state.selectedId = el.id;
+    render(); renderProps(); pushHistory();
+    hint('נוספה צורה: ' + shape);
   }
 
   function delSelected() {
@@ -269,9 +307,11 @@
     }
     empty.hidden = true; panel.hidden = false;
 
-    // הצג/הסתר שדות טקסט
+    // הצג/הסתר שדות טקסט וצורה
     var isText = el.type === 'text';
+    var isShape = el.type === 'shape';
     $$('.ae-fld-text', panel).forEach(function (f) { f.hidden = !isText; });
+    $$('.ae-fld-shape', panel).forEach(function (f) { f.hidden = !isShape; });
 
     if (isText) {
       $('#aePropText').value = el.text || '';
@@ -282,11 +322,19 @@
       $('#aePropColor').value = el.color || '#12233F';
       $('#aePropLine').value = el.line || 1.3;
     }
+    if (isShape) {
+      $('#aePropFill').value = el.fill || '#12233F';
+      $('#aePropStroke').value = el.stroke || '#12233F';
+      $('#aePropStrokeW').value = el.strokeW || 0;
+      $('#aePropRadius').value = el.radius || 0;
+    }
     $('#aePropX').value = Math.round(el.x);
     $('#aePropY').value = Math.round(el.y);
     $('#aePropW').value = Math.round(el.w);
     $('#aePropH').value = Math.round(el.h);
     $('#aePropRot').value = el.rotation || 0;
+    $('#aePropOpacity').value = (el.opacity != null ? el.opacity : 1);
+    $('#aePropShadow').value = el.shadow ? '1' : '0';
   }
 
   function updateSelected(patch) {
@@ -315,10 +363,34 @@
     saveDraft();
   }
 
-  /* ── אינטראקציה: גרירה + שינוי גודל ═════════════════════════ */
+  /* ── אינטראקציה: גרירה + שינוי גודל + מגע ═════════════════ */
+  function beginTextEdit(elNode) {
+    var id = elNode.dataset.id;
+    var el = state.elements.find(function (x) { return x.id === id; });
+    if (!el || el.type !== 'text') return;
+    var t = elNode.querySelector('.txt');
+    t.contentEditable = 'true';
+    elNode.classList.add('editing');
+    t.focus();
+    var rng = document.createRange(); rng.selectNodeContents(t);
+    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rng);
+    var blur = function () {
+      t.removeEventListener('blur', blur);
+      t.contentEditable = 'false';
+      elNode.classList.remove('editing');
+      el.text = t.textContent;
+      renderProps();
+      pushHistory();
+    };
+    t.addEventListener('blur', blur);
+  }
+
   function initInteraction() {
     var cv = $('#aeCanvas');
+    var wrap = $('#aeCanvasWrap');
     var drag = null;
+    var pinch = null;
+    var pressTimer = null, pressStart = null;
 
     cv.addEventListener('pointerdown', function (e) {
       var elNode = e.target.closest('.ae-el');
@@ -326,6 +398,9 @@
         state.selectedId = null; highlightSelection(); renderProps();
         return;
       }
+      // אם כבר במצב עריכה — לתת לדפדפן להמשיך (סמן טקסט, בחירה)
+      if (elNode.classList.contains('editing')) return;
+
       var id = elNode.dataset.id;
       state.selectedId = id;
       highlightSelection(); renderProps();
@@ -336,10 +411,23 @@
         mode: hnd ? (hnd === 'rot' ? 'rotate' : 'resize') : 'move',
         hnd: hnd,
         startX: e.clientX, startY: e.clientY,
-        origX: el.x, origY: el.y, origW: el.w, origH: el.h, origRot: el.rotation || 0
+        origX: el.x, origY: el.y, origW: el.w, origH: el.h, origRot: el.rotation || 0,
+        moved: false
       };
       elNode.setPointerCapture(e.pointerId);
       e.preventDefault();
+
+      // long-press = כניסה לעריכת טקסט (חלופה נגישה למגע ל-dblclick)
+      if (!hnd && el.type === 'text') {
+        pressStart = { x: e.clientX, y: e.clientY };
+        clearTimeout(pressTimer);
+        pressTimer = setTimeout(function () {
+          if (drag && !drag.moved) {
+            drag = null;
+            beginTextEdit(elNode);
+          }
+        }, 500);
+      }
     });
 
     cv.addEventListener('pointermove', function (e) {
@@ -348,24 +436,32 @@
       var dx = (e.clientX - drag.startX) / state.scale;
       var dy = (e.clientY - drag.startY) / state.scale;
 
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) drag.moved = true;
+
+      var doSnap = e.shiftKey || (state.snap && drag.moved);
+
       if (drag.mode === 'move') {
-        el.x = Math.round(drag.origX + dx);
-        el.y = Math.round(drag.origY + dy);
+        var nx = drag.origX + dx, ny = drag.origY + dy;
+        el.x = doSnap ? snap(nx) : Math.round(nx);
+        el.y = doSnap ? snap(ny) : Math.round(ny);
       } else if (drag.mode === 'resize') {
-        var nx = drag.origX, ny = drag.origY, nw = drag.origW, nh = drag.origH;
+        var nx2 = drag.origX, ny2 = drag.origY, nw = drag.origW, nh = drag.origH;
         if (drag.hnd.indexOf('r') > -1) { nw = drag.origW + dx; }
-        if (drag.hnd.indexOf('l') > -1) { nw = drag.origW - dx; nx = drag.origX + dx; }
+        if (drag.hnd.indexOf('l') > -1) { nw = drag.origW - dx; nx2 = drag.origX + dx; }
         if (drag.hnd.indexOf('b') > -1) { nh = drag.origH + dy; }
-        if (drag.hnd.indexOf('t') > -1) { nh = drag.origH - dy; ny = drag.origY + dy; }
+        if (drag.hnd.indexOf('t') > -1) { nh = drag.origH - dy; ny2 = drag.origY + dy; }
         if (nw < 20) nw = 20;
         if (nh < 20) nh = 20;
-        el.x = Math.round(nx); el.y = Math.round(ny);
-        el.w = Math.round(nw); el.h = Math.round(nh);
+        el.x = doSnap ? snap(nx2) : Math.round(nx2);
+        el.y = doSnap ? snap(ny2) : Math.round(ny2);
+        el.w = doSnap ? snap(nw) : Math.round(nw);
+        el.h = doSnap ? snap(nh) : Math.round(nh);
       } else if (drag.mode === 'rotate') {
         var node = $('.ae-el[data-id="' + el.id + '"]', cv);
         var r = node.getBoundingClientRect();
         var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
         var ang = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI + 90;
+        if (e.shiftKey) ang = Math.round(ang / 15) * 15;
         el.rotation = Math.round(ang);
       }
       updateSelected({ x: el.x, y: el.y, w: el.w, h: el.h, rotation: el.rotation });
@@ -373,33 +469,49 @@
     });
 
     cv.addEventListener('pointerup', function () {
-      if (drag) { drag = null; pushHistory(); }
+      clearTimeout(pressTimer); pressTimer = null;
+      if (drag) {
+        if (drag.moved) pushHistory();
+        drag = null;
+      }
+    });
+    cv.addEventListener('pointercancel', function () {
+      clearTimeout(pressTimer); pressTimer = null; drag = null;
     });
 
-    // עריכת טקסט בלחיצה כפולה
+    // עריכת טקסט בלחיצה כפולה (עכבר) — בנוסף ל-long-press
     cv.addEventListener('dblclick', function (e) {
       var elNode = e.target.closest('.ae-el.text');
-      if (!elNode) return;
-      var id = elNode.dataset.id;
-      var el = state.elements.find(function (x) { return x.id === id; });
-      if (!el) return;
-      var t = elNode.querySelector('.txt');
-      t.contentEditable = 'true';
-      elNode.classList.add('editing');
-      t.focus();
-      // בחר את כל הטקסט
-      var rng = document.createRange(); rng.selectNodeContents(t);
-      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rng);
-      var blur = function () {
-        t.removeEventListener('blur', blur);
-        t.contentEditable = 'false';
-        elNode.classList.remove('editing');
-        el.text = t.textContent;
-        renderProps();
-        pushHistory();
-      };
-      t.addEventListener('blur', blur);
+      if (elNode) beginTextEdit(elNode);
     });
+
+    /* ── פינץ' זום של הקנבס ═══════════════════════════════════ */
+    var activePointers = new Map();
+    wrap.addEventListener('pointerdown', function (e) {
+      activePointers.set(e.pointerId, e);
+      if (activePointers.size === 2 && !e.target.closest('.ae-el')) {
+        var pts = Array.from(activePointers.values());
+        var d = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+        pinch = { startDist: d, startZoom: state.userZoom };
+      }
+    });
+    wrap.addEventListener('pointermove', function (e) {
+      if (!activePointers.has(e.pointerId)) return;
+      activePointers.set(e.pointerId, e);
+      if (pinch && activePointers.size === 2) {
+        var pts = Array.from(activePointers.values());
+        var d = Math.hypot(pts[0].clientX - pts[1].clientX, pts[0].clientY - pts[1].clientY);
+        state.userZoom = Math.max(0.4, Math.min(3, pinch.startZoom * d / pinch.startDist));
+        resizeCanvas();
+      }
+    });
+    function endPointer(e) {
+      activePointers.delete(e.pointerId);
+      if (activePointers.size < 2) pinch = null;
+    }
+    wrap.addEventListener('pointerup', endPointer);
+    wrap.addEventListener('pointercancel', endPointer);
+    wrap.addEventListener('pointerleave', endPointer);
 
     // קיצורי מקלדת
     document.addEventListener('keydown', function (e) {
@@ -455,12 +567,47 @@
   function drawElement(ctx, el) {
     return new Promise(function (resolve) {
       ctx.save();
+      if (el.opacity != null && el.opacity < 1) ctx.globalAlpha = el.opacity;
+      if (el.shadow) {
+        ctx.shadowColor = 'rgba(0,0,0,.45)';
+        ctx.shadowBlur = 14; ctx.shadowOffsetY = 6;
+      }
       // סיבוב סביב המרכז
       var cx = el.x + el.w / 2, cy = el.y + el.h / 2;
       if (el.rotation) {
         ctx.translate(cx, cy);
         ctx.rotate(el.rotation * Math.PI / 180);
         ctx.translate(-cx, -cy);
+      }
+
+      if (el.type === 'shape') {
+        var fill = el.fill || '#12233F';
+        var stroke = el.stroke || '#000';
+        var sw = el.strokeW || 0;
+        var rad = el.radius || 0;
+        if (el.shape === 'circle') {
+          ctx.beginPath();
+          ctx.ellipse(el.x + el.w / 2, el.y + el.h / 2, el.w / 2, el.h / 2, 0, 0, Math.PI * 2);
+          if (fill && fill !== 'transparent' && fill !== '#00000000') { ctx.fillStyle = fill; ctx.fill(); }
+          if (sw > 0) { ctx.lineWidth = sw; ctx.strokeStyle = stroke; ctx.stroke(); }
+        } else if (el.shape === 'line') {
+          ctx.beginPath();
+          ctx.moveTo(el.x, el.y + el.h / 2);
+          ctx.lineTo(el.x + el.w, el.y + el.h / 2);
+          ctx.lineWidth = Math.max(2, sw || 6);
+          ctx.strokeStyle = stroke || fill; ctx.lineCap = 'round';
+          ctx.stroke();
+        } else { // rect
+          if (rad > 0 && ctx.roundRect) {
+            ctx.beginPath(); ctx.roundRect(el.x, el.y, el.w, el.h, rad);
+            if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+            if (sw > 0) { ctx.lineWidth = sw; ctx.strokeStyle = stroke; ctx.stroke(); }
+          } else {
+            if (fill) { ctx.fillStyle = fill; ctx.fillRect(el.x, el.y, el.w, el.h); }
+            if (sw > 0) { ctx.lineWidth = sw; ctx.strokeStyle = stroke; ctx.strokeRect(el.x, el.y, el.w, el.h); }
+          }
+        }
+        ctx.restore(); resolve(); return;
       }
 
       if (el.type === 'image') {
@@ -613,6 +760,13 @@
     $('#aeLoadTpl').addEventListener('click', function () { applyTemplate($('#aeTpl').value); });
     $('#aeAddText').addEventListener('click', addText);
     $('#aeAddImg').addEventListener('click', function () { addImage(); });
+    var addRect = $('#aeAddRect'); if (addRect) addRect.addEventListener('click', function () { addShape('rect'); });
+    var addCirc = $('#aeAddCirc'); if (addCirc) addCirc.addEventListener('click', function () { addShape('circle'); });
+    var addLine = $('#aeAddLine'); if (addLine) addLine.addEventListener('click', function () { addShape('line'); });
+    var snapChk = $('#aeSnap'); if (snapChk) {
+      snapChk.checked = state.snap;
+      snapChk.addEventListener('change', function (e) { state.snap = !!e.target.checked; });
+    }
     $('#aeUpload').addEventListener('change', function (e) {
       var f = e.target.files[0]; if (f) handleUpload(f);
       e.target.value = '';
@@ -658,6 +812,64 @@
     $('#aeLayerDown').addEventListener('click', function () { moveLayer('down'); });
     $('#aeDup').addEventListener('click', dupSelected);
     $('#aeDel').addEventListener('click', delSelected);
+
+    var op = $('#aePropOpacity'); if (op) {
+      op.addEventListener('input', function (e) { updateSelected({ opacity: parseFloat(e.target.value) }); });
+      op.addEventListener('change', pushHistory);
+    }
+    var sh = $('#aePropShadow'); if (sh) sh.addEventListener('change', function (e) {
+      updateSelected({ shadow: e.target.value === '1' }); render(); pushHistory();
+    });
+    var fill = $('#aePropFill'); if (fill) {
+      fill.addEventListener('input', function (e) {
+        var el = getSel(); if (!el) return;
+        el.fill = e.target.value;
+        var node = $('.ae-el[data-id="' + el.id + '"]', $('#aeCanvas'));
+        if (node) node.style.setProperty('--shp-fill', el.fill);
+        saveDraft();
+      });
+      fill.addEventListener('change', pushHistory);
+    }
+    var strk = $('#aePropStroke'); if (strk) {
+      strk.addEventListener('input', function (e) {
+        var el = getSel(); if (!el) return;
+        el.stroke = e.target.value;
+        var node = $('.ae-el[data-id="' + el.id + '"]', $('#aeCanvas'));
+        if (node) node.style.setProperty('--shp-stroke', el.stroke);
+        saveDraft();
+      });
+      strk.addEventListener('change', pushHistory);
+    }
+    var strkW = $('#aePropStrokeW'); if (strkW) {
+      strkW.addEventListener('input', function (e) {
+        var el = getSel(); if (!el) return;
+        el.strokeW = parseInt(e.target.value, 10) || 0;
+        var node = $('.ae-el[data-id="' + el.id + '"]', $('#aeCanvas'));
+        if (node) node.style.setProperty('--shp-stroke-w', el.strokeW + 'px');
+        saveDraft();
+      });
+      strkW.addEventListener('change', pushHistory);
+    }
+    var rad = $('#aePropRadius'); if (rad) {
+      rad.addEventListener('input', function (e) {
+        var el = getSel(); if (!el) return;
+        el.radius = parseInt(e.target.value, 10) || 0;
+        var node = $('.ae-el[data-id="' + el.id + '"]', $('#aeCanvas'));
+        if (node) node.style.setProperty('--shp-radius', el.radius + 'px');
+        saveDraft();
+      });
+      rad.addEventListener('change', pushHistory);
+    }
+
+    /* לחיצה על כותרת פאנל התכונות במובייל = פתיחה/סגירה */
+    var props = $('#aeProps');
+    if (props) {
+      props.addEventListener('click', function (e) {
+        if (window.innerWidth > 700) return;
+        var rect = props.getBoundingClientRect();
+        if (e.clientY - rect.top < 44) props.classList.toggle('open');
+      });
+    }
 
     // סקייל מחדש בשינוי גודל חלון
     window.addEventListener('resize', function () {
