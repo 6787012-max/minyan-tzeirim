@@ -48,6 +48,8 @@
       <button type="button" class="side-link" data-panel="congSec"><i>◎</i>מתפללים</button>
       <button type="button" class="side-link" data-panel="newsSec"><i>▤</i>חדשות</button>
       <button type="button" class="side-link" data-panel="seudahSec"><i>❉</i>סעודת שמחת תורה</button>
+      <button type="button" class="side-link" data-panel="contactsSec"><i>☰</i>אנשי קשר</button>
+      <button type="button" class="side-link" data-panel="gemachimSec"><i>✧</i>גמ״חים</button>
       <button type="button" class="side-link" data-panel="adsSec"><i>◈</i>עורך מודעות</button>
     </div>
     <div class="side-foot">
@@ -130,6 +132,67 @@
         </table>
       </div>
       <p class="note" id="congNote"></p>
+    </section>
+
+    <!-- אנשי קשר (הרחבה של congregants) -->
+    <section class="adm-sec" id="contactsSec" data-panel hidden>
+      <div class="head">
+        <div class="eyebrow">CRM · אנשי קשר וגמ״חים</div>
+        <h2>אנשי קשר</h2>
+        <p>כרטיס אדם מלא: פרטים · תגיות · מסמכים (ספח ת״ז, מכתבים) · היסטוריית פנייה. כמו במכינה — בהתאמה למניין.</p>
+      </div>
+      <div class="cards" id="contactsKpi"></div>
+      <div class="toolbar" style="margin-top:16px">
+        <input type="search" id="contactsQ" placeholder="חיפוש בשם/טלפון/כתובת/תגית…" aria-label="חיפוש">
+        <select id="contactsFilter">
+          <option value="all">כל האנשים</option>
+          <option value="hok">בעלי הוראת קבע</option>
+          <option value="no-hok">בלי הוראת קבע</option>
+          <option value="waad">חברי ועדה</option>
+          <option value="incomplete">חסרי פרטים (טלפון/מייל)</option>
+        </select>
+        <button type="button" class="btn btn-s small" id="contactsExport">ייצוא CSV</button>
+        <button type="button" class="btn btn-g small" id="contactsAddOpen">+ הוספה</button>
+      </div>
+      <p class="note" id="contactsHint">ממתין למיגרציה 08_contacts_gemachim.sql (הרחבת congregants + טבלת contact_docs). עד הרצתה — התצוגה מציגה רק את הפרטים הבסיסיים הקיימים.</p>
+      <div class="tbl-wrap">
+        <table class="tbl" id="contactsTable">
+          <thead><tr>
+            <th>שם</th><th>טלפון</th><th>מייל</th><th>תגיות</th><th>מסמכים</th><th>קמפיין</th><th></th>
+          </tr></thead>
+          <tbody id="contactsRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- גמ״חים -->
+    <section class="adm-sec" id="gemachimSec" data-panel hidden>
+      <div class="head">
+        <div class="eyebrow">הקהילה · חסד</div>
+        <h2>גמ״חים של הקהילה</h2>
+        <p>עורך גמ״חים: שם, קטגוריה, איש קשר, טלפון, שעות פעילות, תיאור, האם להציג באתר הציבורי.</p>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="gemQ" placeholder="חיפוש…" aria-label="חיפוש">
+        <select id="gemCat">
+          <option value="all">כל הקטגוריות</option>
+          <option value="כספים">כספים</option>
+          <option value="מטבח">מטבח</option>
+          <option value="תרופות">תרופות</option>
+          <option value="ילדים">ילדים</option>
+          <option value="אחר">אחר</option>
+        </select>
+        <button type="button" class="btn btn-g small" id="gemAdd">+ גמ״ח חדש</button>
+      </div>
+      <p class="note" id="gemHint">ממתין למיגרציה 08_contacts_gemachim.sql (טבלת minyan.gemachim). לאחר ההרצה — הרשימה תיטען אוטומטית.</p>
+      <div class="tbl-wrap">
+        <table class="tbl" id="gemTable">
+          <thead><tr>
+            <th>שם</th><th>קטגוריה</th><th>איש קשר</th><th>טלפון</th><th>שעות</th><th>באתר?</th><th></th>
+          </tr></thead>
+          <tbody id="gemRows"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- סעודת שמחת תורה -->

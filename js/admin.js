@@ -512,7 +512,108 @@
     if (!b) return;
     showPanel(b.dataset.panel);
     if (b.dataset.panel === 'seudahSec') loadSeudah();
+    if (b.dataset.panel === 'contactsSec') loadContacts();
+    if (b.dataset.panel === 'gemachimSec') loadGemachim();
   });
+
+  /* ── אנשי קשר (הרחבה של congregants) ─────────────────────────── */
+  var CONTACTS = [];
+  function loadContacts() {
+    var q = 'congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status&order=surname';
+    db(q).then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { CONTACTS = rows || []; renderContacts(); })
+      .catch(function () { $('#contactsHint').textContent = 'שגיאה בטעינה — ייתכן שהמיגרציה עוד לא הורצה.'; });
+  }
+  function renderContacts() {
+    var qStr = ($('#contactsQ').value || '').trim();
+    var filt = $('#contactsFilter').value;
+    var view = CONTACTS.filter(function (c) {
+      var s = ((c.surname||'') + ' ' + (c.full_name||'') + ' ' + (c.phone||'') +
+              ' ' + (c.email||'') + ' ' + (c.address||'') + ' ' + (c.role||'') +
+              ' ' + ((c.tags||[]).join(' ')));
+      if (qStr && s.indexOf(qStr) < 0) return false;
+      if (filt === 'hok') return c.tier === 'שותף' || c.tier === 'מחזיק' || c.tier === 'תורם' || (c.tags||[]).indexOf('הוראת קבע') >= 0;
+      if (filt === 'no-hok') return !c.tier && (c.tags||[]).indexOf('הוראת קבע') < 0;
+      if (filt === 'waad') return (c.tags||[]).indexOf('ועדה') >= 0 || c.role === 'ועדה';
+      if (filt === 'incomplete') return !c.phone || !c.email;
+      return true;
+    });
+    var total = CONTACTS.length;
+    var hasHok = CONTACTS.filter(function (c) { return c.tier; }).length;
+    var missing = CONTACTS.filter(function (c) { return !c.phone || !c.email; }).length;
+    $('#contactsKpi').innerHTML =
+      '<div class="card"><div class="k">סה״כ אנשי קשר</div><div class="v">' + total + '</div></div>' +
+      '<div class="card"><div class="k">עם הוראת קבע</div><div class="v">' + hasHok + '</div></div>' +
+      '<div class="card"><div class="k">חסרי פרטים</div><div class="v">' + missing + '</div></div>' +
+      '<div class="card"><div class="k">מוצגים</div><div class="v">' + view.length + '</div></div>';
+    var body = view.map(function (c) {
+      var nm = esc(c.full_name || c.surname);
+      var tags = (c.tags||[]).map(function (t) { return '<span class="kind" style="margin-inline-start:4px">' + esc(t) + '</span>'; }).join('');
+      return '<tr data-id="' + c.id + '">' +
+        '<td><b>' + nm + '</b>' + (c.role ? '<div style="font-size:12.5px;color:#6b6257">' + esc(c.role) + '</div>' : '') + '</td>' +
+        '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span style="color:#c00">חסר</span>') + '</td>' +
+        '<td>' + (c.email ? '<a href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '<span style="color:#c00">חסר</span>') + '</td>' +
+        '<td>' + tags + '</td>' +
+        '<td>—</td>' +
+        '<td>' + esc(c.campaign_status || '') + '</td>' +
+        '<td><button class="btn btn-s small" data-act="edit">עריכה</button></td>' +
+      '</tr>';
+    }).join('');
+    $('#contactsRows').innerHTML = body || '<tr><td colspan="7" style="padding:16px;color:#6b6257">אין תוצאות.</td></tr>';
+  }
+  var $cq = $('#contactsQ'); if ($cq) $cq.addEventListener('input', renderContacts);
+  var $cf = $('#contactsFilter'); if ($cf) $cf.addEventListener('change', renderContacts);
+  var $cex = $('#contactsExport'); if ($cex) $cex.addEventListener('click', function () {
+    var lines = ['שם,טלפון,מייל,רמה,סכום,תגיות,קמפיין'];
+    CONTACTS.forEach(function (c) {
+      var csv = [c.full_name || c.surname, c.phone||'', c.email||'', c.tier||'',
+                 c.tier_amount||'', (c.tags||[]).join('; '), c.campaign_status||''];
+      lines.push(csv.map(function (v) {
+        v = String(v == null ? '' : v);
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }).join(','));
+    });
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'contacts_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  });
+
+  /* ── גמ״חים ──────────────────────────────────────────────────── */
+  var GEMS = [];
+  function loadGemachim() {
+    db('gemachim?select=*&order=sort_order,name').then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { GEMS = rows || []; renderGems(); $('#gemHint').textContent = 'סה״כ ' + GEMS.length + ' גמ״חים.'; })
+      .catch(function () { $('#gemHint').textContent = 'שגיאה בטעינה — ייתכן שהמיגרציה 08 עוד לא הורצה.'; });
+  }
+  function renderGems() {
+    var qStr = ($('#gemQ').value || '').trim();
+    var cat = $('#gemCat').value;
+    var view = GEMS.filter(function (g) {
+      if (cat !== 'all' && g.category !== cat) return false;
+      if (qStr) {
+        var s = (g.name||'') + ' ' + (g.description||'') + ' ' + (g.contact_name||'');
+        if (s.indexOf(qStr) < 0) return false;
+      }
+      return true;
+    });
+    var body = view.map(function (g) {
+      return '<tr>' +
+        '<td><b>' + esc(g.name) + '</b><div style="font-size:12.5px;color:#6b6257">' + esc(g.description||'') + '</div></td>' +
+        '<td>' + esc(g.category||'') + '</td>' +
+        '<td>' + esc(g.contact_name||'') + '</td>' +
+        '<td>' + (g.phone ? '<a href="tel:' + esc(g.phone) + '">' + esc(g.phone) + '</a>' : '') + '</td>' +
+        '<td>' + esc(g.hours||'') + '</td>' +
+        '<td>' + (g.is_public ? '✔' : '—') + '</td>' +
+        '<td><button class="btn btn-s small">עריכה</button></td>' +
+      '</tr>';
+    }).join('');
+    $('#gemRows').innerHTML = body || '<tr><td colspan="7" style="padding:16px;color:#6b6257">אין גמ״חים ברשימה. לחצו על "+ גמ״ח חדש" להוסיף.</td></tr>';
+  }
+  var $gq = $('#gemQ'); if ($gq) $gq.addEventListener('input', renderGems);
+  var $gc = $('#gemCat'); if ($gc) $gc.addEventListener('change', renderGems);
 
   /* ── סעודת שמחת תורה תשפ״ז ───────────────────────────────────── */
   var SEUDAH_REF = 'seudah-simchat-torah-5787';
