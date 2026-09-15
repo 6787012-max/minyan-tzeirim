@@ -136,6 +136,32 @@
         <label class="sc-fld"><span>הערות (אלרגיות, כשרות מיוחדת, בקשה)</span>
           <textarea id="scNote" rows="3" placeholder="לא חובה"></textarea></label>
 
+        <!-- עדכון רשימת חברי המניין ─ בקשה נעימה, לא חובה -->
+        <div class="sc-tip" style="background:#EEF6FB;border-color:#93BEDA;color:#254764;margin:14px 0 8px">
+          <b>הזדמנות קטנה — לעדכן את הרשימה שלנו.</b>
+          כדי שהמערכת של המניין (מכתבי תודה, קבלות תרומה, הזמנות לאירועים)
+          תגיע אליכם באופן חלק, אנחנו מזמינים אתכם לעדכן את הפרטים שלכם ולהעלות
+          ספח תעודת זהות. <b>הכל וולונטרי לחלוטין</b>, ורק לצורך הרישום הפנימי
+          של המניין — שום פרט לא ייחשף לאף גורם מחוץ לוועדה.
+        </div>
+
+        <div class="sc-row">
+          <label class="sc-fld"><span>מייל</span>
+            <input id="scEmail" type="email" autocomplete="email" placeholder="לא חובה"></label>
+          <label class="sc-fld"><span>ת״ז (להפקת קבלה)</span>
+            <input id="scId" inputmode="numeric" placeholder="לא חובה"></label>
+        </div>
+        <label class="sc-fld"><span>כתובת מגורים</span>
+          <input id="scAddr" autocomplete="street-address" placeholder="רחוב, בית, מעלה עמוס"></label>
+
+        <label class="sc-fld"><span>ספח תעודת זהות (תמונה או PDF)</span>
+          <input id="scIdScan" type="file" accept="image/*,application/pdf">
+          <span class="subtle" id="scIdScanName" style="display:block;margin-top:4px">לא נבחר קובץ. עד 3 מגה.</span>
+        </label>
+
+        <label class="sc-fld"><span>עדכונים נוספים לרשימה (תוספת פרטים, מספרים של בני משפחה, בקשות)</span>
+          <textarea id="scUpd" rows="3" placeholder="לא חובה"></textarea></label>
+
         <div class="sc-actions">
           <button type="button" class="btn-g" id="scSend">שליחת ההרשמה</button>
           <span class="subtle">הרישום נשמר מיד. מייל אישור נשלח לגבאי.</span>
@@ -184,6 +210,26 @@
 
   function digits(s){ return String(s||'').replace(/\D/g,''); }
 
+  var idScanB64 = '', idScanName = '', idScanMime = '';
+  $('#scIdScan').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    var lbl = $('#scIdScanName');
+    idScanB64 = ''; idScanName = ''; idScanMime = '';
+    if (!f){ lbl.textContent = 'לא נבחר קובץ. עד 3 מגה.'; return; }
+    if (f.size > 3 * 1024 * 1024){
+      lbl.textContent = 'הקובץ גדול מ־3 מגה. בחר קובץ קטן יותר או צלם באיכות בינונית.';
+      e.target.value = ''; return;
+    }
+    var rd = new FileReader();
+    rd.onload = function(ev){
+      idScanB64 = String(ev.target.result || '');
+      idScanName = f.name || 'id-scan';
+      idScanMime = f.type || '';
+      lbl.textContent = 'נבחר: ' + idScanName + ' (' + Math.round(f.size/1024) + 'KB)';
+    };
+    rd.readAsDataURL(f);
+  });
+
   $('#scSend').addEventListener('click', function(){
     var name = $('#scName').value.trim();
     var phone = $('#scPhone').value.trim();
@@ -202,19 +248,32 @@
     hint.textContent = 'שולח…';
 
     var meals = attending ? (adults + kids) : 0;
+    var email = $('#scEmail').value.trim();
+    var idn = $('#scId').value.trim();
+    var addr = $('#scAddr').value.trim();
+    var upd = $('#scUpd').value.trim();
+    var details = {
+      attending: attending ? 'כן' : 'לא',
+      adults: attending ? adults : 0,
+      kids: attending ? kids : 0,
+      note: note
+    };
+    if (idn) details['ת״ז'] = idn;
+    if (addr) details['כתובת'] = addr;
+    if (upd) details['עדכון פרטים'] = upd;
+    if (idScanB64) {
+      details['ספח ת״ז'] = 'צורף · ' + idScanName + ' · ' + idScanMime;
+      details['id_scan_data'] = idScanB64;
+    }
     var payload = {
       kind: 'other',
       name: name,
       phone: phone,
+      email: email || null,
       ref_key: 'seudah-simchat-torah-5787',
       ref_label: 'סעודת שמחת תורה תשפ״ז',
       qty: meals,
-      details: {
-        attending: attending ? 'כן' : 'לא',
-        adults: attending ? adults : 0,
-        kids: attending ? kids : 0,
-        note: note
-      },
+      details: details,
       source: 'simchat.html'
     };
 
