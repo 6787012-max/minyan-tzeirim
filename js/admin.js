@@ -511,6 +511,88 @@
     var b = e.target.closest('.side-link');
     if (!b) return;
     showPanel(b.dataset.panel);
+    if (b.dataset.panel === 'seudahSec') loadSeudah();
+  });
+
+  /* ── סעודת שמחת תורה תשפ״ז ───────────────────────────────────── */
+  var SEUDAH_REF = 'seudah-simchat-torah-5787';
+  var SEUDAH_ROWS = [];
+
+  function loadSeudah() {
+    var q = 'signups?select=id,name,phone,qty,details,mail_status,created_at,status&ref_key=eq.'
+          + encodeURIComponent(SEUDAH_REF) + '&order=created_at.desc';
+    db(q).then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { SEUDAH_ROWS = rows || []; renderSeudah(); })
+      .catch(function () { $('#seudahNote').textContent = 'שגיאה בטעינה.'; });
+  }
+
+  function renderSeudah() {
+    var qStr = ($('#seudahQ').value || '').trim();
+    var view = qStr
+      ? SEUDAH_ROWS.filter(function (r) {
+          return (r.name || '').indexOf(qStr) >= 0 || (r.phone || '').indexOf(qStr) >= 0;
+        })
+      : SEUDAH_ROWS;
+
+    var kpi = {
+      families: 0, comes: 0, adults: 0, kids: 0, meals: 0
+    };
+    view.forEach(function (r) {
+      kpi.families++;
+      var d = r.details || {};
+      if (d.attending === 'כן') {
+        kpi.comes++;
+        kpi.adults += Number(d.adults) || 0;
+        kpi.kids += Number(d.kids) || 0;
+        kpi.meals += Number(r.qty) || 0;
+      }
+    });
+
+    $('#seudahKpi').innerHTML =
+      '<div class="card"><div class="k">משפחות נרשמו</div><div class="v">' + kpi.families + '</div></div>' +
+      '<div class="card"><div class="k">מגיעים</div><div class="v">' + kpi.comes + '</div></div>' +
+      '<div class="card"><div class="k">מבוגרים</div><div class="v">' + kpi.adults + '</div></div>' +
+      '<div class="card"><div class="k">ילדים</div><div class="v">' + kpi.kids + '</div></div>' +
+      '<div class="card"><div class="k">סה״כ מנות</div><div class="v">' + kpi.meals + '</div></div>';
+
+    var body = view.map(function (r) {
+      var d = r.details || {};
+      var dt = new Date(r.created_at);
+      var when = isNaN(dt) ? '' : (dt.getDate() + '/' + (dt.getMonth() + 1) + ' ' +
+        String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0'));
+      return '<tr>' +
+        '<td>' + esc(r.name) + '</td>' +
+        '<td><a href="tel:' + esc(r.phone) + '">' + esc(r.phone || '') + '</a></td>' +
+        '<td>' + esc(d.attending || '') + '</td>' +
+        '<td>' + esc(d.adults != null ? d.adults : '') + '</td>' +
+        '<td>' + esc(d.kids != null ? d.kids : '') + '</td>' +
+        '<td><b>' + (r.qty || 0) + '</b></td>' +
+        '<td>' + esc(d.note || '') + '</td>' +
+        '<td style="white-space:nowrap;color:#6b6257;font-size:12.5px">' + esc(when) + '</td>' +
+      '</tr>';
+    }).join('');
+    $('#seudahRows').innerHTML = body || '<tr><td colspan="8" style="padding:16px;color:#6b6257">אין רישומים עדיין.</td></tr>';
+    $('#seudahNote').textContent = 'סה״כ ' + view.length + ' רישומים.';
+  }
+
+  $('#seudahQ') && $('#seudahQ').addEventListener('input', renderSeudah);
+  $('#seudahExport') && $('#seudahExport').addEventListener('click', function () {
+    var lines = ['שם,טלפון,מגיע,מבוגרים,ילדים,מנות,הערה,נרשם'];
+    SEUDAH_ROWS.forEach(function (r) {
+      var d = r.details || {};
+      var csv = [r.name, r.phone, d.attending || '', d.adults || '', d.kids || '',
+                 r.qty || 0, (d.note || '').replace(/\n/g, ' '), r.created_at || ''];
+      lines.push(csv.map(function (v) {
+        v = String(v == null ? '' : v);
+        return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+      }).join(','));
+    });
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'seudah_simchat_torah.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
   });
 
   /* ── אירועים ────────────────────────────────────────────────── */

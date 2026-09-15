@@ -47,6 +47,7 @@
       <button type="button" class="side-link" data-panel="donSec"><i>❋</i>תרומות</button>
       <button type="button" class="side-link" data-panel="congSec"><i>◎</i>מתפללים</button>
       <button type="button" class="side-link" data-panel="newsSec"><i>▤</i>חדשות</button>
+      <button type="button" class="side-link" data-panel="seudahSec"><i>❉</i>סעודת שמחת תורה</button>
       <button type="button" class="side-link" data-panel="adsSec"><i>◈</i>עורך מודעות</button>
     </div>
     <div class="side-foot">
@@ -129,6 +130,30 @@
         </table>
       </div>
       <p class="note" id="congNote"></p>
+    </section>
+
+    <!-- סעודת שמחת תורה -->
+    <section class="adm-sec" id="seudahSec" data-panel hidden>
+      <div class="head">
+        <div class="eyebrow">חג תשפ״ז · הרשמות</div>
+        <h2>סעודת שמחת תורה</h2>
+        <p>רשימה חיה מהטופס באתר. הצטרפויות חדשות נכנסות מיד, וסיכום כמות המנות בראש.</p>
+      </div>
+      <div class="cards" id="seudahKpi"></div>
+      <div class="toolbar" style="margin-top:16px">
+        <input type="search" id="seudahQ" placeholder="חיפוש שם או טלפון…" aria-label="חיפוש">
+        <button type="button" class="btn btn-s small" id="seudahExport">ייצוא CSV</button>
+        <a class="btn btn-s small" href="simchat.html" target="_blank" rel="noopener">← הטופס באתר</a>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl" id="seudahTable">
+          <thead><tr>
+            <th>שם</th><th>טלפון</th><th>מגיע?</th><th>מבוגרים</th><th>ילדים</th><th>סה״כ</th><th>הערה</th><th>נרשם</th>
+          </tr></thead>
+          <tbody id="seudahRows"></tbody>
+        </table>
+      </div>
+      <p class="note" id="seudahNote"></p>
     </section>
 
     <!-- עורך מודעות -->
