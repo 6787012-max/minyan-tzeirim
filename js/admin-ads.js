@@ -91,19 +91,35 @@
 
   /* ── תבניות ────────────────────────────────────────────────── */
   function loadTemplates() {
-    return fetch('data/ads-templates.json', { cache: 'no-cache' })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        state.templates = d.templates || [];
-        var sel = $('#aeTpl');
-        sel.innerHTML = '';
-        state.templates.forEach(function (t) {
-          var o = document.createElement('option');
-          o.value = t.id; o.textContent = t.name;
-          sel.appendChild(o);
+    var staticP = fetch('data/ads-templates.json', { cache: 'no-cache' }).then(function (r) { return r.json(); });
+    // תבניות ששמר מנהל מתוך העורך עצמו — minyan.ads_templates בסופאבייס,
+    // לא בקובץ הסטטי (אין גישת-כתיבה מהדפדפן ל-GitHub Pages/Cloudflare Pages).
+    var customP = window.MTDb
+      ? window.MTDb('ads_templates?select=id,name,canvas,elements&order=created_at.desc')
+          .then(function (r) { return r.ok ? r.json() : []; })
+          .catch(function () { return []; })
+      : Promise.resolve([]);
+    return Promise.all([staticP, customP]).then(function (res) {
+      var staticTpls = (res[0] && res[0].templates) || [];
+      var customTpls = (res[1] || []).map(function (row) {
+        return { id: 'custom-' + row.id, dbId: row.id, name: row.name, canvas: row.canvas, elements: row.elements, custom: true };
+      });
+      state.templates = staticTpls.concat(customTpls);
+      var sel = $('#aeTpl');
+      sel.innerHTML = '';
+      var gStatic = document.createElement('optgroup'); gStatic.label = 'תבניות קבועות';
+      staticTpls.forEach(function (t) {
+        var o = document.createElement('option'); o.value = t.id; o.textContent = t.name; gStatic.appendChild(o);
+      });
+      sel.appendChild(gStatic);
+      if (customTpls.length) {
+        var gCustom = document.createElement('optgroup'); gCustom.label = 'התבניות שלנו';
+        customTpls.forEach(function (t) {
+          var o = document.createElement('option'); o.value = t.id; o.textContent = t.name; gCustom.appendChild(o);
         });
-      })
-      .catch(function (e) { hint('שגיאה בטעינת תבניות: ' + e.message, 'err'); });
+        sel.appendChild(gCustom);
+      }
+    }).catch(function (e) { hint('שגיאה בטעינת תבניות: ' + e.message, 'err'); });
   }
   function applyTemplate(id) {
     var t = state.templates.find(function (x) { return x.id === id; });
@@ -740,6 +756,32 @@
     });
   }
 
+  /* ── שמירת תבנית חדשה (בענן, ב-minyan.ads_templates — משותפת לכל
+     מנהל, לא רק למחשב הזה) ═══════════════════════════════════════ */
+  function openTplModal() {
+    $('#aeTplModal').hidden = false;
+    var inp = $('#aeTplName'); inp.value = '';
+    setTimeout(function () { inp.focus(); }, 50);
+  }
+  function closeTplModal() { $('#aeTplModal').hidden = true; }
+  function saveAsTemplate() {
+    var name = $('#aeTplName').value.trim();
+    if (!name) { $('#aeTplName').focus(); return; }
+    if (!window.MTDb) { hint('אין חיבור לשרת — לא ניתן לשמור תבנית כרגע.', 'err'); return; }
+    var row = { name: name, canvas: clone(state.canvas), elements: clone(state.elements) };
+    window.MTDb('ads_templates', { method: 'POST', body: JSON.stringify(row), prefer: 'return=representation' })
+      .then(function (r) { if (!r.ok) throw new Error('http-' + r.status); return r.json(); })
+      .then(function (rows) {
+        closeTplModal();
+        return loadTemplates().then(function () {
+          var newRow = rows && rows[0];
+          if (newRow) $('#aeTpl').value = 'custom-' + newRow.id;
+          hint('התבנית "' + name + '" נשמרה. היא תופיע ברשימת "תבנית" לכל מנהל.', 'ok');
+        });
+      })
+      .catch(function () { hint('שמירת התבנית נכשלה.', 'err'); });
+  }
+
   /* ── שמירה / פתיחה של קובץ פרויקט ═══════════════════════════ */
   function saveProject() {
     var data = { canvas: state.canvas, elements: state.elements };
@@ -779,6 +821,9 @@
     $('#aeSendMail').addEventListener('click', openMailModal);
     $('#aeMailCancel').addEventListener('click', closeMailModal);
     $('#aeMailSend').addEventListener('click', sendMail);
+    $('#aeSaveTpl').addEventListener('click', openTplModal);
+    $('#aeTplCancel').addEventListener('click', closeTplModal);
+    $('#aeTplSave').addEventListener('click', saveAsTemplate);
     $('#aeBgColor').addEventListener('input', function (e) {
       state.canvas.bg = e.target.value;
       $('#aeCanvas').style.background = state.canvas.bg;

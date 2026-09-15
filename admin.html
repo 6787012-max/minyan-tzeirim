@@ -252,6 +252,7 @@
             <button type="button" class="btn btn-s small" id="aeRedo" title="חזרה (Ctrl+Y)">↷</button>
           </div>
           <div class="ae-group ae-right">
+            <button type="button" class="btn btn-s small" id="aeSaveTpl">שמירה כתבנית…</button>
             <button type="button" class="btn btn-s small" id="aeSave">שמירה</button>
             <button type="button" class="btn btn-s small" id="aeExportPng">PNG</button>
             <button type="button" class="btn btn-s small" id="aeExportPdf">PDF</button>
@@ -449,6 +450,19 @@
           <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
             <button type="button" class="btn btn-s small" id="aeMailCancel">ביטול</button>
             <button type="button" class="btn btn-g small" id="aeMailSend">פתיחת מייל + הורדה</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ae-modal" id="aeTplModal" hidden>
+        <div class="ae-modal-box">
+          <h3>שמירת התבנית הנוכחית</h3>
+          <label class="fld"><span>שם התבנית</span>
+            <input id="aeTplName" type="text" placeholder="לדוגמה: הזמנה לאירוע"></label>
+          <p class="hint">התבנית תישמר בענן ותופיע ברשימת "תבנית" בפתח הבא — לכל מנהל, לא רק במחשב הזה.</p>
+          <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
+            <button type="button" class="btn btn-s small" id="aeTplCancel">ביטול</button>
+            <button type="button" class="btn btn-g small" id="aeTplSave">שמירה</button>
           </div>
         </div>
       </div>
