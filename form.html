@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>טופס · מניין הצעירים</title>
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="stylesheet" href="css/main.css?v=25">
+<style>
+  body{min-height:100dvh;display:flex;align-items:flex-start;justify-content:center;padding:32px 14px}
+  .fcard{background:var(--cream-2);border:1px solid var(--gold-pale);border-radius:16px;padding:26px;max-width:560px;width:100%;box-shadow:0 8px 30px rgba(18,35,63,.08)}
+  .fcard h1{margin:0 0 6px;font-size:22px;color:var(--navy)}
+  .fcard .body{white-space:pre-wrap;color:#555;font-size:14px;margin-bottom:18px;line-height:1.65}
+  .fld{display:block;margin-bottom:14px}
+  .fld span{display:block;font-size:13px;color:#666;margin-bottom:5px;font-weight:600}
+  .fld input[type=text],.fld textarea,.fld select{width:100%;font:inherit;padding:9px 11px;border:1.5px solid var(--gold-pale);border-radius:9px;background:#fff;box-sizing:border-box}
+  .fld textarea{resize:vertical;min-height:70px}
+  .fld.chk{display:flex;align-items:center;gap:8px}
+  .fld.chk span{margin:0}
+  .msg{padding:12px 14px;border-radius:10px;font-size:14px;margin-bottom:14px}
+  .msg.err{background:#fde8e8;color:#9B1E1E}
+  .msg.ok{background:#e7f5ec;color:#1d6b3e}
+  .btn-send{width:100%;padding:12px;border:0;border-radius:10px;background:var(--navy);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+  .btn-send:hover{background:var(--navy-2)}
+  .btn-send:disabled{opacity:.6;cursor:default}
+</style>
+</head>
+<body>
+  <div class="fcard" id="app"><div class="msg">טוען…</div></div>
+  <script src="js/form.js"></script>
+</body>
+</html>

@@ -51,6 +51,7 @@
       <button type="button" class="side-link" data-panel="contactsSec"><i>☰</i>אנשי קשר</button>
       <button type="button" class="side-link" data-panel="gemachimSec"><i>✧</i>גמ״חים</button>
       <button type="button" class="side-link" data-panel="adsSec"><i>◈</i>עורך מודעות</button>
+      <button type="button" class="side-link" data-panel="formsSec"><i>☑</i>טפסים</button>
     </div>
     <div class="side-foot">
       <span class="who" id="who"></span>
@@ -477,6 +478,77 @@
       </div>
     </section>
 
+    <!-- טפסים -->
+    <section class="adm-sec" id="formsSec" data-panel hidden>
+      <div class="head">
+        <div class="eyebrow">טפסים דינמיים</div>
+        <h2>טפסים</h2>
+        <p>בונים טופס עם שדות משלכם (טקסט, בחירה, תיבת סימון, שאלה פתוחה, אישור בשם), ושולחים קישור — ציבורי אחד לכולם, או אישי לכל איש קשר.</p>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="btn btn-g small" id="formsNew">+ טופס חדש</button>
+      </div>
+      <p class="note" id="formsEmpty" hidden>אין עדיין טפסים — לוחצים "טופס חדש" כדי להתחיל.</p>
+      <div class="tbl-wrap">
+        <table class="tbl" id="formsTable" hidden>
+          <thead><tr><th>כותרת</th><th>סוג</th><th>תשובות</th><th></th></tr></thead>
+          <tbody id="formsRows"></tbody>
+        </table>
+      </div>
+
+      <div class="ae-modal" id="formBuildModal" hidden>
+        <div class="ae-modal-box" style="width:min(680px,100%)">
+          <h3>טופס חדש</h3>
+          <label class="fld"><span>כותרת הטופס *</span><input id="fb_title" type="text" placeholder="לדוגמה: טופס הרשמה לסעודת מלווה מלכה"></label>
+          <label class="fld"><span>תוכן / הסבר (מוצג למי שממלא)</span><textarea id="fb_body" rows="3"></textarea></label>
+          <label class="fld"><span>נמענים</span>
+            <select id="fb_scope">
+              <option value="public">🌐 קישור ציבורי אחד לכולם</option>
+              <option value="personal">קישור אישי לכל איש קשר</option>
+            </select>
+          </label>
+          <div class="fld">
+            <span>שדות למילוי</span>
+            <div id="fb_fields"></div>
+            <button type="button" class="btn btn-s small" id="fb_addField">+ הוסף שדה</button>
+          </div>
+          <p class="hint">שדה מסוג "אישור בשם" משמש כחתימה — המילוי מקליד שם מלא כדי לאשר, בלי ציור ביד.</p>
+          <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
+            <button type="button" class="btn btn-s small" id="fb_cancel">ביטול</button>
+            <button type="button" class="btn btn-g small" id="fb_save">יצירה ושליחה</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ae-modal" id="formLinkModal" hidden>
+        <div class="ae-modal-box">
+          <h3>הטופס נוצר</h3>
+          <p class="hint" id="formLinkHint">קישור לשיתוף:</p>
+          <input id="formLinkUrl" type="text" readonly style="width:100%;font-family:monospace;font-size:13px">
+          <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
+            <button type="button" class="btn btn-s small" id="formLinkCopy">העתקה</button>
+            <button type="button" class="btn btn-g small" id="formLinkClose">סגירה</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ae-modal" id="formRespModal" hidden>
+        <div class="ae-modal-box" style="width:min(720px,100%)">
+          <h3 id="formRespTitle">תשובות</h3>
+          <div class="tbl-wrap">
+            <table class="tbl" id="formRespTable">
+              <thead><tr><th>שם</th><th>תאריך</th><th>סטטוס</th><th>תשובות</th></tr></thead>
+              <tbody id="formRespRows"></tbody>
+            </table>
+          </div>
+          <div class="ae-btn-row" style="justify-content:space-between;margin-top:10px">
+            <button type="button" class="btn btn-x small" id="formDeleteBtn">מחיקת הטופס</button>
+            <button type="button" class="btn btn-s small" id="formRespClose">סגירה</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- חדשות -->
     <section class="adm-sec" id="newsSec" data-panel hidden>
       <div class="head">
@@ -502,7 +574,8 @@
 </div>
 
 <script src="js/vendor/jspdf.umd.min.js"></script>
-<script src="js/admin.js?v=28"></script>
-<script src="js/admin-ads.js?v=1"></script>
+<script src="js/admin.js?v=29"></script>
+<script src="js/admin-ads.js?v=3"></script>
+<script src="js/admin-forms.js?v=1"></script>
 </body>
 </html>
