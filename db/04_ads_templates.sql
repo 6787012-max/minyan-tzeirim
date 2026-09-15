@@ -6,7 +6,11 @@
 -- מציג את שתי הרשימות מאוחדות: הקבועות קודם, אחריהן "התבניות שלנו".
 --
 -- הרשאות: כמו כל שאר הטבלאות בסכימה — minyan.is_admin() בלבד (לא anon,
--- לא authenticated סתם). בלי update (recreate ולא edit-במקום, מספיק לצורך).
+-- לא authenticated סתם).
+--
+-- 15/09/2026 (המשך אותו יום): נוסף update — יוסף ביקש גם "לערוך את הקיים
+-- כולל העיצוב", לא רק ליצור חדש. "עדכון תבנית" ב-UI כותב קנבס+elements
+-- חדשים לאותה שורה (PATCH לפי id), לא יוצר שורה נוספת.
 --
 -- אידמפוטנטי.
 
@@ -30,6 +34,9 @@ create policy ads_tpl_write on minyan.ads_templates
 drop policy if exists ads_tpl_delete on minyan.ads_templates;
 create policy ads_tpl_delete on minyan.ads_templates
   for delete to authenticated using (minyan.is_admin());
+drop policy if exists ads_tpl_update on minyan.ads_templates;
+create policy ads_tpl_update on minyan.ads_templates
+  for update to authenticated using (minyan.is_admin()) with check (minyan.is_admin());
 
-grant select, insert, delete on minyan.ads_templates to authenticated;
+grant select, insert, update, delete on minyan.ads_templates to authenticated;
 grant usage, select on sequence minyan.ads_templates_id_seq to authenticated;

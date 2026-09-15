@@ -456,13 +456,22 @@
 
       <div class="ae-modal" id="aeTplModal" hidden>
         <div class="ae-modal-box">
-          <h3>שמירת התבנית הנוכחית</h3>
-          <label class="fld"><span>שם התבנית</span>
+          <h3>שמירת תבנית</h3>
+          <div id="aeTplUpdateRow" hidden>
+            <button type="button" class="btn btn-g" id="aeTplUpdate" style="width:100%">עדכון התבנית "<span id="aeTplCurName"></span>"</button>
+            <p class="hint">שומר את השינויים הנוכחיים (כולל העיצוב) לתוך התבנית הזו, בלי ליצור תבנית נוספת.</p>
+            <hr>
+            <p class="hint">או — לשמור בתור תבנית חדשה ונפרדת:</p>
+          </div>
+          <label class="fld"><span>שם תבנית חדשה</span>
             <input id="aeTplName" type="text" placeholder="לדוגמה: הזמנה לאירוע"></label>
           <p class="hint">התבנית תישמר בענן ותופיע ברשימת "תבנית" בפתח הבא — לכל מנהל, לא רק במחשב הזה.</p>
-          <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
-            <button type="button" class="btn btn-s small" id="aeTplCancel">ביטול</button>
-            <button type="button" class="btn btn-g small" id="aeTplSave">שמירה</button>
+          <div class="ae-btn-row" style="justify-content:space-between;margin-top:10px">
+            <button type="button" class="btn btn-x small" id="aeTplDelete" hidden>מחיקת התבנית הזו</button>
+            <div class="ae-btn-row" style="margin-inline-start:auto">
+              <button type="button" class="btn btn-s small" id="aeTplCancel">ביטול</button>
+              <button type="button" class="btn btn-g small" id="aeTplSave">שמירה כחדשה</button>
+            </div>
           </div>
         </div>
       </div>

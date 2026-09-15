@@ -131,6 +131,9 @@
       return e;
     });
     state.selectedId = null;
+    // תבנית מותאמת-אישית (לא אחת מהקבועות) — זוכרים אותה כדי ש"שמירה
+    // כתבנית" יוכל להציע "עדכון" (PATCH לאותה שורה) ולא רק "שמירה כחדשה".
+    state.loadedTemplate = t.custom ? { dbId: t.dbId, name: t.name } : null;
     resizeCanvas();
     render();
     renderProps();
@@ -759,6 +762,14 @@
   /* ── שמירת תבנית חדשה (בענן, ב-minyan.ads_templates — משותפת לכל
      מנהל, לא רק למחשב הזה) ═══════════════════════════════════════ */
   function openTplModal() {
+    var loaded = state.loadedTemplate;
+    var row = $('#aeTplUpdateRow'), delBtn = $('#aeTplDelete');
+    if (loaded) {
+      row.hidden = false; delBtn.hidden = false;
+      $('#aeTplCurName').textContent = loaded.name;
+    } else {
+      row.hidden = true; delBtn.hidden = true;
+    }
     $('#aeTplModal').hidden = false;
     var inp = $('#aeTplName'); inp.value = '';
     setTimeout(function () { inp.focus(); }, 50);
@@ -775,11 +786,39 @@
         closeTplModal();
         return loadTemplates().then(function () {
           var newRow = rows && rows[0];
-          if (newRow) $('#aeTpl').value = 'custom-' + newRow.id;
+          if (newRow) { $('#aeTpl').value = 'custom-' + newRow.id; state.loadedTemplate = { dbId: newRow.id, name: name }; }
           hint('התבנית "' + name + '" נשמרה. היא תופיע ברשימת "תבנית" לכל מנהל.', 'ok');
         });
       })
       .catch(function () { hint('שמירת התבנית נכשלה.', 'err'); });
+  }
+  // "עדכון תבנית" — כותב את הקנבס הנוכחי (כולל העיצוב) לתוך אותה שורה
+  // שממנה נטענה התבנית, במקום ליצור עותק חדש.
+  function updateCurrentTemplate() {
+    var loaded = state.loadedTemplate; if (!loaded) return;
+    if (!window.MTDb) { hint('אין חיבור לשרת — לא ניתן לעדכן תבנית כרגע.', 'err'); return; }
+    var patch = { name: loaded.name, canvas: clone(state.canvas), elements: clone(state.elements) };
+    window.MTDb('ads_templates?id=eq.' + loaded.dbId, { method: 'PATCH', body: JSON.stringify(patch) })
+      .then(function (r) { if (!r.ok) throw new Error('http-' + r.status);
+        closeTplModal();
+        return loadTemplates().then(function () {
+          $('#aeTpl').value = 'custom-' + loaded.dbId;
+          hint('התבנית "' + loaded.name + '" עודכנה.', 'ok');
+        });
+      })
+      .catch(function () { hint('עדכון התבנית נכשל.', 'err'); });
+  }
+  function deleteCurrentTemplate() {
+    var loaded = state.loadedTemplate; if (!loaded) return;
+    if (!window.MTDb) { hint('אין חיבור לשרת — לא ניתן למחוק תבנית כרגע.', 'err'); return; }
+    if (!window.confirm('למחוק את התבנית "' + loaded.name + '"? אי אפשר לשחזר.')) return;
+    window.MTDb('ads_templates?id=eq.' + loaded.dbId, { method: 'DELETE' })
+      .then(function (r) { if (!r.ok) throw new Error('http-' + r.status);
+        closeTplModal();
+        state.loadedTemplate = null;
+        return loadTemplates().then(function () { hint('התבנית נמחקה.', 'ok'); });
+      })
+      .catch(function () { hint('מחיקת התבנית נכשלה.', 'err'); });
   }
 
   /* ── שמירה / פתיחה של קובץ פרויקט ═══════════════════════════ */
@@ -824,6 +863,8 @@
     $('#aeSaveTpl').addEventListener('click', openTplModal);
     $('#aeTplCancel').addEventListener('click', closeTplModal);
     $('#aeTplSave').addEventListener('click', saveAsTemplate);
+    $('#aeTplUpdate').addEventListener('click', updateCurrentTemplate);
+    $('#aeTplDelete').addEventListener('click', deleteCurrentTemplate);
     $('#aeBgColor').addEventListener('input', function (e) {
       state.canvas.bg = e.target.value;
       $('#aeCanvas').style.background = state.canvas.bg;
