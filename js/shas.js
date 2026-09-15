@@ -109,11 +109,13 @@
 
   function volHtml(v) {
     var t = taken(v);
+    /* 15/09/2026: יוסף ביקש שלא לחשוף שמות של תופסי כרכים —
+       מציגים "תפוס" גם כשה-by הוא שם אמיתי, וגם ב-tooltip. */
     var inner =
       '<span class="n">' + esc(v.n) + '</span>' +
       '<span class="b"><b>' + esc(v.name) + '</b><span>' +
-      (t ? esc(v.by) : shekel(S.pricePerVolume) + ' · פנוי') + '</span></span>';
-    if (t) return '<div class="vol taken" title="נלקח על ידי ' + esc(v.by) + '">' + inner + '</div>';
+      (t ? 'תפוס' : shekel(S.pricePerVolume) + ' · פנוי') + '</span></span>';
+    if (t) return '<div class="vol taken" title="כרך זה כבר נלקח">' + inner + '</div>';
     return '<button type="button" class="vol" data-n="' + esc(v.n) + '" ' +
       'title="לקחת את הכרך הזה">' + inner + '</button>';
   }

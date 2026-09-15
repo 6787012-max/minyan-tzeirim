@@ -15,22 +15,24 @@
 <style>
   .sc-hero { padding: 40px 0 20px; background: linear-gradient(135deg,#FBF6E8 0%, #F6EEDA 100%); }
   .sc-hero .eyebrow { color: var(--gold); letter-spacing:.08em; font-weight:800; font-size:12.5px }
-  .sc-hero h1 { font-family:'Frank',serif; font-size:42px; margin:6px 0 8px; color:var(--navy) }
+  .sc-hero h1 { font-family:'Frank',serif; font-size:44px; margin:6px 0 8px; color:var(--navy); line-height:1.1 }
   .sc-hero .lead { font-size:18px; color:#3a3b40; line-height:1.65; max-width:640px }
   .sc-hero .quiet { font-size:14.5px; color:#6b6257; margin-top:12px; max-width:640px; line-height:1.6 }
   .sc-hero .quiet a { color:var(--gold); text-decoration:underline }
+
   .sc-form { padding: 26px 0 60px }
-  .sc-card { background:#fff; border:1px solid #E7DFD2; border-radius:16px;
-             padding:24px 22px; max-width:640px; margin:0 auto;
-             box-shadow: 0 8px 30px rgba(18,35,63,.06) }
-  .sc-card h2 { font-family:'Frank',serif; font-size:26px; color:var(--navy); margin:0 0 4px }
-  .sc-card .subtle { color:#6b6257; font-size:14px; margin:0 0 18px }
-  .sc-fld { display:block; margin-bottom:14px }
-  .sc-fld > span { display:block; font-size:13.5px; color:#6b6257; margin-bottom:5px; font-weight:600 }
+  .sc-card { background:#fff; border:1px solid #E7DFD2; border-radius:18px;
+             padding:28px 24px; max-width:640px; margin:0 auto;
+             box-shadow: 0 12px 40px rgba(18,35,63,.08) }
+  .sc-card h2 { font-family:'Frank',serif; font-size:28px; color:var(--navy); margin:0 0 4px }
+  .sc-card .subtle { color:#6b6257; font-size:14px; margin:0 0 20px; line-height:1.6 }
+
+  .sc-fld { display:block; margin-bottom:16px }
+  .sc-fld > span.lbl { display:block; font-size:13.5px; color:#6b6257; margin-bottom:6px; font-weight:700 }
   .sc-fld input, .sc-fld select, .sc-fld textarea {
-    width:100%; font: inherit; font-size:15.5px; padding:10px 12px;
+    width:100%; box-sizing:border-box; font: inherit; font-size:15.5px; padding:11px 13px;
     border: 1.5px solid #E7DFD2; border-radius: 10px; background: #FBF8F3;
-    color: var(--navy);
+    color: var(--navy); transition: border-color .15s, background .15s;
   }
   .sc-fld input:focus, .sc-fld select:focus, .sc-fld textarea:focus {
     outline: 2px solid var(--gold); outline-offset: 1px; background:#fff;
@@ -39,23 +41,52 @@
   .sc-row { display:grid; grid-template-columns:1fr 1fr; gap:12px }
   @media (max-width:520px){ .sc-row { grid-template-columns:1fr } }
 
-  .sc-yn { display:flex; gap:8px; flex-wrap:wrap }
+  /* בורר מגיע/לא מגיע — גדול וברור */
+  .sc-yn { display:grid; grid-template-columns:1fr 1fr; gap:10px }
   .sc-yn label {
-    flex:1; min-width:120px; padding:12px 10px; text-align:center;
-    border:1.5px solid #E7DFD2; border-radius:10px; background:#FBF8F3;
-    color:var(--navy); font-weight:700; cursor:pointer; user-select:none;
+    padding:16px 12px; text-align:center;
+    border:2px solid #E7DFD2; border-radius:12px; background:#FBF8F3;
+    color:var(--navy); font-weight:800; cursor:pointer; user-select:none;
+    font-size:16px; transition: all .12s;
   }
-  .sc-yn input { display:none }
-  .sc-yn input:checked + label { border-color:var(--gold); background:#FDF3DC; box-shadow: inset 0 0 0 1px var(--gold) }
+  .sc-yn label:hover { border-color:#D9C79B }
+  .sc-yn input { position:absolute; opacity:0; pointer-events:none }
+  .sc-yn input:checked + label {
+    border-color:var(--gold); background:#FDF3DC;
+    box-shadow: inset 0 0 0 2px var(--gold);
+    transform: translateY(-1px);
+  }
 
-  .sc-actions { display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap }
-  .sc-actions .btn-g { background:var(--gold); color:#fff; border:0; padding:12px 20px;
-                       border-radius:10px; font-weight:800; cursor:pointer; font-size:15.5px }
-  .sc-actions .btn-g:hover { filter:brightness(1.06) }
-  .sc-actions .btn-g[disabled] { opacity:.5; cursor:not-allowed }
+  /* בורר מספרים בכפתורי + / − */
+  .sc-num { display:flex; align-items:center; gap:8px;
+            border:1.5px solid #E7DFD2; border-radius:10px; background:#FBF8F3;
+            padding:4px }
+  .sc-num button {
+    width:38px; height:38px; border-radius:8px; border:0;
+    background:#fff; color:var(--navy); font-size:22px; font-weight:700;
+    cursor:pointer; line-height:1; border:1.5px solid #E7DFD2;
+  }
+  .sc-num button:hover:not(:disabled) { background:#FDF3DC; border-color:var(--gold) }
+  .sc-num button:disabled { opacity:.4; cursor:not-allowed }
+  .sc-num input {
+    flex:1; text-align:center; border:0; background:transparent;
+    font-size:18px; font-weight:800; color:var(--navy); padding:6px 0;
+    -moz-appearance:textfield;
+  }
+  .sc-num input::-webkit-inner-spin-button,
+  .sc-num input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0 }
+
+  .sc-actions { display:flex; gap:12px; align-items:center; margin-top:14px; flex-wrap:wrap }
+  .sc-actions .btn-g { background:var(--gold); color:#fff; border:0; padding:14px 24px;
+                       border-radius:12px; font-weight:800; cursor:pointer; font-size:16px;
+                       box-shadow: 0 4px 14px rgba(176,141,62,.35);
+                       transition: transform .1s, box-shadow .1s }
+  .sc-actions .btn-g:hover { filter:brightness(1.05); transform: translateY(-1px);
+                             box-shadow: 0 6px 18px rgba(176,141,62,.42) }
+  .sc-actions .btn-g[disabled] { opacity:.5; cursor:not-allowed; transform:none }
   .sc-hint { margin: 12px 0 0; font-size: 14px; min-height: 20px }
   .sc-hint.err { color:#9B1E1E }
-  .sc-hint.ok { color:#2C5F3F }
+  .sc-hint.ok  { color:#2C5F3F }
 
   .sc-tip { margin-top:22px; padding:14px 16px; background:#FDF3DC;
             border:1px dashed var(--gold); border-radius:12px; font-size:14.5px;
@@ -63,9 +94,24 @@
   .sc-tip b { color:var(--navy) }
   .sc-tip a { color:var(--navy); font-weight:700 }
 
-  .sc-thanks { text-align:center; padding:20px 10px }
-  .sc-thanks h3 { color:var(--navy); font-family:'Frank',serif; font-size:28px; margin:0 0 6px }
-  .sc-thanks p { color:#6b6257; margin:0 0 14px }
+  .sc-privacy { margin-top:14px; padding:12px 14px; background:#F3F7FA;
+                border:1px solid #D8E4EE; border-radius:10px;
+                font-size:13.5px; color:#3a5266; line-height:1.55 }
+  .sc-privacy b { color:#12233F }
+
+  .sc-thanks { text-align:center; padding:24px 12px }
+  .sc-thanks h3 { color:var(--navy); font-family:'Frank',serif; font-size:32px; margin:0 0 8px }
+  .sc-thanks p { color:#6b6257; margin:0 0 14px; font-size:15.5px }
+  .sc-thanks .checkmark {
+    width:64px; height:64px; margin:0 auto 12px; border-radius:50%;
+    background:#DCF0E1; color:#2C5F3F; display:flex; align-items:center;
+    justify-content:center; font-size:34px; font-weight:800;
+  }
+
+  /* מקטע כותרת קטן */
+  .sc-section-title { font-family:'Frank',serif; font-size:18px; color:var(--navy);
+                      margin: 22px 0 6px; padding-top:14px; border-top:1px solid #EEE5D3 }
+  .sc-section-title:first-of-type { padding-top:0; border-top:0 }
 </style>
 </head>
 <body>
@@ -109,62 +155,82 @@
         <p class="subtle">הרישום עוזר לנו לתכנן את כמות המנות, האוכל יתחלק בצורה שווה
           בין המשפחות. חלוקת ההשתתפות (כספית או אוכל מבושל) — תפורסם בהמשך.</p>
 
-        <label class="sc-fld"><span>שם מלא</span>
+        <div class="sc-section-title">פרטי איש הקשר</div>
+
+        <label class="sc-fld"><span class="lbl">שם מלא</span>
           <input id="scName" autocomplete="name" required></label>
 
-        <label class="sc-fld"><span>טלפון</span>
+        <label class="sc-fld"><span class="lbl">טלפון</span>
           <input id="scPhone" inputmode="tel" autocomplete="tel" required
                  placeholder="נייד לתיאום אחרון"></label>
 
+        <div class="sc-section-title">האם מגיעים?</div>
+
         <div class="sc-fld">
-          <span>מגיע/ה לסעודה?</span>
           <div class="sc-yn">
             <input type="radio" name="scAttend" id="scYes" value="yes" checked>
-            <label for="scYes">כן, בשמחה</label>
+            <label for="scYes">כן, בשמחה 🎉</label>
             <input type="radio" name="scAttend" id="scNo" value="no">
             <label for="scNo">לא הפעם</label>
           </div>
         </div>
 
-        <div class="sc-row" id="scCounts">
-          <label class="sc-fld"><span>כמות מבוגרים</span>
-            <input id="scAdults" type="number" min="1" max="12" value="2"></label>
-          <label class="sc-fld"><span>כמות ילדים</span>
-            <input id="scKids" type="number" min="0" max="15" value="0"></label>
+        <div id="scCounts">
+          <div class="sc-row">
+            <label class="sc-fld"><span class="lbl">כמות מבוגרים</span>
+              <div class="sc-num">
+                <button type="button" data-step="-1" data-for="scAdults" aria-label="פחות">−</button>
+                <input id="scAdults" type="number" min="1" max="12" value="2">
+                <button type="button" data-step="+1" data-for="scAdults" aria-label="יותר">+</button>
+              </div>
+            </label>
+            <label class="sc-fld"><span class="lbl">כמות ילדים</span>
+              <div class="sc-num">
+                <button type="button" data-step="-1" data-for="scKids" aria-label="פחות">−</button>
+                <input id="scKids" type="number" min="0" max="15" value="0">
+                <button type="button" data-step="+1" data-for="scKids" aria-label="יותר">+</button>
+              </div>
+            </label>
+          </div>
+
+          <label class="sc-fld"><span class="lbl">הערות (אלרגיות, כשרות מיוחדת, בקשה)</span>
+            <textarea id="scNote" rows="3" placeholder="לא חובה"></textarea></label>
         </div>
 
-        <label class="sc-fld"><span>הערות (אלרגיות, כשרות מיוחדת, בקשה)</span>
-          <textarea id="scNote" rows="3" placeholder="לא חובה"></textarea></label>
+        <div class="sc-section-title">עדכון פרטים לרשימת המניין <span style="color:#9b8d6b;font-weight:400;font-size:13px">· לא חובה</span></div>
 
-        <!-- עדכון רשימת חברי המניין ─ בקשה נעימה, לא חובה -->
-        <div class="sc-tip" style="background:#EEF6FB;border-color:#93BEDA;color:#254764;margin:14px 0 8px">
-          <b>הזדמנות קטנה — לעדכן את הרשימה שלנו.</b>
-          כדי שהמערכת של המניין (מכתבי תודה, קבלות תרומה, הזמנות לאירועים)
-          תגיע אליכם באופן חלק, אנחנו מזמינים אתכם לעדכן את הפרטים שלכם ולהעלות
-          ספח תעודת זהות. <b>הכל וולונטרי לחלוטין</b>, ורק לצורך הרישום הפנימי
-          של המניין — שום פרט לא ייחשף לאף גורם מחוץ לוועדה.
-        </div>
+        <p class="subtle" style="margin:-2px 0 12px">
+          כדי שהמערכת שלנו (מכתבי תודה, קבלות תרומה, הזמנות)
+          תגיע אליכם באופן חלק, אנחנו מזמינים אתכם לעדכן פרטים.
+          <b>כל השדות כאן וולונטריים</b>, לשימוש פנימי בלבד של ועדת המניין.
+        </p>
 
         <div class="sc-row">
-          <label class="sc-fld"><span>מייל</span>
+          <label class="sc-fld"><span class="lbl">מייל</span>
             <input id="scEmail" type="email" autocomplete="email" placeholder="לא חובה"></label>
-          <label class="sc-fld"><span>ת״ז (להפקת קבלה)</span>
+          <label class="sc-fld"><span class="lbl">ת״ז (להפקת קבלה)</span>
             <input id="scId" inputmode="numeric" placeholder="לא חובה"></label>
         </div>
-        <label class="sc-fld"><span>כתובת מגורים</span>
+        <label class="sc-fld"><span class="lbl">כתובת מגורים</span>
           <input id="scAddr" autocomplete="street-address" placeholder="רחוב, בית, מעלה עמוס"></label>
 
-        <label class="sc-fld"><span>ספח תעודת זהות (תמונה או PDF)</span>
+        <label class="sc-fld"><span class="lbl">ספח תעודת זהות (תמונה או PDF)</span>
           <input id="scIdScan" type="file" accept="image/*,application/pdf">
           <span class="subtle" id="scIdScanName" style="display:block;margin-top:4px">לא נבחר קובץ. עד 3 מגה.</span>
         </label>
 
-        <label class="sc-fld"><span>עדכונים נוספים לרשימה (תוספת פרטים, מספרים של בני משפחה, בקשות)</span>
+        <label class="sc-fld"><span class="lbl">עדכונים נוספים לרשימה (בני משפחה, בקשות)</span>
           <textarea id="scUpd" rows="3" placeholder="לא חובה"></textarea></label>
+
+        <div class="sc-privacy">
+          🔒 <b>פרטיות:</b> הפרטים שלך נשמרים בשרת מוצפן פרטי של המניין (Supabase).
+          רק גבאי המניין רואים אותם. הם לא מפורסמים, לא משותפים לגורם חיצוני,
+          ולא מופיעים בשום דף פומבי.
+        </div>
 
         <div class="sc-actions">
           <button type="button" class="btn-g" id="scSend">שליחת ההרשמה</button>
-          <span class="subtle">הרישום נשמר מיד. מייל אישור נשלח לגבאי.</span>
+          <span class="subtle" style="margin:0">ההרשמה נשמרת מיד. מייל אישור יישלח לגבאי.</span>
         </div>
         <p class="sc-hint" id="scHint"></p>
 
@@ -178,6 +244,7 @@
       </div>
 
       <div class="sc-card sc-thanks" id="scThanks" hidden>
+        <div class="checkmark">✓</div>
         <h3>נרשמת. תודה!</h3>
         <p>ההרשמה נשמרה במערכת. אם משהו משתנה — ניתן לחזור לעמוד הזה ולעדכן.</p>
         <p><a href="./" class="btn-g" style="display:inline-block;text-decoration:none;padding:12px 22px;border-radius:10px">חזרה לדף הבית</a></p>
@@ -196,100 +263,7 @@
   </div>
 </footer>
 
-<script src="js/forms.js?v=20"></script>
-<script>
-(function(){
-  var $ = function(s){ return document.querySelector(s); };
-
-  function toggleCounts(){
-    var yes = $('#scYes').checked;
-    $('#scCounts').style.display = yes ? '' : 'none';
-  }
-  $('#scYes').addEventListener('change', toggleCounts);
-  $('#scNo').addEventListener('change', toggleCounts);
-
-  function digits(s){ return String(s||'').replace(/\D/g,''); }
-
-  var idScanB64 = '', idScanName = '', idScanMime = '';
-  $('#scIdScan').addEventListener('change', function(e){
-    var f = e.target.files && e.target.files[0];
-    var lbl = $('#scIdScanName');
-    idScanB64 = ''; idScanName = ''; idScanMime = '';
-    if (!f){ lbl.textContent = 'לא נבחר קובץ. עד 3 מגה.'; return; }
-    if (f.size > 3 * 1024 * 1024){
-      lbl.textContent = 'הקובץ גדול מ־3 מגה. בחר קובץ קטן יותר או צלם באיכות בינונית.';
-      e.target.value = ''; return;
-    }
-    var rd = new FileReader();
-    rd.onload = function(ev){
-      idScanB64 = String(ev.target.result || '');
-      idScanName = f.name || 'id-scan';
-      idScanMime = f.type || '';
-      lbl.textContent = 'נבחר: ' + idScanName + ' (' + Math.round(f.size/1024) + 'KB)';
-    };
-    rd.readAsDataURL(f);
-  });
-
-  $('#scSend').addEventListener('click', function(){
-    var name = $('#scName').value.trim();
-    var phone = $('#scPhone').value.trim();
-    var attending = $('#scYes').checked;
-    var adults = parseInt($('#scAdults').value,10) || 0;
-    var kids = parseInt($('#scKids').value,10) || 0;
-    var note = $('#scNote').value.trim();
-    var hint = $('#scHint');
-    hint.className = 'sc-hint';
-
-    if (name.length < 2){ hint.className='sc-hint err'; hint.textContent='נא למלא שם מלא.'; $('#scName').focus(); return; }
-    if (digits(phone).length < 9){ hint.className='sc-hint err'; hint.textContent='מספר טלפון לא תקין.'; $('#scPhone').focus(); return; }
-    if (attending && adults < 1){ hint.className='sc-hint err'; hint.textContent='כמות המבוגרים חייבת להיות לפחות 1.'; return; }
-
-    var btn = $('#scSend'); btn.disabled = true;
-    hint.textContent = 'שולח…';
-
-    var meals = attending ? (adults + kids) : 0;
-    var email = $('#scEmail').value.trim();
-    var idn = $('#scId').value.trim();
-    var addr = $('#scAddr').value.trim();
-    var upd = $('#scUpd').value.trim();
-    var details = {
-      attending: attending ? 'כן' : 'לא',
-      adults: attending ? adults : 0,
-      kids: attending ? kids : 0,
-      note: note
-    };
-    if (idn) details['ת״ז'] = idn;
-    if (addr) details['כתובת'] = addr;
-    if (upd) details['עדכון פרטים'] = upd;
-    if (idScanB64) {
-      details['ספח ת״ז'] = 'צורף · ' + idScanName + ' · ' + idScanMime;
-      details['id_scan_data'] = idScanB64;
-    }
-    var payload = {
-      kind: 'other',
-      name: name,
-      phone: phone,
-      email: email || null,
-      ref_key: 'seudah-simchat-torah-5787',
-      ref_label: 'סעודת שמחת תורה תשפ״ז',
-      qty: meals,
-      details: details,
-      source: 'simchat.html'
-    };
-
-    window.Forms.send(payload).then(function(res){
-      btn.disabled = false;
-      if (res.saved){
-        $('#scCard').hidden = true;
-        $('#scThanks').hidden = false;
-        window.scrollTo({top:0, behavior:'smooth'});
-      } else {
-        hint.className = 'sc-hint err';
-        hint.textContent = window.Forms.explain(res);
-      }
-    });
-  });
-})();
-</script>
+<script src="js/forms.js?v=21"></script>
+<script src="js/simchat.js?v=21"></script>
 </body>
 </html>

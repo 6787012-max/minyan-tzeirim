@@ -20,6 +20,39 @@
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/assistant-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css?v=25">
+<style>
+  /* פופ-אפ סעודת שמחת תורה — מעולה עד 04/10/2026, אחרי זה JS לא יציג */
+  .sp-backdrop { position: fixed; inset: 0; background: rgba(18,35,63,.55);
+                 display:flex; align-items:center; justify-content:center;
+                 padding:16px; z-index: 9999; opacity:0; transition: opacity .22s;
+                 backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+  .sp-backdrop.sp-show { opacity: 1 }
+  .sp-backdrop.sp-hide { opacity: 0 }
+  .sp-card { background:#fff; max-width: 460px; width: 100%; border-radius: 18px;
+             padding: 26px 24px 22px; text-align: right; position: relative;
+             border: 1px solid #E7DFD2;
+             box-shadow: 0 20px 60px rgba(18,35,63,.28);
+             transform: translateY(10px) scale(.98); transition: transform .22s; }
+  .sp-backdrop.sp-show .sp-card { transform: translateY(0) scale(1) }
+  .sp-close { position: absolute; top: 10px; left: 10px; background: transparent;
+              border: 0; font-size: 28px; line-height: 1; color: #A99A82; cursor: pointer;
+              width: 34px; height: 34px; border-radius: 50%; padding: 0;
+              display:flex; align-items:center; justify-content:center; font-weight:400 }
+  .sp-close:hover { background: #FBF6E8; color: #12233F }
+  .sp-eyebrow { color: #B08D3E; letter-spacing:.08em; font-weight:800; font-size:12px }
+  .sp-title { font-family:'Frank',serif; font-size:26px; color:#12233F;
+              margin: 6px 0 10px; line-height: 1.2 }
+  .sp-body { color:#4a4a4a; font-size:15.5px; line-height:1.6; margin: 0 0 18px }
+  .sp-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+  .sp-btn { display:inline-block; padding: 12px 20px; border-radius: 10px;
+            font-weight: 800; font-size: 15px; text-decoration: none;
+            border: 0; cursor: pointer; font-family: inherit }
+  .sp-btn-p { background: #B08D3E; color: #fff;
+              box-shadow: 0 4px 12px rgba(176,141,62,.3) }
+  .sp-btn-p:hover { filter: brightness(1.06) }
+  .sp-btn-s { background: transparent; color: #6b6257 }
+  .sp-btn-s:hover { background: #FBF6E8; color: #12233F }
+</style>
 </head>
 <body>
 
@@ -38,6 +71,7 @@
       <a href="kibud.html">כיבוד</a>
       <a href="hok.html">הוראת קבע</a>
       <a href="news.html">חדשות</a>
+      <a href="https://gmachim.mokad.co.il/">גמ"חים</a>
       <a class="give" href="#give">בוא תהיה שותף</a>
     </nav>
   </div>
@@ -103,14 +137,14 @@
   <a class="shas-banner" href="shas.html">
     <div class="wrap">
       <div class="sb-text">
-        <span class="k">חדש בבית הכנסת</span>
-        <b>ש״ס שוטנשטיין</b>
-        <span class="d">ברוך השם נקנה ש״ס לבית הכנסת. 73 כרכים —
-          כל אחד יכול לקחת על עצמו כרך.</span>
+        <span class="k">ש״ס שוטנשטיין · הזדרזו</span>
+        <b>נותרו 3 כרכים אחרונים</b>
+        <span class="d">ברוך השם נמכרו כמעט כל כרכי הש״ס שנקנה לבית הכנסת.
+          שלושה כרכים אחרונים ממתינים למי שיזדרז.</span>
       </div>
       <div class="sb-side">
-        <span class="num" id="sbFree">73</span>
-        <span class="lbl">כרכים עדיין פנויים</span>
+        <span class="num" id="sbFree">3</span>
+        <span class="lbl">כרכים אחרונים</span>
         <span class="go">לטבלת הכרכים ←</span>
       </div>
     </div>
@@ -286,6 +320,15 @@
     </div>
   </section>
 
+  <!-- קהילה: מרכז הגמ"חים -->
+  <section id="gmachim-community" style="padding:36px 16px; text-align:center; background:linear-gradient(180deg,#FFFDF7,#F7F3E9)">
+    <div class="wrap" style="max-width:720px; margin:0 auto">
+      <h2 style="margin:0 0 6px; font-size:24px">מרכז הגמ"חים של מעלה עמוס</h2>
+      <p style="margin:0 0 18px; color:#3D4F6B; font-size:16px">מאגר יישובי אחד לכל הגמ"חים שביישוב. לחפש גמ"ח, להוסיף את הגמ"ח שלכם, ולעדכן פרטים.</p>
+      <p style="margin:0"><a href="https://gmachim.mokad.co.il/" style="display:inline-block; background:#12233F; color:#fff; padding:12px 26px; border-radius:12px; font-weight:800; text-decoration:none; font-size:16px">כניסה למרכז הגמ"חים ←</a></p>
+    </div>
+  </section>
+
 </main>
 
 <footer>
@@ -313,5 +356,6 @@
 <script src="js/luach.js?v=20"></script>
 <script src="js/motion.js?v=20"></script>
 <script src="js/app.js?v=25"></script>
+<script src="js/simchat-popup.js?v=21"></script>
 </body>
 </html>
