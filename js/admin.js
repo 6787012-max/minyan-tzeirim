@@ -550,10 +550,21 @@
       if (saved && document.getElementById(saved)) startPanel = saved;
     } catch (e) { /* מצב פרטי */ }
     showPanel(startPanel);
+    /* sessionStorage שומר את הפאנל האחרון שהיה פתוח, אז אחרי רענון דף
+       יכול להיפתח ישר על contactsSec/seudahSec/gemachimSec בלי שאף
+       קליק על הסיידבר קרה — ובלי הקריאה הזו, הנתונים שלהם היו נשארים
+       ריקים (מיזוג/עריכה מסתמכים על מצב שלא נטען, ונכשלים בשקט). */
+    loadPanelData(startPanel);
   }
 
   /* ── מעבר בין פאנלים (סיידבר) ──────────────────────────────── */
   var PANEL_KEY = 'mt-admin-panel';
+
+  function loadPanelData(id) {
+    if (id === 'seudahSec') loadSeudah();
+    if (id === 'contactsSec') loadContacts();
+    if (id === 'gemachimSec') loadGemachim();
+  }
 
   function showPanel(id) {
     [].forEach.call(document.querySelectorAll('section[data-panel]'), function (s) {
@@ -573,9 +584,7 @@
     var b = e.target.closest('.side-link');
     if (!b) return;
     showPanel(b.dataset.panel);
-    if (b.dataset.panel === 'seudahSec') loadSeudah();
-    if (b.dataset.panel === 'contactsSec') loadContacts();
-    if (b.dataset.panel === 'gemachimSec') loadGemachim();
+    loadPanelData(b.dataset.panel);
   });
 
   /* ── אנשי קשר (הרחבה של congregants) ─────────────────────────── */
