@@ -164,6 +164,21 @@
 .b-confirmed, .b-paid { background: rgba(44, 95, 63, .12); color: #2C5F3F; }
 .b-cancelled, .b-duplicate { background: rgba(155, 30, 30, .1); color: #9B1E1E; }
 .row .warn { font-size: 12.5px; color: #9B1E1E; }
+.row .ok-badge { font-size: 12.5px; color: #2C5F3F; background: rgba(44, 95, 63, .1); padding: 2px 8px; border-radius: 999px; }
+
+/* כרטיסיית משפחה שחולצה אוטומטית מהספח בטופס סעודת שמחת תורה */
+.row .family-card {
+  margin-top: 10px; background: #FBF8F3; border: 1px solid #E7DFD2; border-radius: 10px;
+  padding: 12px 14px; font-size: 13.5px; color: #12233F;
+}
+.row .family-card .fc-title {
+  font-size: 11.5px; letter-spacing: .06em; color: #B08D3E; margin-bottom: 6px;
+}
+.row .family-card .fc-head { margin-bottom: 4px; }
+.row .family-card .fc-addr { color: #6b6257; font-size: 13px; margin-bottom: 6px; }
+.row .family-card .fc-kids-title { color: #6b6257; margin-top: 6px; font-size: 12.5px; }
+.row .family-card ul.fc-kids { margin: 4px 0 0 20px; padding: 0; }
+.row .family-card ul.fc-kids li { margin: 2px 0; font-size: 13.5px; }
 
 /* רישום שכבר טופל נשאר קריא אבל מפסיק למשוך את העין */
 .row.st-cancelled, .row.st-duplicate { opacity: .62; }

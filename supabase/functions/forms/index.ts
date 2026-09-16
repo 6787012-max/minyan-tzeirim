@@ -32,6 +32,10 @@ const GDRIVE_CLIENT_ID = Deno.env.get('GDRIVE_CLIENT_ID') ?? '';
 const GDRIVE_CLIENT_SECRET = Deno.env.get('GDRIVE_CLIENT_SECRET') ?? '';
 const GDRIVE_REFRESH_TOKEN = Deno.env.get('GDRIVE_REFRESH_TOKEN') ?? '';
 
+/* Gemini Vision — משמש לחילוץ פרטי משפחה מספח ת״ז שהועלה. gemini-2.5-flash
+   קורא את התמונה/PDF ומחזיר JSON מובנה של שמות ילדים+תאריכי לידה. */
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? '';
+
 const ALLOWED = new Set([SITE, 'http://localhost:8787', 'http://127.0.0.1:8787']);
 
 /* ── עזרי HTTP ─────────────────────────────────────────────────── */
@@ -273,7 +277,157 @@ async function relayStorageToDrive(pathWithBucket: string, displayName: string):
   return await uploadToDrive(displayName || 'id-scan', f.mime, f.data);
 }
 
-function mailHtml(kind: string, row: Record<string, unknown>, scanLink: string, scanName: string) {
+/* ── Gemini Vision — חילוץ פרטי משפחה מספח ת״ז ──────────────── */
+
+/** ממיר Uint8Array ל-base64 בלי לפוצץ zoro ב-btoa על מחרוזות ארוכות. */
+function bytesToB64(bytes: Uint8Array): string {
+  let bin = '';
+  const chunk = 8192;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    const sub = bytes.subarray(i, i + chunk);
+    bin += String.fromCharCode(...sub);
+  }
+  return btoa(bin);
+}
+
+interface FamilyCard {
+  head_of_household?: { name?: string; id?: string };
+  spouse?: { name?: string; id?: string };
+  address?: string;
+  city?: string;
+  children?: { name?: string; id?: string; birth_date?: string; gender?: string }[];
+  notes?: string;
+  model?: string;
+  extracted_at?: string;
+}
+
+/** קורא ספח ת״ז (image או PDF) ומחזיר JSON של המשפחה — או null בכשל. */
+async function extractFamilyFromScan(data: Uint8Array, mime: string): Promise<FamilyCard | null> {
+  if (!GEMINI_API_KEY) return null;
+  if (!data || data.length < 500) return null;
+
+  /* Gemini תומך ישירות ב-image/* ובחלק מ-PDF. אם ה-mime חסר או "octet-stream"
+     ננסה image/jpeg כברירת מחדל (רוב המכשירים שולחים JPG). */
+  let effectiveMime = mime && mime.includes('/') ? mime.toLowerCase() : 'image/jpeg';
+  if (effectiveMime === 'image/jpg') effectiveMime = 'image/jpeg';
+  /* HEIC/HEIF לא נתמך היטב ב-Gemini — נדלג בשקט במקום להפיל מודל */
+  if (effectiveMime.includes('heic') || effectiveMime.includes('heif')) return null;
+
+  const b64data = bytesToB64(data);
+
+  const model = 'gemini-2.5-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+
+  const prompt = `You are given a scan of an Israeli teudat zehut (ID) appendix ("ספח").
+Extract the family members listed on it into a strict JSON object with this exact structure:
+
+{
+  "head_of_household": {"name": "<full name in Hebrew>", "id": "<9-digit ID or empty>"},
+  "spouse": {"name": "<name>", "id": "<id>"} or null if not present,
+  "address": "<street + number in Hebrew>" or "",
+  "city": "<city name in Hebrew>" or "",
+  "children": [
+    {"name": "<full name in Hebrew>", "id": "<9-digit>", "birth_date": "YYYY-MM-DD", "gender": "male" or "female"}
+  ]
+}
+
+Rules:
+- Return names in Hebrew, exactly as printed on the document.
+- Convert Hebrew calendar dates to Gregorian YYYY-MM-DD if only Hebrew is shown; otherwise use what's printed.
+- If any field is missing on the scan, omit it (do not invent).
+- Gender is inferred from name/context ("בן"/"בת") when explicit.
+- If the scan is not a teudat zehut / ספח — return {"children": [], "notes": "not-a-teudat-zehut"}.
+- Return ONLY the JSON, no markdown, no commentary.`;
+
+  const payload = {
+    contents: [{
+      parts: [
+        { text: prompt },
+        { inline_data: { mime_type: effectiveMime, data: b64data } },
+      ],
+    }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0.1,
+      maxOutputTokens: 2048,
+    },
+  };
+
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) {
+      console.error('gemini extract non-ok', r.status, (await r.text()).slice(0, 300));
+      return null;
+    }
+    const j = await r.json();
+    const parts = j?.candidates?.[0]?.content?.parts ?? [];
+    let raw = '';
+    for (const p of parts) if (typeof p?.text === 'string') raw += p.text;
+    raw = raw.trim();
+    if (!raw) return null;
+    /* לפעמים המודל חוזר עם ```json … ``` למרות ה-responseMimeType. מנקים. */
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
+    let parsed: FamilyCard;
+    try { parsed = JSON.parse(raw); } catch {
+      console.error('gemini extract JSON parse fail', raw.slice(0, 200));
+      return null;
+    }
+    parsed.model = model;
+    parsed.extracted_at = new Date().toISOString();
+    return parsed;
+  } catch (e) {
+    console.error('gemini extract exception', String(e).slice(0, 200));
+    return null;
+  }
+}
+
+/** מחלץ מ-Storage + מפעיל Gemini + מחזיר את הכרטיס. */
+async function extractFamilyFromStoragePath(pathWithBucket: string): Promise<FamilyCard | null> {
+  const f = await downloadFromStorage(pathWithBucket);
+  if (!f) return null;
+  return await extractFamilyFromScan(f.data, f.mime);
+}
+
+/** מרנדר בלוק "כרטיסייה של משפחה" למייל, אם החילוץ הצליח. */
+function familyCardHtml(fam: FamilyCard | null): string {
+  if (!fam) return '';
+  const rows: string[] = [];
+  const line = (label: string, value: string) => {
+    if (!value) return;
+    rows.push(`<div style="margin:4px 0;font-size:14px"><b style="color:#B08D3E">${esc(label)}:</b> <span style="color:#12233F">${esc(value)}</span></div>`);
+  };
+  if (fam.head_of_household?.name) line('ראש המשפחה', fam.head_of_household.name + (fam.head_of_household.id ? ' · ' + fam.head_of_household.id : ''));
+  if (fam.spouse?.name)             line('בן/בת זוג',   fam.spouse.name + (fam.spouse.id ? ' · ' + fam.spouse.id : ''));
+  if (fam.address || fam.city)      line('כתובת',       [fam.address, fam.city].filter(Boolean).join(', '));
+
+  let kidsHtml = '';
+  if (Array.isArray(fam.children) && fam.children.length) {
+    const items = fam.children.map((c) => {
+      const parts: string[] = [];
+      if (c.name) parts.push(c.name);
+      if (c.id) parts.push('ת״ז ' + c.id);
+      if (c.birth_date) parts.push('נולד/ה ' + c.birth_date);
+      return `<li style="margin:3px 0;color:#12233F;font-size:14px">${esc(parts.join(' · '))}</li>`;
+    }).join('');
+    kidsHtml =
+      `<div style="margin:10px 0 0;font-size:14px"><b style="color:#B08D3E">ילדים (${fam.children.length}):</b>
+       <ul style="margin:6px 0 0 20px;padding:0">${items}</ul></div>`;
+  }
+
+  if (!rows.length && !kidsHtml) return '';
+
+  return `<div style="margin:18px 0 0;background:#FBF8F3;border:1px solid #E7DFD2;border-radius:10px;padding:14px 18px">
+    <div style="font-size:12px;letter-spacing:.08em;color:#B08D3E;margin-bottom:6px">כרטיסיית המשפחה · חולץ אוטומטית מהספח</div>
+    ${rows.join('')}
+    ${kidsHtml}
+  </div>`;
+}
+
+function mailHtml(kind: string, row: Record<string, unknown>, scanLink: string, scanName: string, fam: FamilyCard | null) {
   const d = (row.details ?? {}) as Record<string, unknown>;
   const lines: [string, string][] = [];
   const push = (k: string, v: unknown) => {
@@ -305,11 +459,12 @@ function mailHtml(kind: string, row: Record<string, unknown>, scanLink: string, 
     : '';
 
   return `<div dir="rtl" style="font-family:Arial,sans-serif;background:#FBF8F3;padding:22px">
-  <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #E7DFD2;border-radius:14px;padding:22px">
+  <div style="max-width:620px;margin:0 auto;background:#fff;border:1px solid #E7DFD2;border-radius:14px;padding:22px">
     <div style="font-size:13px;letter-spacing:.08em;color:#B08D3E">מניין הצעירים · מעלה עמוס</div>
     <h2 style="margin:6px 0 2px;color:#12233F;font-size:21px">רישום חדש — ${esc(LABEL[kind] ?? kind)}</h2>
     <p style="margin:0 0 16px;color:#6b6257;font-size:13px">נשלח אוטומטית מהאתר. הרישום כבר שמור במערכת.</p>
     <table style="border-collapse:collapse;font-size:15px;width:100%">${rows}</table>
+    ${familyCardHtml(fam)}
     ${scanBlock}
     <p style="margin:20px 0 0"><a href="${SITE}/admin.html"
        style="display:inline-block;background:#12233F;color:#fff;text-decoration:none;
@@ -367,31 +522,54 @@ Deno.serve(async (req) => {
   let id: number | null = null;
   try { id = JSON.parse(insText)[0]?.id ?? null; } catch { /* לא קריטי */ }
 
-  /* אם הלקוח העלה ספח ת״ז ל-Storage — מעבירים ל-Google Drive למייל.
+  /* אם הלקוח העלה ספח ת״ז ל-Storage — מעבירים ל-Google Drive למייל,
+     ובמקביל שולחים ל-Gemini Vision לחילוץ פרטי המשפחה.
      נטפרי חוסם קישורי storage.supabase — drive.google.com מותר בסביבה החרדית. */
   const details = row.details as Record<string, unknown>;
   const scanPath = clean(details?.id_scan_path, 200);
   const scanName = clean(details?.id_scan_name, 120) || 'id-scan';
   let scanLink = '';
+  let family: FamilyCard | null = null;
+  let extractionStatus: 'extracted' | 'failed' | 'skipped' = 'skipped';
+
   if (scanPath) {
     // מוסיפים סיומת אם חסרה, ומקדימים את השם הלוגי עם שם המגיש
     const safeName = (name + ' — ' + scanName).replace(/[<>:"|?*]/g, '_').slice(0, 180);
-    scanLink = await relayStorageToDrive(scanPath, safeName);
+    // מוריד פעם אחת מ-Storage, ואז משתמש בבתים לגם דרייב וגם Gemini
+    const scan = await downloadFromStorage(scanPath);
+    if (scan) {
+      // Drive
+      scanLink = await uploadToDrive(safeName, scan.mime, scan.data);
+      // Gemini
+      family = await extractFamilyFromScan(scan.data, scan.mime);
+      extractionStatus = family ? 'extracted' : 'failed';
+    } else {
+      // הקובץ הלך לאיבוד? עדיין שולחים מייל — הרישום הגיע
+      extractionStatus = 'failed';
+    }
   }
 
   const m = await sendMail(
     'רישום חדש — ' + (LABEL[kind] ?? kind) + ' — ' + name,
-    mailHtml(kind, row, scanLink, scanName),
+    mailHtml(kind, row, scanLink, scanName, family),
   );
 
   if (id !== null) {
+    const patch: Record<string, unknown> = {
+      mail_status: m.ok ? 'sent'
+        : (m.err === 'mail-not-configured' ? 'skipped' : 'failed'),
+      mail_error: m.ok ? null : m.err,
+    };
+    if (scanPath) {
+      patch.extraction_status = extractionStatus;
+      patch.family_extracted = family ?? null;
+      if (!family && extractionStatus === 'failed') {
+        patch.extraction_error = GEMINI_API_KEY ? 'gemini-returned-null' : 'gemini-not-configured';
+      }
+    }
     await db('signups?id=eq.' + id, {
       method: 'PATCH',
-      body: JSON.stringify({
-        mail_status: m.ok ? 'sent'
-          : (m.err === 'mail-not-configured' ? 'skipped' : 'failed'),
-        mail_error: m.ok ? null : m.err,
-      }),
+      body: JSON.stringify(patch),
     });
   }
 

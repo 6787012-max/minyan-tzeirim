@@ -147,9 +147,45 @@
     });
   }
 
+  function familyCardHtml(x) {
+    var fam = x.family_extracted;
+    if (!fam || typeof fam !== 'object') return '';
+    var head = '', kids = '', addr = '';
+    if (fam.head_of_household && fam.head_of_household.name) {
+      head += '<b>' + esc(fam.head_of_household.name) + '</b>';
+      if (fam.head_of_household.id) head += ' · ת״ז ' + esc(fam.head_of_household.id);
+    }
+    if (fam.spouse && fam.spouse.name) {
+      head += (head ? ' · ' : '') + esc(fam.spouse.name);
+      if (fam.spouse.id) head += ' · ' + esc(fam.spouse.id);
+    }
+    if (fam.address || fam.city) {
+      addr = '<div class="fc-addr">' + esc([fam.address, fam.city].filter(Boolean).join(', ')) + '</div>';
+    }
+    if (Array.isArray(fam.children) && fam.children.length) {
+      var items = fam.children.map(function (c) {
+        var parts = [];
+        if (c.name) parts.push(esc(c.name));
+        if (c.id) parts.push('ת״ז ' + esc(c.id));
+        if (c.birth_date) parts.push('נולד/ה ' + esc(c.birth_date));
+        return '<li>' + parts.join(' · ') + '</li>';
+      }).join('');
+      kids = '<div class="fc-kids-title">ילדים (' + fam.children.length + '):</div>' +
+             '<ul class="fc-kids">' + items + '</ul>';
+    }
+    if (!head && !kids && !addr) return '';
+    return '<div class="family-card">' +
+             '<div class="fc-title">כרטיסיית משפחה · חולץ אוטומטית מהספח</div>' +
+             (head ? '<div class="fc-head">' + head + '</div>' : '') +
+             addr + kids +
+           '</div>';
+  }
+
   function rowHtml(x) {
     var d = x.details || {};
     var extra = Object.keys(d).map(function (k) {
+      // מסתירים שדות פנימיים של הקובץ - הכרטיסייה כבר מציגה אותם
+      if (k === 'id_scan_path' || k === 'id_scan_name' || k === 'id_scan_mime') return '';
       return d[k] ? '<span class="dt"><i>' + esc(k) + '</i> ' + esc(d[k]) + '</span>' : '';
     }).join('');
 
@@ -160,6 +196,13 @@
     var mail = x.mail_status === 'sent' ? ''
       : '<span class="warn" title="' + esc(x.mail_error || '') + '">המייל לא נשלח</span>';
 
+    var extraction = '';
+    if (x.extraction_status === 'failed') {
+      extraction = '<span class="warn" title="' + esc(x.extraction_error || '') + '">חילוץ הספח נכשל</span>';
+    } else if (x.extraction_status === 'extracted') {
+      extraction = '<span class="ok-badge" title="נחתם אוטומטית מהספח">✔ ספח נקרא</span>';
+    }
+
     return '<article class="row st-' + esc(x.status) + '" data-id="' + x.id + '">' +
       '<div class="main">' +
         '<div class="line1">' +
@@ -167,7 +210,7 @@
           '<b>' + esc(x.name) + '</b>' +
           (x.phone ? '<a class="tel" href="tel:' + esc(x.phone) + '">' + esc(x.phone) + '</a>' : '') +
           '<span class="badge b-' + esc(x.status) + '">' + esc(STATUS[x.status] || x.status) + '</span>' +
-          mail +
+          mail + extraction +
         '</div>' +
         '<div class="line2">' +
           (x.ref_label ? '<span class="ref">' + esc(x.ref_label) + '</span>' : '') +
@@ -176,6 +219,7 @@
           extra +
           '<span class="when">' + ago + '</span>' +
         '</div>' +
+        familyCardHtml(x) +
         (x.admin_note ? '<div class="anote">' + esc(x.admin_note) + '</div>' : '') +
       '</div>' +
       '<div class="acts">' +
@@ -620,7 +664,8 @@
   var SEUDAH_ROWS = [];
 
   function loadSeudah() {
-    var q = 'signups?select=id,name,phone,qty,details,mail_status,created_at,status&ref_key=eq.'
+    var q = 'signups?select=id,name,phone,qty,details,mail_status,created_at,status,' +
+            'family_extracted,extraction_status,extraction_error&ref_key=eq.'
           + encodeURIComponent(SEUDAH_REF) + '&order=created_at.desc';
     db(q).then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) { SEUDAH_ROWS = rows || []; renderSeudah(); })
@@ -661,7 +706,26 @@
       var dt = new Date(r.created_at);
       var when = isNaN(dt) ? '' : (dt.getDate() + '/' + (dt.getMonth() + 1) + ' ' +
         String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0'));
-      return '<tr>' +
+
+      var famToggle = '';
+      var famRow = '';
+      if (r.family_extracted && typeof r.family_extracted === 'object') {
+        var kidsCount = Array.isArray(r.family_extracted.children) ? r.family_extracted.children.length : 0;
+        famToggle = '<button type="button" class="btn btn-s xsmall" data-fam="' + r.id + '" ' +
+                     'title="הצג/הסתר כרטיסיית משפחה שחולצה מהספח">' +
+                     '👨‍👩‍👧 ' + kidsCount + ' ילדים' +
+                    '</button>';
+        var famHtml = familyCardHtml({ family_extracted: r.family_extracted });
+        famRow = '<tr class="seudah-fam" id="fam-' + r.id + '" hidden>' +
+                   '<td colspan="9" style="padding:0 8px 12px">' + famHtml + '</td>' +
+                 '</tr>';
+      } else if (r.extraction_status === 'failed') {
+        famToggle = '<span class="warn" title="' + esc(r.extraction_error || '') + '">חילוץ נכשל</span>';
+      } else if (r.extraction_status === 'pending') {
+        famToggle = '<span class="dt">בעיבוד…</span>';
+      }
+
+      return '<tr class="seudah-row">' +
         '<td>' + esc(r.name) + '</td>' +
         '<td><a href="tel:' + esc(r.phone) + '">' + esc(r.phone || '') + '</a></td>' +
         '<td>' + esc(d.attending || '') + '</td>' +
@@ -669,20 +733,41 @@
         '<td>' + esc(d.kids != null ? d.kids : '') + '</td>' +
         '<td><b>' + (r.qty || 0) + '</b></td>' +
         '<td>' + esc(d.note || '') + '</td>' +
+        '<td>' + famToggle + '</td>' +
         '<td style="white-space:nowrap;color:#6b6257;font-size:12.5px">' + esc(when) + '</td>' +
-      '</tr>';
+      '</tr>' + famRow;
     }).join('');
-    $('#seudahRows').innerHTML = body || '<tr><td colspan="8" style="padding:16px;color:#6b6257">אין רישומים עדיין.</td></tr>';
+    $('#seudahRows').innerHTML = body || '<tr><td colspan="9" style="padding:16px;color:#6b6257">אין רישומים עדיין.</td></tr>';
+
+    /* מאזין לחשיפה/הסתרה של כרטיסיית המשפחה */
+    $('#seudahRows').querySelectorAll('[data-fam]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = document.getElementById('fam-' + b.getAttribute('data-fam'));
+        if (t) t.hidden = !t.hidden;
+      });
+    });
     $('#seudahNote').textContent = 'סה״כ ' + view.length + ' רישומים.';
   }
 
   $('#seudahQ') && $('#seudahQ').addEventListener('input', renderSeudah);
   $('#seudahExport') && $('#seudahExport').addEventListener('click', function () {
-    var lines = ['שם,טלפון,מגיע,מבוגרים,ילדים,מנות,הערה,נרשם'];
+    var lines = ['שם,טלפון,מגיע,מבוגרים,ילדים,מנות,הערה,ראש המשפחה,בן/בת זוג,כתובת,שמות הילדים (מהספח),נרשם'];
     SEUDAH_ROWS.forEach(function (r) {
       var d = r.details || {};
+      var f = r.family_extracted || {};
+      var head = f.head_of_household ? (f.head_of_household.name || '') : '';
+      var spouse = f.spouse ? (f.spouse.name || '') : '';
+      var addr = [f.address, f.city].filter(Boolean).join(', ');
+      var kids = Array.isArray(f.children)
+        ? f.children.map(function (c) {
+            var s = c.name || '';
+            if (c.birth_date) s += ' (' + c.birth_date + ')';
+            return s;
+          }).join(' | ')
+        : '';
       var csv = [r.name, r.phone, d.attending || '', d.adults || '', d.kids || '',
-                 r.qty || 0, (d.note || '').replace(/\n/g, ' '), r.created_at || ''];
+                 r.qty || 0, (d.note || '').replace(/\n/g, ' '),
+                 head, spouse, addr, kids, r.created_at || ''];
       lines.push(csv.map(function (v) {
         v = String(v == null ? '' : v);
         return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
