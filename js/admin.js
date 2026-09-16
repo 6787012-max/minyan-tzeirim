@@ -564,7 +564,7 @@
   var CONTACTS = [];
   function loadContacts() {
     var q = 'congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status&order=surname';
-    db(q).then(function (r) { return r.ok ? r.json() : []; })
+    return db(q).then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) { CONTACTS = rows || []; renderContacts(); })
       .catch(function () { $('#contactsHint').textContent = 'שגיאה בטעינה — ייתכן שהמיגרציה עוד לא הורצה.'; });
   }
@@ -662,17 +662,92 @@
   /* ── סעודת שמחת תורה תשפ״ז ───────────────────────────────────── */
   var SEUDAH_REF = 'seudah-simchat-torah-5787';
   var SEUDAH_ROWS = [];
+  var SEUDAH_EDIT_ID = null;
 
   function loadSeudah() {
     /* ref_key כולל מ-16/09 גם סיומת טלפון (ref_key:digits) כדי לאפשר כמה
        משפחות להירשם — eq. המדויק הישן כבר לא תופס אף שורה. like. עם *
        בסוף תואם גם רשומות ישנות בלי סיומת וגם חדשות איתה. */
     var q = 'signups?select=id,name,phone,qty,details,mail_status,created_at,status,' +
-            'family_extracted,extraction_status,extraction_error&ref_key=like.'
+            'family_extracted,extraction_status,extraction_error,congregant_id&ref_key=like.'
           + encodeURIComponent(SEUDAH_REF + '*') + '&order=created_at.desc';
     db(q).then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) { SEUDAH_ROWS = rows || []; renderSeudah(); })
       .catch(function () { $('#seudahNote').textContent = 'שגיאה בטעינה.'; });
+  }
+
+  /* כרטיס איש הקשר המקושר נוצר/מתעדכן אוטומטית ב-DB (טריגר seudah_sync,
+     ראו db/10_seudah_congregant_sync.sql) בכל הרשמה חדשה או עריכה כאן —
+     לפי טלפון מנורמל, בלי לדרוס שדות שכבר מולאו ידנית בכרטיס. */
+  function seudahContactBadge(r) {
+    if (!r.congregant_id) return '<span class="dt" style="color:#8A5A16">לא מקושר</span>';
+    return '<button type="button" class="btn btn-s xsmall" data-goto-contact="' + r.congregant_id + '">👤 לכרטיס</button>';
+  }
+
+  function seudahEditHtml(r) {
+    var d = r.details || {};
+    var attending = d.attending !== 'לא';
+    return '<tr class="seudah-row editing" data-id="' + r.id + '">' +
+      '<td><input class="se-name inp mb0" style="width:100px" value="' + esc(r.name) + '"></td>' +
+      '<td><input class="se-phone inp mb0" style="width:100px" value="' + esc(r.phone || '') + '"></td>' +
+      '<td><select class="se-attending inp mb0">' +
+        '<option value="כן"' + (attending ? ' selected' : '') + '>כן</option>' +
+        '<option value="לא"' + (!attending ? ' selected' : '') + '>לא</option>' +
+      '</select></td>' +
+      '<td><input class="se-adults inp mb0" type="number" min="0" max="20" style="width:52px" value="' + esc(d.adults != null ? d.adults : 0) + '"></td>' +
+      '<td><input class="se-kids inp mb0" type="number" min="0" max="20" style="width:52px" value="' + esc(d.kids != null ? d.kids : 0) + '"></td>' +
+      '<td>—</td>' +
+      '<td><input class="se-note inp mb0" style="width:110px" value="' + esc(d.note || '') + '"></td>' +
+      '<td colspan="4" class="acts">' +
+        '<button type="button" class="btn btn-g small" data-seudah-save="' + r.id + '">שמירה</button> ' +
+        '<button type="button" class="btn btn-s small" data-seudah-cancel="' + r.id + '">ביטול</button>' +
+      '</td>' +
+    '</tr>';
+  }
+
+  function saveSeudahRow(id) {
+    var row = document.querySelector('.seudah-row.editing[data-id="' + id + '"]');
+    var r = SEUDAH_ROWS.filter(function (x) { return x.id === id; })[0];
+    if (!row || !r) return;
+
+    var name = row.querySelector('.se-name').value.trim();
+    var phone = row.querySelector('.se-phone').value.trim();
+    var attending = row.querySelector('.se-attending').value === 'כן';
+    var adults = Math.max(0, parseInt(row.querySelector('.se-adults').value, 10) || 0);
+    var kids = Math.max(0, parseInt(row.querySelector('.se-kids').value, 10) || 0);
+    var note = row.querySelector('.se-note').value.trim();
+    if (name.length < 2 || phone.replace(/\D/g, '').length < 9) {
+      alert('שם או טלפון לא תקינים.'); return;
+    }
+
+    var details = Object.assign({}, r.details || {}, {
+      attending: attending ? 'כן' : 'לא',
+      adults: attending ? adults : 0,
+      kids: attending ? kids : 0,
+      note: note
+    });
+    var patch = { name: name, phone: phone, qty: attending ? (adults + kids) : 0, details: details };
+
+    row.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    db('signups?id=eq.' + id, {
+      method: 'PATCH', body: JSON.stringify(patch), prefer: 'return=representation'
+    }).then(function (resp) {
+      return resp.text().then(function (t) { return { ok: resp.ok, t: t }; });
+    }).then(function (res) {
+      if (!res.ok) {
+        alert('שמירה נכשלה.');
+        row.querySelectorAll('button').forEach(function (b) { b.disabled = false; });
+        return;
+      }
+      var x = null;
+      try { x = JSON.parse(res.t)[0]; } catch (e) { /* ריק */ }
+      if (x) {
+        var idx = SEUDAH_ROWS.findIndex(function (y) { return y.id === x.id; });
+        if (idx >= 0) SEUDAH_ROWS[idx] = x;
+      }
+      SEUDAH_EDIT_ID = null;
+      renderSeudah();
+    });
   }
 
   function renderSeudah() {
@@ -705,6 +780,8 @@
       '<div class="card"><div class="k">סה״כ מנות</div><div class="v">' + kpi.meals + '</div></div>';
 
     var body = view.map(function (r) {
+      if (r.id === SEUDAH_EDIT_ID) return seudahEditHtml(r);
+
       var d = r.details || {};
       var dt = new Date(r.created_at);
       var when = isNaN(dt) ? '' : (dt.getDate() + '/' + (dt.getMonth() + 1) + ' ' +
@@ -720,7 +797,7 @@
                     '</button>';
         var famHtml = familyCardHtml({ family_extracted: r.family_extracted });
         famRow = '<tr class="seudah-fam" id="fam-' + r.id + '" hidden>' +
-                   '<td colspan="9" style="padding:0 8px 12px">' + famHtml + '</td>' +
+                   '<td colspan="11" style="padding:0 8px 12px">' + famHtml + '</td>' +
                  '</tr>';
       } else if (r.extraction_status === 'failed') {
         famToggle = '<span class="warn" title="' + esc(r.extraction_error || '') + '">חילוץ נכשל</span>';
@@ -728,7 +805,7 @@
         famToggle = '<span class="dt">בעיבוד…</span>';
       }
 
-      return '<tr class="seudah-row">' +
+      return '<tr class="seudah-row" data-id="' + r.id + '">' +
         '<td>' + esc(r.name) + '</td>' +
         '<td><a href="tel:' + esc(r.phone) + '">' + esc(r.phone || '') + '</a></td>' +
         '<td>' + esc(d.attending || '') + '</td>' +
@@ -737,20 +814,42 @@
         '<td><b>' + (r.qty || 0) + '</b></td>' +
         '<td>' + esc(d.note || '') + '</td>' +
         '<td>' + famToggle + '</td>' +
+        '<td>' + seudahContactBadge(r) + '</td>' +
         '<td style="white-space:nowrap;color:#6b6257;font-size:12.5px">' + esc(when) + '</td>' +
+        '<td><button type="button" class="btn btn-s xsmall" data-seudah-edit="' + r.id + '">עריכה</button></td>' +
       '</tr>' + famRow;
     }).join('');
-    $('#seudahRows').innerHTML = body || '<tr><td colspan="9" style="padding:16px;color:#6b6257">אין רישומים עדיין.</td></tr>';
-
-    /* מאזין לחשיפה/הסתרה של כרטיסיית המשפחה */
-    $('#seudahRows').querySelectorAll('[data-fam]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var t = document.getElementById('fam-' + b.getAttribute('data-fam'));
-        if (t) t.hidden = !t.hidden;
-      });
-    });
+    $('#seudahRows').innerHTML = body || '<tr><td colspan="11" style="padding:16px;color:#6b6257">אין רישומים עדיין.</td></tr>';
     $('#seudahNote').textContent = 'סה״כ ' + view.length + ' רישומים.';
   }
+
+  /* מאזין אחד קבוע — בלי re-bind בכל render — לכל הפעולות בטבלת הסעודה:
+     חשיפת כרטיסיית משפחה, מעבר לכרטיס איש קשר, עריכה/שמירה/ביטול. */
+  $('#seudahRows').addEventListener('click', function (e) {
+    var famBtn = e.target.closest('[data-fam]');
+    if (famBtn) {
+      var t = document.getElementById('fam-' + famBtn.getAttribute('data-fam'));
+      if (t) t.hidden = !t.hidden;
+      return;
+    }
+    var gotoBtn = e.target.closest('[data-goto-contact]');
+    if (gotoBtn) {
+      var cid = Number(gotoBtn.dataset.gotoContact);
+      showPanel('contactsSec');
+      loadContacts().then(function () {
+        var c = CONTACTS.filter(function (x) { return x.id === cid; })[0];
+        var input = $('#contactsQ');
+        if (input) { input.value = c ? (c.full_name || c.surname || '') : ''; renderContacts(); }
+      });
+      return;
+    }
+    var editBtn = e.target.closest('[data-seudah-edit]');
+    if (editBtn) { SEUDAH_EDIT_ID = Number(editBtn.dataset.seudahEdit); renderSeudah(); return; }
+    var cancelBtn = e.target.closest('[data-seudah-cancel]');
+    if (cancelBtn) { SEUDAH_EDIT_ID = null; renderSeudah(); return; }
+    var saveBtn = e.target.closest('[data-seudah-save]');
+    if (saveBtn) { saveSeudahRow(Number(saveBtn.dataset.seudahSave)); return; }
+  });
 
   $('#seudahQ') && $('#seudahQ').addEventListener('input', renderSeudah);
   $('#seudahExport') && $('#seudahExport').addEventListener('click', function () {
