@@ -177,7 +177,36 @@ function esc(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function mailHtml(kind: string, row: Record<string, unknown>) {
+/** יוצר signed URL לקובץ בדלי פרטי. נכשל בשקט (מחזיר '') כדי שהמייל
+ *  יישלח גם אם החתימה נכשלה — עדיף רישום עם קישור חסר מאשר שאין מייל. */
+async function signStorageUrl(pathWithBucket: string, expiresSec: number): Promise<string> {
+  // pathWithBucket = 'bucket/folder/file.ext' — הלקוח שולח את זה
+  const slash = pathWithBucket.indexOf('/');
+  if (slash < 0) return '';
+  const bucket = pathWithBucket.slice(0, slash);
+  const objectPath = pathWithBucket.slice(slash + 1);
+  try {
+    const r = await fetch(
+      URL_ + '/storage/v1/object/sign/' + bucket + '/' + encodeURI(objectPath),
+      {
+        method: 'POST',
+        headers: {
+          'apikey': SERVICE,
+          'Authorization': 'Bearer ' + SERVICE,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ expiresIn: expiresSec }),
+      },
+    );
+    if (!r.ok) return '';
+    const j = await r.json();
+    const rel = String(j.signedURL || j.signedUrl || '');
+    if (!rel) return '';
+    return URL_ + '/storage/v1' + (rel.startsWith('/') ? rel : '/' + rel);
+  } catch { return ''; }
+}
+
+function mailHtml(kind: string, row: Record<string, unknown>, scanLink: string, scanName: string) {
   const d = (row.details ?? {}) as Record<string, unknown>;
   const lines: [string, string][] = [];
   const push = (k: string, v: unknown) => {
@@ -190,12 +219,23 @@ function mailHtml(kind: string, row: Record<string, unknown>) {
   push('פריט', row.ref_label);
   push('כמות', row.qty);
   push('סכום', row.amount ? '₪' + row.amount : '');
-  for (const [k, v] of Object.entries(d)) push(k, v);
+  for (const [k, v] of Object.entries(d)) {
+    // אלה שדות פנימיים לחתימת URL — לא צריך להדביק אותם למייל
+    if (k === 'id_scan_path' || k === 'id_scan_name' || k === 'id_scan_mime') continue;
+    push(k, v);
+  }
   push('מהדף', row.source);
 
   const rows = lines.map(([k, v]) =>
     `<tr><td style="padding:6px 14px 6px 0;color:#6b6257;white-space:nowrap">${esc(k)}</td>` +
     `<td style="padding:6px 0;color:#12233F;font-weight:600">${esc(v)}</td></tr>`).join('');
+
+  const scanBlock = scanLink
+    ? `<p style="margin:16px 0 0"><a href="${esc(scanLink)}"
+         style="display:inline-block;background:#B08D3E;color:#fff;text-decoration:none;
+                padding:10px 18px;border-radius:9px;font-size:14px">📎 הורדת ספח: ${esc(scanName || 'קובץ')}</a>
+       <span style="font-size:12px;color:#6b6257;display:block;margin-top:6px">הקישור בתוקף ל-30 יום.</span></p>`
+    : '';
 
   return `<div dir="rtl" style="font-family:Arial,sans-serif;background:#FBF8F3;padding:22px">
   <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #E7DFD2;border-radius:14px;padding:22px">
@@ -203,6 +243,7 @@ function mailHtml(kind: string, row: Record<string, unknown>) {
     <h2 style="margin:6px 0 2px;color:#12233F;font-size:21px">רישום חדש — ${esc(LABEL[kind] ?? kind)}</h2>
     <p style="margin:0 0 16px;color:#6b6257;font-size:13px">נשלח אוטומטית מהאתר. הרישום כבר שמור במערכת.</p>
     <table style="border-collapse:collapse;font-size:15px;width:100%">${rows}</table>
+    ${scanBlock}
     <p style="margin:20px 0 0"><a href="${SITE}/admin.html"
        style="display:inline-block;background:#12233F;color:#fff;text-decoration:none;
               padding:10px 18px;border-radius:9px;font-size:14px">לאזור הניהול</a></p>
@@ -259,9 +300,15 @@ Deno.serve(async (req) => {
   let id: number | null = null;
   try { id = JSON.parse(insText)[0]?.id ?? null; } catch { /* לא קריטי */ }
 
+  /* אם הלקוח העלה ספח ת״ז ל-Storage — חותמים על קישור זמני למייל */
+  const details = row.details as Record<string, unknown>;
+  const scanPath = clean(details?.id_scan_path, 200);
+  const scanName = clean(details?.id_scan_name, 120);
+  const scanLink = scanPath ? await signStorageUrl(scanPath, 60 * 60 * 24 * 30) : '';
+
   const m = await sendMail(
     'רישום חדש — ' + (LABEL[kind] ?? kind) + ' — ' + name,
-    mailHtml(kind, row),
+    mailHtml(kind, row, scanLink, scanName),
   );
 
   if (id !== null) {
