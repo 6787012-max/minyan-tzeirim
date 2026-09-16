@@ -26,6 +26,12 @@ const MAIL_PASS = Deno.env.get('MAIL_PASS') ?? '';
 const MAIL_TO = Deno.env.get('MAIL_TO') ?? '';
 const SITE = Deno.env.get('SITE_ORIGIN') ?? 'https://minyan.mokad.co.il';
 
+/* OAuth של גוגל דרייב — משמש להעברת ספחי ת״ז מ-Storage לדרייב. הכרחי כי
+   נטפרי חוסם URLs של Supabase Storage אבל מאפשר drive.google.com. */
+const GDRIVE_CLIENT_ID = Deno.env.get('GDRIVE_CLIENT_ID') ?? '';
+const GDRIVE_CLIENT_SECRET = Deno.env.get('GDRIVE_CLIENT_SECRET') ?? '';
+const GDRIVE_REFRESH_TOKEN = Deno.env.get('GDRIVE_REFRESH_TOKEN') ?? '';
+
 const ALLOWED = new Set([SITE, 'http://localhost:8787', 'http://127.0.0.1:8787']);
 
 /* ── עזרי HTTP ─────────────────────────────────────────────────── */
@@ -177,33 +183,94 @@ function esc(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-/** יוצר signed URL לקובץ בדלי פרטי. נכשל בשקט (מחזיר '') כדי שהמייל
- *  יישלח גם אם החתימה נכשלה — עדיף רישום עם קישור חסר מאשר שאין מייל. */
-async function signStorageUrl(pathWithBucket: string, expiresSec: number): Promise<string> {
-  // pathWithBucket = 'bucket/folder/file.ext' — הלקוח שולח את זה
+/** מוריד קובץ מ-Supabase Storage. מחזיר Blob או null. */
+async function downloadFromStorage(pathWithBucket: string): Promise<{data: Uint8Array; mime: string} | null> {
   const slash = pathWithBucket.indexOf('/');
-  if (slash < 0) return '';
+  if (slash < 0) return null;
   const bucket = pathWithBucket.slice(0, slash);
   const objectPath = pathWithBucket.slice(slash + 1);
   try {
     const r = await fetch(
-      URL_ + '/storage/v1/object/sign/' + bucket + '/' + encodeURI(objectPath),
-      {
-        method: 'POST',
-        headers: {
-          'apikey': SERVICE,
-          'Authorization': 'Bearer ' + SERVICE,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ expiresIn: expiresSec }),
-      },
+      URL_ + '/storage/v1/object/' + bucket + '/' + encodeURI(objectPath),
+      { headers: { 'apikey': SERVICE, 'Authorization': 'Bearer ' + SERVICE } },
     );
+    if (!r.ok) return null;
+    const buf = new Uint8Array(await r.arrayBuffer());
+    return { data: buf, mime: r.headers.get('content-type') || 'application/octet-stream' };
+  } catch { return null; }
+}
+
+/** ממיר refresh token ל-access token תקף. תוקף של שעה. */
+async function gdriveAccessToken(): Promise<string> {
+  if (!GDRIVE_CLIENT_ID || !GDRIVE_CLIENT_SECRET || !GDRIVE_REFRESH_TOKEN) return '';
+  try {
+    const body = new URLSearchParams({
+      client_id: GDRIVE_CLIENT_ID,
+      client_secret: GDRIVE_CLIENT_SECRET,
+      refresh_token: GDRIVE_REFRESH_TOKEN,
+      grant_type: 'refresh_token',
+    });
+    const r = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    });
     if (!r.ok) return '';
     const j = await r.json();
-    const rel = String(j.signedURL || j.signedUrl || '');
-    if (!rel) return '';
-    return URL_ + '/storage/v1' + (rel.startsWith('/') ? rel : '/' + rel);
+    return String(j.access_token || '');
   } catch { return ''; }
+}
+
+/** מעלה קובץ לגוגל דרייב, מגדיר anyone-with-link ומחזיר URL של view. */
+async function uploadToDrive(name: string, mime: string, data: Uint8Array): Promise<string> {
+  const tok = await gdriveAccessToken();
+  if (!tok) return '';
+  try {
+    // multipart upload — יעיל לקבצים עד ~5MB, ועובד גם עד ~50MB (במגבלת memory)
+    const boundary = '===mniyan_' + crypto.randomUUID();
+    const meta = JSON.stringify({ name, mimeType: mime });
+    const head = enc.encode(
+      '--' + boundary + '\r\n' +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      meta + '\r\n' +
+      '--' + boundary + '\r\n' +
+      'Content-Type: ' + mime + '\r\n\r\n',
+    );
+    const tail = enc.encode('\r\n--' + boundary + '--\r\n');
+    const body = new Uint8Array(head.length + data.length + tail.length);
+    body.set(head, 0);
+    body.set(data, head.length);
+    body.set(tail, head.length + data.length);
+
+    const up = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + tok,
+        'Content-Type': 'multipart/related; boundary=' + boundary,
+      },
+      body,
+    });
+    if (!up.ok) return '';
+    const uj = await up.json();
+    const fileId = String(uj.id || '');
+    if (!fileId) return '';
+
+    // מרשה גישה לכל מי שיש לו את הקישור (reader)
+    await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '/permissions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + tok, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'reader', type: 'anyone' }),
+    });
+
+    return 'https://drive.google.com/file/d/' + fileId + '/view';
+  } catch { return ''; }
+}
+
+/** מעביר קובץ מ-Supabase Storage לדרייב. מחזיר URL של דרייב, או '' בכשל. */
+async function relayStorageToDrive(pathWithBucket: string, displayName: string): Promise<string> {
+  const f = await downloadFromStorage(pathWithBucket);
+  if (!f) return '';
+  return await uploadToDrive(displayName || 'id-scan', f.mime, f.data);
 }
 
 function mailHtml(kind: string, row: Record<string, unknown>, scanLink: string, scanName: string) {
@@ -233,8 +300,8 @@ function mailHtml(kind: string, row: Record<string, unknown>, scanLink: string, 
   const scanBlock = scanLink
     ? `<p style="margin:16px 0 0"><a href="${esc(scanLink)}"
          style="display:inline-block;background:#B08D3E;color:#fff;text-decoration:none;
-                padding:10px 18px;border-radius:9px;font-size:14px">📎 הורדת ספח: ${esc(scanName || 'קובץ')}</a>
-       <span style="font-size:12px;color:#6b6257;display:block;margin-top:6px">הקישור בתוקף ל-30 יום.</span></p>`
+                padding:10px 18px;border-radius:9px;font-size:14px">📎 פתיחת ספח בגוגל דרייב</a>
+       <span style="font-size:12px;color:#6b6257;display:block;margin-top:6px">${esc(scanName || '')}</span></p>`
     : '';
 
   return `<div dir="rtl" style="font-family:Arial,sans-serif;background:#FBF8F3;padding:22px">
@@ -300,11 +367,17 @@ Deno.serve(async (req) => {
   let id: number | null = null;
   try { id = JSON.parse(insText)[0]?.id ?? null; } catch { /* לא קריטי */ }
 
-  /* אם הלקוח העלה ספח ת״ז ל-Storage — חותמים על קישור זמני למייל */
+  /* אם הלקוח העלה ספח ת״ז ל-Storage — מעבירים ל-Google Drive למייל.
+     נטפרי חוסם קישורי storage.supabase — drive.google.com מותר בסביבה החרדית. */
   const details = row.details as Record<string, unknown>;
   const scanPath = clean(details?.id_scan_path, 200);
-  const scanName = clean(details?.id_scan_name, 120);
-  const scanLink = scanPath ? await signStorageUrl(scanPath, 60 * 60 * 24 * 30) : '';
+  const scanName = clean(details?.id_scan_name, 120) || 'id-scan';
+  let scanLink = '';
+  if (scanPath) {
+    // מוסיפים סיומת אם חסרה, ומקדימים את השם הלוגי עם שם המגיש
+    const safeName = (name + ' — ' + scanName).replace(/[<>:"|?*]/g, '_').slice(0, 180);
+    scanLink = await relayStorageToDrive(scanPath, safeName);
+  }
 
   const m = await sendMail(
     'רישום חדש — ' + (LABEL[kind] ?? kind) + ' — ' + name,

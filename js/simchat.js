@@ -307,12 +307,14 @@
       details['id_scan_mime'] = idScanMime;
     }
 
+    /* ref_key כולל את הטלפון: אינדקס יחודי (kind, ref_key) מונע
+       מאותו משתמש להירשם פעמיים, אבל מאפשר לכל משפחה להירשם. */
     var payload = {
       kind: 'other',
       name: name,
       phone: phone,
       email: email || null,
-      ref_key:   'seudah-simchat-torah-5787',
+      ref_key:   'seudah-simchat-torah-5787:' + digits(phone),
       ref_label: 'סעודת שמחת תורה תשפ״ז',
       qty: meals,
       details: details,
