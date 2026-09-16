@@ -11,7 +11,7 @@
 <link rel="icon" href="img/favicon.ico" sizes="any">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css?v=20">
-<link rel="stylesheet" href="css/admin.css?v=25">
+<link rel="stylesheet" href="css/admin.css?v=26">
 </head>
 <body class="adm">
 
@@ -361,7 +361,14 @@
           </div>
           <div class="ae-group">
             <button type="button" class="btn btn-s small" id="aeAddText">+ טקסט</button>
-            <button type="button" class="btn btn-s small" id="aeAddImg">+ תמונה/לוגו</button>
+            <select id="aeLogoPick" class="ae-sel" style="min-width:150px" title="בחירת לוגו">
+              <option value="img/logo-h.svg">לוגו מניין הצעירים</option>
+              <option value="img/logo-h-white.svg">לוגו מניין הצעירים · לבן</option>
+              <option value="img/logo-kehilati.svg">לוגו חלקי בקהילתי</option>
+              <option value="img/logo-kehilati-navy.svg">לוגו חלקי בקהילתי · נייבי</option>
+              <option value="img/logo-kehilati-cream.svg">לוגו חלקי בקהילתי · קרם</option>
+            </select>
+            <button type="button" class="btn btn-s small" id="aeAddImg">+ הוספת לוגו</button>
             <label class="btn btn-s small" for="aeUpload" style="cursor:pointer">העלאה…</label>
             <input type="file" id="aeUpload" accept="image/*" hidden>
             <button type="button" class="btn btn-s small" id="aeAddRect" title="מלבן">▭</button>
@@ -702,7 +709,7 @@
 <script src="js/vendor/pdfjs/pdf.min.js"></script>
 <script src="js/ocr-scan.js?v=1"></script>
 <script src="js/admin.js?v=35"></script>
-<script src="js/admin-ads.js?v=3"></script>
+<script src="js/admin-ads.js?v=4"></script>
 <script src="js/admin-forms.js?v=1"></script>
 <script src="js/realtime.js?v=4"></script>
 </body>

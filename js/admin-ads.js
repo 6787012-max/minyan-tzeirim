@@ -840,7 +840,10 @@
   function bind() {
     $('#aeLoadTpl').addEventListener('click', function () { applyTemplate($('#aeTpl').value); });
     $('#aeAddText').addEventListener('click', addText);
-    $('#aeAddImg').addEventListener('click', function () { addImage(); });
+    $('#aeAddImg').addEventListener('click', function () {
+      var pick = $('#aeLogoPick');
+      addImage(pick ? pick.value : undefined);
+    });
     var addRect = $('#aeAddRect'); if (addRect) addRect.addEventListener('click', function () { addShape('rect'); });
     var addCirc = $('#aeAddCirc'); if (addCirc) addCirc.addEventListener('click', function () { addShape('circle'); });
     var addLine = $('#aeAddLine'); if (addLine) addLine.addEventListener('click', function () { addShape('line'); });
