@@ -219,6 +219,22 @@
           </div>
           <label class="fld"><span>הערת התאמה</span><input id="ceNote"></label>
 
+          <div class="fld" id="ceKidsWrap">
+            <span>ילדים</span>
+            <div id="ceKidsList" style="display:flex;flex-direction:column;gap:6px;margin:6px 0"></div>
+            <button type="button" class="btn btn-s small" id="ceKidAdd">+ הוסף ילד/ה</button>
+          </div>
+
+          <div class="fld" id="ceScanWrap">
+            <span>ספח ת״ז — העלאה וחילוץ אוטומטי</span>
+            <input id="ceScanFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+            <p class="hint" id="ceScanHint" style="margin:6px 0 0">לא נבחר קובץ.</p>
+            <div id="ceScanSuggest" hidden style="margin-top:8px;background:var(--cream);border:1px solid var(--line);border-radius:9px;padding:10px 12px">
+              <div id="ceScanSuggestText" style="font-size:13px;color:var(--navy)"></div>
+              <button type="button" class="btn btn-g small" id="ceScanApply" style="margin-top:8px">מילוי אוטומטי מהחילוץ</button>
+            </div>
+          </div>
+
           <div class="fld" id="ceRelWrap">
             <span>קשורים (בתי-אב אחרים — הורים/ילדים נשואים/אחים)</span>
             <div id="ceRelList" style="display:flex;flex-direction:column;gap:6px;margin:6px 0"></div>
@@ -679,7 +695,7 @@
 
 <script src="js/vendor/jspdf.umd.min.js"></script>
 <script src="js/vendor/supabase/supabase.min.js"></script>
-<script src="js/admin.js?v=32"></script>
+<script src="js/admin.js?v=33"></script>
 <script src="js/admin-ads.js?v=3"></script>
 <script src="js/admin-forms.js?v=1"></script>
 <script src="js/realtime.js?v=4"></script>

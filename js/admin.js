@@ -650,7 +650,7 @@
 
   function loadContacts() {
     return Promise.all([
-      db('congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status,match_note&order=surname')
+      db('congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status,match_note,children&order=surname')
         .then(function (r) { return r.ok ? r.json() : []; }),
       db('contact_docs?select=id,contact_id,kind,file_path,original_name,created_at')
         .then(function (r) { return r.ok ? r.json() : []; }),
@@ -730,6 +730,116 @@
   /* ── עריכה/הוספה של כרטיס איש קשר ─────────────────────────────── */
   var CE_EDIT_ID = null; /* null = כרטיס חדש */
   var CE_REL_MAP = {};   /* שם→id, למימוש ה-datalist של בחירת קרוב */
+  var CE_CHILDREN = [];  /* [{name,id_num,birth_date,gender}] — נערך בזיכרון עד שמירה */
+  var CE_SCAN_PATH = '', CE_SCAN_NAME = '', CE_SCAN_MIME = '', CE_SCAN_FAMILY = null;
+
+  function renderCeKids() {
+    var wrap = $('#ceKidsList');
+    wrap.innerHTML = CE_CHILDREN.length ? CE_CHILDREN.map(function (k, i) {
+      return '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 8px">' +
+        '<input class="inp mb0 ck-name" data-i="' + i + '" placeholder="שם" value="' + esc(k.name || '') + '" style="flex:1 1 120px">' +
+        '<input class="inp mb0 ck-id" data-i="' + i + '" placeholder="ת״ז" value="' + esc(k.id_num || '') + '" style="flex:0 1 100px">' +
+        '<input class="inp mb0 ck-bd" data-i="' + i + '" type="date" value="' + esc(k.birth_date || '') + '" style="flex:0 1 150px">' +
+        '<button type="button" class="btn btn-x small" data-kid-del="' + i + '">הסרה</button>' +
+      '</div>';
+    }).join('') : '<span class="hint" style="margin:0">אין ילדים רשומים.</span>';
+  }
+  $('#ceKidAdd').addEventListener('click', function () {
+    CE_CHILDREN.push({ name: '', id_num: '', birth_date: '', gender: '' });
+    renderCeKids();
+  });
+  $('#ceKidsList').addEventListener('input', function (e) {
+    var i = Number(e.target.dataset.i);
+    if (isNaN(i) || !CE_CHILDREN[i]) return;
+    if (e.target.classList.contains('ck-name')) CE_CHILDREN[i].name = e.target.value;
+    if (e.target.classList.contains('ck-id')) CE_CHILDREN[i].id_num = e.target.value;
+    if (e.target.classList.contains('ck-bd')) CE_CHILDREN[i].birth_date = e.target.value;
+  });
+  $('#ceKidsList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-kid-del]');
+    if (!b) return;
+    CE_CHILDREN.splice(Number(b.dataset.kidDel), 1);
+    renderCeKids();
+  });
+
+  /* ── העלאת ספח ישירות מהכרטיס + חילוץ אוטומטי (Gemini, Edge Function
+     extract-scan) — בנפרד מהעלאה דרך טופס simchat.html הציבורי: כאן
+     ההעלאה עצמה כבר authenticated+admin (RLS על storage.objects, לא
+     anon), וה-extraction דורש JWT admin כי הוא עולה כסף לקריאה. */
+  function renderCeScanSuggest() {
+    var f = CE_SCAN_FAMILY;
+    if (!f) { $('#ceScanSuggest').hidden = true; return; }
+    var lines = [];
+    if (f.head_of_household && f.head_of_household.name) {
+      lines.push('ראש משפחה: ' + f.head_of_household.name + (f.head_of_household.id ? ' · ' + f.head_of_household.id : ''));
+    }
+    if (f.spouse && f.spouse.name) lines.push('בן/בת זוג: ' + f.spouse.name);
+    if (f.address || f.city) lines.push('כתובת: ' + [f.address, f.city].filter(Boolean).join(', '));
+    if (Array.isArray(f.children) && f.children.length) lines.push(f.children.length + ' ילדים זוהו בספח');
+    $('#ceScanSuggestText').innerHTML = lines.length ? lines.map(esc).join('<br>') : 'לא זוהה מידע ברור בספח.';
+    $('#ceScanSuggest').hidden = false;
+  }
+  function callExtractScan() {
+    var hint = $('#ceScanHint');
+    return fetch(API + '/functions/v1/extract-scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: ANON, Authorization: 'Bearer ' + (SES && SES.access_token) },
+      body: JSON.stringify({ scan_path: CE_SCAN_PATH }),
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.j || !res.j.family) {
+          hint.textContent = 'הועלה: ' + CE_SCAN_NAME + ' — חילוץ אוטומטי לא הצליח, אפשר למלא ידנית.';
+          return;
+        }
+        CE_SCAN_FAMILY = res.j.family;
+        hint.textContent = 'הועלה: ' + CE_SCAN_NAME;
+        renderCeScanSuggest();
+      }).catch(function () { hint.textContent = 'הועלה: ' + CE_SCAN_NAME + ' — חילוץ נכשל (בעיית רשת).'; });
+  }
+  function uploadCeScan(file) {
+    var hint = $('#ceScanHint');
+    if (file.size > 30 * 1024 * 1024) { hint.textContent = 'הקובץ גדול מ-30 מגה.'; return; }
+    var ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    var key = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2);
+    var path = 'contacts/' + key + '.' + ext;
+    hint.textContent = 'מעלה: ' + file.name + '…';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', API + '/storage/v1/object/id-scans/' + path, true);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + (SES && SES.access_token));
+    xhr.setRequestHeader('apikey', ANON);
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.upload.onprogress = function (ev) {
+      if (ev.lengthComputable) hint.textContent = 'מעלה: ' + file.name + ' — ' + Math.round(ev.loaded * 100 / ev.total) + '%';
+    };
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        CE_SCAN_PATH = 'id-scans/' + path; CE_SCAN_NAME = file.name; CE_SCAN_MIME = file.type || '';
+        hint.textContent = 'הועלה: ' + file.name + ' — מחלץ פרטים…';
+        callExtractScan();
+      } else {
+        hint.textContent = 'העלאה נכשלה (' + xhr.status + ').';
+      }
+    };
+    xhr.onerror = function () { hint.textContent = 'העלאה נכשלה — בעיית רשת.'; };
+    xhr.send(file);
+  }
+  $('#ceScanFile').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (f) uploadCeScan(f);
+  });
+  $('#ceScanApply').addEventListener('click', function () {
+    var f = CE_SCAN_FAMILY;
+    if (!f) return;
+    if (f.head_of_household && f.head_of_household.id && !$('#ceIdNum').value.trim()) $('#ceIdNum').value = f.head_of_household.id;
+    if ((f.address || f.city) && !$('#ceAddress').value.trim()) $('#ceAddress').value = [f.address, f.city].filter(Boolean).join(', ');
+    if (Array.isArray(f.children) && f.children.length) {
+      f.children.forEach(function (c) {
+        CE_CHILDREN.push({ name: c.name || '', id_num: c.id || '', birth_date: c.birth_date || '', gender: c.gender || '' });
+      });
+      renderCeKids();
+    }
+    $('#ceHint').textContent = 'מולא אוטומטית מהספח — לבדוק ולתקן לפני שמירה.';
+  });
 
   function renderCeRelPicker() {
     var dl = $('#ceRelOptions');
@@ -778,6 +888,12 @@
     $('#ceDelete').hidden  = !id;
     $('#ceHint').textContent = '';
     $('#ceRelPick').value = '';
+    CE_CHILDREN = c && Array.isArray(c.children) ? c.children.map(function (k) { return Object.assign({}, k); }) : [];
+    CE_SCAN_PATH = ''; CE_SCAN_NAME = ''; CE_SCAN_MIME = ''; CE_SCAN_FAMILY = null;
+    $('#ceScanFile').value = '';
+    $('#ceScanHint').textContent = 'לא נבחר קובץ.';
+    $('#ceScanSuggest').hidden = true;
+    renderCeKids();
     renderCeRelPicker();
     renderCeRelList();
     renderCeDocs();
@@ -789,6 +905,8 @@
   function saveContact() {
     var surname = $('#ceSurname').value.trim();
     if (!surname) { $('#ceHint').textContent = 'שם משפחה חובה.'; $('#ceSurname').focus(); return; }
+    var kids = CE_CHILDREN.filter(function (k) { return (k.name || '').trim(); })
+      .map(function (k) { return { name: k.name.trim(), id_num: k.id_num || '', birth_date: k.birth_date || '', gender: k.gender || '' }; });
     var body = {
       surname: surname,
       full_name: $('#ceFullName').value.trim() || null,
@@ -801,6 +919,7 @@
       tier: $('#ceTier').value || null,
       campaign_status: $('#ceCampaign').value,
       match_note: $('#ceNote').value.trim() || null,
+      children: kids,
     };
     $('#ceHint').textContent = 'שומר…';
     $('#ceSave').disabled = true;
@@ -812,8 +931,17 @@
      .then(function (res) {
        $('#ceSave').disabled = false;
        if (!res.ok) { $('#ceHint').textContent = 'שמירה נכשלה — ' + (res.t || '').slice(0, 120); return; }
-       closeContactEdit();
-       loadContacts();
+       var savedId = CE_EDIT_ID;
+       if (isNew) { try { savedId = JSON.parse(res.t)[0].id; } catch (e) { /* ריק */ } }
+       /* אם הועלה ספח בזמן העריכה — מקשרים אותו לכרטיש רק עכשיו,
+          כשיש כבר id ודאי (כרטיס חדש עוד לא היה לו id בזמן ההעלאה). */
+       var linkDoc = (CE_SCAN_PATH && savedId)
+         ? db('contact_docs', { method: 'POST', body: JSON.stringify({
+             contact_id: savedId, kind: 'id_scan', file_path: CE_SCAN_PATH,
+             original_name: CE_SCAN_NAME, uploaded_by: 'admin:contacts-panel',
+           }) })
+         : Promise.resolve();
+       linkDoc.then(function () { closeContactEdit(); loadContacts(); });
      });
   }
   function deleteContact() {
