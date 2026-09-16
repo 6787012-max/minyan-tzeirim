@@ -34,6 +34,7 @@
       channel = client.channel('minyan-admin-live');
       TABLES.forEach(function (table) {
         channel.on('postgres_changes', { event: '*', schema: 'minyan', table: table }, function (payload) {
+          console.log('[MTRealtime] event received:', table, payload.eventType);
           pulse();
           listeners.forEach(function (fn) {
             try { fn(table, payload); } catch (e) { /* מאזין בודד לא מפיל את השאר */ }
