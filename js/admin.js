@@ -394,6 +394,61 @@
       });
   }
 
+  /* ── התאמת תורמים (נדרים פלוס) לכרטיסי אנשי-קשר ───────────────────
+     אין טלפון משותף לשני הצדדים — ההצעה היא ניחוש לפי דמיון שם, לא
+     שיוך אוטומטי. המנהל מאשר/בוחר ידנית לכל שם; אחרי אישור פעם אחת
+     כל תרומה עתידית מאותו שם משתייכת לבד (טריגר ב-DB). */
+  var DON_MATCH_ROWS = [];
+  function openDonMatch() {
+    $('#donMatchRows').innerHTML = '<tr><td colspan="4">טוען…</td></tr>';
+    $('#donMatchModal').hidden = false;
+    Promise.all([
+      db('rpc/donation_match_suggestions', { method: 'POST', body: '{}' }).then(function (r) { return r.ok ? r.json() : []; }),
+      CONTACTS.length ? Promise.resolve(CONTACTS) : loadContacts().then(function () { return CONTACTS; }),
+    ]).then(function (res) {
+      DON_MATCH_ROWS = res[0] || [];
+      renderDonMatch();
+    }).catch(function () { $('#donMatchRows').innerHTML = '<tr><td colspan="4">שגיאה בטעינה.</td></tr>'; });
+  }
+  function renderDonMatch() {
+    if (!DON_MATCH_ROWS.length) {
+      $('#donMatchRows').innerHTML = '<tr><td colspan="4">כל התרומות כבר משויכות.</td></tr>';
+      return;
+    }
+    var options = '<option value="">— בלי שיוך —</option>' + CONTACTS.map(function (c) {
+      return '<option value="' + c.id + '">' + esc(c.full_name || c.surname) + '</option>';
+    }).join('');
+    /* מציעים בחירה אוטומטית ב-dropdown רק כשהדמיון סביר — מתחת לזה
+       ה-"הצעה" נשארת טקסט-מידע בלבד, כדי לא לפתות אישור-בעיניים-עצומות
+       על שיוך שגוי (זה כסף, לא תגית). */
+    $('#donMatchRows').innerHTML = DON_MATCH_ROWS.map(function (m) {
+      var confident = m.congregant_id && m.score >= 0.4;
+      var sel = confident ? options.replace('value="' + m.congregant_id + '"', 'value="' + m.congregant_id + '" selected') : options;
+      var scoreTxt = m.congregant_id
+        ? Math.round((m.score || 0) * 100) + '% דמיון ל־' + esc(m.congregant_name) + (confident ? '' : ' (נמוך — לבדוק ידנית)')
+        : 'אין הצעה סבירה';
+      return '<tr data-client="' + esc(m.client_name) + '">' +
+        '<td>' + esc(m.client_name) + '</td>' +
+        '<td>₪' + Number(m.total_amount).toLocaleString('he-IL') + ' · ' + m.tx_count + '</td>' +
+        '<td><select class="don-match-sel" style="width:100%">' + sel + '</select>' +
+          '<div class="hint" style="margin:2px 0 0">' + scoreTxt + '</div></td>' +
+        '<td><button type="button" class="btn btn-g small" data-don-match="' + esc(m.client_name) + '">שיוך</button></td>' +
+      '</tr>';
+    }).join('');
+  }
+  function assignDonMatch(clientName, row) {
+    var sel = row.querySelector('.don-match-sel');
+    var cid = sel.value ? Number(sel.value) : null;
+    row.querySelectorAll('button,select').forEach(function (el) { el.disabled = true; });
+    db('rpc/assign_donation_match', { method: 'POST', body: JSON.stringify({ p_client_name: clientName, p_congregant_id: cid }) })
+      .then(function (r) {
+        if (!r.ok) { alert('השיוך נכשל.'); row.querySelectorAll('button,select').forEach(function (el) { el.disabled = false; }); return; }
+        DON_MATCH_ROWS = DON_MATCH_ROWS.filter(function (m) { return m.client_name !== clientName; });
+        renderDonMatch();
+        loadContacts();
+      });
+  }
+
   function congHtml(c) {
     var st = c.campaign_status || 'new';
     return '<tr data-id="' + c.id + '">' +
@@ -591,6 +646,7 @@
   var CONTACTS = [];
   var DOCS = [];   /* minyan.contact_docs — ספחים/מכתבים מקושרים */
   var RELS = [];   /* minyan.congregant_relations — קישורי משפחה בין בתי-אב */
+  var DONS = [];   /* minyan.congregant_donations — סיכום תרומות משוייכות */
 
   function loadContacts() {
     return Promise.all([
@@ -600,11 +656,14 @@
         .then(function (r) { return r.ok ? r.json() : []; }),
       db('congregant_relations?select=id,a_id,b_id,kind')
         .then(function (r) { return r.ok ? r.json() : []; }),
+      db('congregant_donations?select=congregant_id,total_amount,tx_count,last_at')
+        .then(function (r) { return r.ok ? r.json() : []; }),
     ]).then(function (res) {
-      CONTACTS = res[0] || []; DOCS = res[1] || []; RELS = res[2] || [];
+      CONTACTS = res[0] || []; DOCS = res[1] || []; RELS = res[2] || []; DONS = res[3] || [];
       renderContacts();
     }).catch(function () { $('#contactsHint').hidden = false; $('#contactsHint').textContent = 'שגיאה בטעינה.'; });
   }
+  function donationsFor(id) { return DONS.filter(function (d) { return d.congregant_id === id; })[0] || null; }
 
   function contactNameOf(id) {
     var c = CONTACTS.filter(function (x) { return x.id === id; })[0];
@@ -645,6 +704,8 @@
       var tags = (c.tags||[]).map(function (t) { return '<span class="kind" style="margin-inline-start:4px">' + esc(t) + '</span>'; }).join('');
       var fam = relRowsFor(c.id).map(function (r) { return esc(r.kind) + ' ' + esc(r.name); }).join(', ');
       var docN = docsCountFor(c.id);
+      var don = donationsFor(c.id);
+      var donCell = don ? '₪' + Number(don.total_amount).toLocaleString('he-IL') + ' · ' + don.tx_count : '—';
       return '<tr data-id="' + c.id + '">' +
         '<td><b>' + nm + '</b>' + (c.role ? '<div style="font-size:12.5px;color:#6b6257">' + esc(c.role) + '</div>' : '') + '</td>' +
         '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span style="color:#c00">חסר</span>') + '</td>' +
@@ -652,11 +713,12 @@
         '<td>' + tags + '</td>' +
         '<td style="white-space:normal;font-size:12.5px;color:#6b6257;max-width:160px">' + (fam || '—') + '</td>' +
         '<td>' + (docN ? docN + ' 📎' : '—') + '</td>' +
+        '<td>' + donCell + '</td>' +
         '<td>' + esc(c.campaign_status || '') + '</td>' +
         '<td><button type="button" class="btn btn-s small" data-contact-edit="' + c.id + '">עריכה</button></td>' +
       '</tr>';
     }).join('');
-    $('#contactsRows').innerHTML = body || '<tr><td colspan="8" style="padding:16px;color:#6b6257">אין תוצאות.</td></tr>';
+    $('#contactsRows').innerHTML = body || '<tr><td colspan="9" style="padding:16px;color:#6b6257">אין תוצאות.</td></tr>';
   }
   var $cq = $('#contactsQ'); if ($cq) $cq.addEventListener('input', renderContacts);
   var $cf = $('#contactsFilter'); if ($cf) $cf.addEventListener('change', renderContacts);
@@ -1219,6 +1281,14 @@
       c.setAttribute('aria-pressed', String(on));
     });
     donations();
+  });
+
+  $('#donMatchOpen').addEventListener('click', openDonMatch);
+  $('#donMatchClose').addEventListener('click', function () { $('#donMatchModal').hidden = true; });
+  $('#donMatchRows').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-don-match]');
+    if (!b) return;
+    assignDonMatch(b.dataset.donMatch, b.closest('tr'));
   });
 
   $('#congExport').addEventListener('click', congExportCsv);

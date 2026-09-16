@@ -97,9 +97,31 @@
         <h2>תרומות</h2>
         <p>נמשך ישירות מנדרים פלוס פעם בשעה — בלי גיליון אמצעי.</p>
       </div>
-      <div class="toolbar"><div class="filters" id="donFilters"></div></div>
+      <div class="toolbar">
+        <div class="filters" id="donFilters"></div>
+        <button type="button" class="btn btn-s small" id="donMatchOpen">התאמת תורמים לכרטיסים</button>
+      </div>
       <div id="donations"></div>
       <p class="note" id="donNote"></p>
+
+      <div class="ae-modal" id="donMatchModal" hidden>
+        <div class="ae-modal-box" style="width:min(720px,100%)">
+          <h3>התאמת תורמים לכרטיסי אנשי-קשר</h3>
+          <p class="hint">נדרים פלוס שולח רק שם חופשי, בלי טלפון — ההצעה היא לפי דמיון שם
+            בלבד ולא תמיד נכונה. לבדוק כל שורה, לא לאשר בעיניים עצומות. תורם שאין לו
+            כרטיס מתאים (למשל תורם חיצוני, לא איש קהילה) — פשוט משאירים "בלי שיוך".
+            אחרי אישור, כל תרומה עתידית מאותו שם תשויך אוטומטית.</p>
+          <div class="tbl-wrap">
+            <table class="tbl" id="donMatchTable">
+              <thead><tr><th>שם בנדרים פלוס</th><th>סכום</th><th>הצעה</th><th></th></tr></thead>
+              <tbody id="donMatchRows"></tbody>
+            </table>
+          </div>
+          <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
+            <button type="button" class="btn btn-s small" id="donMatchClose">סגירה</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- מתפללים -->
@@ -160,7 +182,7 @@
       <div class="tbl-wrap">
         <table class="tbl" id="contactsTable">
           <thead><tr>
-            <th>שם</th><th>טלפון</th><th>מייל</th><th>תגיות</th><th>משפחה</th><th>מסמכים</th><th>קמפיין</th><th></th>
+            <th>שם</th><th>טלפון</th><th>מייל</th><th>תגיות</th><th>משפחה</th><th>מסמכים</th><th>תרומות</th><th>קמפיין</th><th></th>
           </tr></thead>
           <tbody id="contactsRows"></tbody>
         </table>
@@ -657,7 +679,7 @@
 
 <script src="js/vendor/jspdf.umd.min.js"></script>
 <script src="js/vendor/supabase/supabase.min.js"></script>
-<script src="js/admin.js?v=31"></script>
+<script src="js/admin.js?v=32"></script>
 <script src="js/admin-ads.js?v=3"></script>
 <script src="js/admin-forms.js?v=1"></script>
 <script src="js/realtime.js?v=4"></script>
