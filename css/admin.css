@@ -417,3 +417,24 @@
   .ae-modal-box { width: 100%; max-height: 95dvh; border-radius: 14px 14px 0 0; margin-bottom: 0; }
   .ae-modal { align-items: flex-end; padding: 0; }
 }
+
+/* נקודת "מחובר לעדכונים חיים" (Realtime) — פועמת רק כשמשהו זז ממש עכשיו */
+.rt-dot { color: #2C5F3F; font-size: 10px; vertical-align: middle; margin-inline-start: 4px; }
+.rt-dot.pulse { animation: rt-pulse .9s ease-out 2; }
+@keyframes rt-pulse { 0% { opacity: 1; transform: scale(1.6); } 100% { opacity: .4; transform: scale(1); } }
+
+/* רשימת כפילויות/מיזוג */
+.dup-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 4px;
+  border-bottom: 1px solid var(--line); font-size: 13.5px;
+}
+.dup-item:last-child { border-bottom: 0; }
+.dup-item .reason { color: var(--muted); font-size: 12px; }
+.merge-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 8px 4px; border-bottom: 1px solid var(--line); align-items: center; font-size: 13.5px; }
+.merge-row .lbl { color: var(--muted); font-size: 12px; }
+.merge-row label { display: flex; gap: 6px; align-items: flex-start; cursor: pointer; }
+.rel-tag {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--cream);
+  border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 12.5px;
+}
+.rel-tag button { border: 0; background: none; color: #9B1E1E; cursor: pointer; font-size: 13px; padding: 0; }

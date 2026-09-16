@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ניהול · מניין הצעירים</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cmsusfmwjtpfewbydzpi.supabase.co; font-src 'self'; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cmsusfmwjtpfewbydzpi.supabase.co; font-src 'self'; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co wss://cmsusfmwjtpfewbydzpi.supabase.co; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="theme-color" content="#12233F">
@@ -138,9 +138,9 @@
     <!-- אנשי קשר (הרחבה של congregants) -->
     <section class="adm-sec" id="contactsSec" data-panel hidden>
       <div class="head">
-        <div class="eyebrow">CRM · אנשי קשר וגמ״חים</div>
+        <div class="eyebrow">CRM · אנשי קשר וגמ״חים <span id="rtDot" class="rt-dot" title="מחובר לעדכונים חיים" hidden>●</span></div>
         <h2>אנשי קשר</h2>
-        <p>כרטיס אדם מלא: פרטים · תגיות · מסמכים (ספח ת״ז, מכתבים) · היסטוריית פנייה. כמו במכינה — בהתאמה למניין.</p>
+        <p>כרטיס אדם מלא: פרטים · תגיות · מסמכים (ספח ת״ז, מכתבים) · קישורי משפחה · היסטוריית פנייה. מתעדכן בזמן אמת בין מסכים פתוחים.</p>
       </div>
       <div class="cards" id="contactsKpi"></div>
       <div class="toolbar" style="margin-top:16px">
@@ -153,16 +153,98 @@
           <option value="incomplete">חסרי פרטים (טלפון/מייל)</option>
         </select>
         <button type="button" class="btn btn-s small" id="contactsExport">ייצוא CSV</button>
-        <button type="button" class="btn btn-g small" id="contactsAddOpen">+ הוספה</button>
+        <button type="button" class="btn btn-s small" id="contactsDupCheck">בדיקת כפילויות</button>
+        <button type="button" class="btn btn-g small" id="contactsAddOpen">+ איש קשר חדש</button>
       </div>
-      <p class="note" id="contactsHint">ממתין למיגרציה 08_contacts_gemachim.sql (הרחבת congregants + טבלת contact_docs). עד הרצתה — התצוגה מציגה רק את הפרטים הבסיסיים הקיימים.</p>
+      <p class="note" id="contactsHint" hidden></p>
       <div class="tbl-wrap">
         <table class="tbl" id="contactsTable">
           <thead><tr>
-            <th>שם</th><th>טלפון</th><th>מייל</th><th>תגיות</th><th>מסמכים</th><th>קמפיין</th><th></th>
+            <th>שם</th><th>טלפון</th><th>מייל</th><th>תגיות</th><th>משפחה</th><th>מסמכים</th><th>קמפיין</th><th></th>
           </tr></thead>
           <tbody id="contactsRows"></tbody>
         </table>
+      </div>
+
+      <!-- עריכה / הוספה של כרטיס איש קשר -->
+      <div class="ae-modal" id="contactEditModal" hidden>
+        <div class="ae-modal-box" style="width:min(640px,100%)">
+          <h3 id="ceTitle">עריכת איש קשר</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label class="fld" style="flex:1 1 180px"><span>שם משפחה *</span><input id="ceSurname"></label>
+            <label class="fld" style="flex:1 1 220px"><span>שם מלא</span><input id="ceFullName"></label>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label class="fld" style="flex:1 1 140px"><span>טלפון</span><input id="cePhone" inputmode="tel"></label>
+            <label class="fld" style="flex:1 1 200px"><span>מייל</span><input id="ceEmail" type="email"></label>
+            <label class="fld" style="flex:1 1 140px"><span>ת״ז</span><input id="ceIdNum"></label>
+          </div>
+          <label class="fld"><span>כתובת</span><input id="ceAddress"></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label class="fld" style="flex:1 1 160px"><span>תפקיד</span><input id="ceRole" placeholder="גבאי / ועדה / …"></label>
+            <label class="fld" style="flex:1 1 200px"><span>תגיות (מופרד בפסיקים)</span><input id="ceTags"></label>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <label class="fld" style="flex:1 1 160px"><span>רמת קמפיין</span>
+              <select id="ceTier"><option value="">—</option><option value="שותף">שותף</option><option value="מחזיק">מחזיק</option><option value="תורם">תורם</option></select>
+            </label>
+            <label class="fld" style="flex:1 1 160px"><span>סטטוס קמפיין</span>
+              <select id="ceCampaign">
+                <option value="new">טרם נשלח</option><option value="drafted">טיוטה</option>
+                <option value="sent">נשלח</option><option value="responded">הגיב</option><option value="declined">סירב</option>
+              </select>
+            </label>
+          </div>
+          <label class="fld"><span>הערת התאמה</span><input id="ceNote"></label>
+
+          <div class="fld" id="ceRelWrap">
+            <span>קשורים (בתי-אב אחרים — הורים/ילדים נשואים/אחים)</span>
+            <div id="ceRelList" style="display:flex;flex-direction:column;gap:6px;margin:6px 0"></div>
+            <div style="display:flex;gap:6px">
+              <input id="ceRelPick" list="ceRelOptions" placeholder="התחל להקליד שם…" style="flex:1">
+              <datalist id="ceRelOptions"></datalist>
+              <select id="ceRelKind" style="flex:0 0 100px"><option value="קשור">קשור</option><option value="הורים">הורים</option><option value="ילדים">ילדים</option><option value="אחים">אחים</option></select>
+              <button type="button" class="btn btn-s small" id="ceRelAdd">קישור</button>
+            </div>
+          </div>
+
+          <div class="fld" id="ceDocsWrap">
+            <span>מסמכים מקושרים</span>
+            <div id="ceDocsList" style="font-size:13px;color:#6b6257">אין מסמכים.</div>
+          </div>
+
+          <div class="ae-btn-row" style="justify-content:space-between;margin-top:10px">
+            <button type="button" class="btn btn-x small" id="ceDelete">מחיקת הכרטיס</button>
+            <div>
+              <button type="button" class="btn btn-s small" id="ceCancel">ביטול</button>
+              <button type="button" class="btn btn-g small" id="ceSave">שמירה</button>
+            </div>
+          </div>
+          <p class="hint" id="ceHint"></p>
+        </div>
+      </div>
+
+      <!-- בדיקת כפילויות + מיזוג -->
+      <div class="ae-modal" id="dupModal" hidden>
+        <div class="ae-modal-box" style="width:min(720px,100%)">
+          <h3>כפילויות אפשריות</h3>
+          <div id="dupList"></div>
+          <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
+            <button type="button" class="btn btn-s small" id="dupClose">סגירה</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ae-modal" id="mergeModal" hidden>
+        <div class="ae-modal-box" style="width:min(760px,100%)">
+          <h3>מיזוג כרטיסים</h3>
+          <p class="hint">לכל שדה: בוחרים איזה ערך להשאיר. תגיות מתמזגות אוטומטית. הכרטיס שלא נבחר יימחק לגמרי אחרי המיזוג — הפעולה בלתי הפיכה.</p>
+          <div id="mergeFields" class="tbl-wrap"></div>
+          <div class="ae-btn-row" style="justify-content:flex-end;margin-top:10px">
+            <button type="button" class="btn btn-s small" id="mergeCancel">ביטול</button>
+            <button type="button" class="btn btn-g small" id="mergeConfirm">מיזוג סופי</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -574,8 +656,10 @@
 </div>
 
 <script src="js/vendor/jspdf.umd.min.js"></script>
-<script src="js/admin.js?v=29"></script>
+<script src="js/vendor/supabase/supabase.min.js"></script>
+<script src="js/admin.js?v=30"></script>
 <script src="js/admin-ads.js?v=3"></script>
 <script src="js/admin-forms.js?v=1"></script>
+<script src="js/realtime.js?v=1"></script>
 </body>
 </html>

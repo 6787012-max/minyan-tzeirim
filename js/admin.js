@@ -78,7 +78,13 @@
     }).then(function (r) {
       if (!r.ok) throw new Error('refresh');
       return r.json();
-    }).then(function (j) { saveSes(j); return j; });
+    }).then(function (j) {
+      saveSes(j);
+      /* הסוקט של Realtime מחזיק את ה-JWT הישן — בלי לרענן אותו שם גם,
+         עדכונים חיים היו מפסיקים בשקט שעה אחרי הכניסה, בלי שום שגיאה גלויה. */
+      if (window.MTRealtime) window.MTRealtime.start(API, ANON, j.access_token);
+      return j;
+    });
   }
 
   /** קריאה למסד עם רענון אוטומטי פעם אחת. בלי זה הפאנל "מתרוקן"
@@ -526,6 +532,18 @@
     congregants();
     news();
 
+    if (window.MTRealtime) {
+      window.MTRealtime.start(API, ANON, SES.access_token);
+      window.MTRealtime.onChange(function (table) {
+        /* מרעננים רק פאנל גלוי — לא מבזבזים בקשות על מה שממילא לא נראה,
+           ולא דורסים מצב עריכה פתוח בפאנל אחר. */
+        if ((table === 'congregants' || table === 'contact_docs' || table === 'congregant_relations')
+            && !document.getElementById('contactsSec').hidden) loadContacts();
+        if (table === 'signups' && !document.getElementById('seudahSec').hidden && SEUDAH_EDIT_ID == null) loadSeudah();
+        if (table === 'signups' && !document.getElementById('rowsSec').hidden) load(true);
+      });
+    }
+
     var startPanel = 'statsSec';
     try {
       var saved = sessionStorage.getItem(PANEL_KEY);
@@ -562,12 +580,35 @@
 
   /* ── אנשי קשר (הרחבה של congregants) ─────────────────────────── */
   var CONTACTS = [];
+  var DOCS = [];   /* minyan.contact_docs — ספחים/מכתבים מקושרים */
+  var RELS = [];   /* minyan.congregant_relations — קישורי משפחה בין בתי-אב */
+
   function loadContacts() {
-    var q = 'congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status&order=surname';
-    return db(q).then(function (r) { return r.ok ? r.json() : []; })
-      .then(function (rows) { CONTACTS = rows || []; renderContacts(); })
-      .catch(function () { $('#contactsHint').textContent = 'שגיאה בטעינה — ייתכן שהמיגרציה עוד לא הורצה.'; });
+    return Promise.all([
+      db('congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status,match_note&order=surname')
+        .then(function (r) { return r.ok ? r.json() : []; }),
+      db('contact_docs?select=id,contact_id,kind,file_path,original_name,created_at')
+        .then(function (r) { return r.ok ? r.json() : []; }),
+      db('congregant_relations?select=id,a_id,b_id,kind')
+        .then(function (r) { return r.ok ? r.json() : []; }),
+    ]).then(function (res) {
+      CONTACTS = res[0] || []; DOCS = res[1] || []; RELS = res[2] || [];
+      renderContacts();
+    }).catch(function () { $('#contactsHint').hidden = false; $('#contactsHint').textContent = 'שגיאה בטעינה.'; });
   }
+
+  function contactNameOf(id) {
+    var c = CONTACTS.filter(function (x) { return x.id === id; })[0];
+    return c ? (c.full_name || c.surname || ('#' + id)) : ('#' + id);
+  }
+  function relRowsFor(id) {
+    return RELS.filter(function (r) { return r.a_id === id || r.b_id === id; }).map(function (r) {
+      var otherId = r.a_id === id ? r.b_id : r.a_id;
+      return { relId: r.id, otherId: otherId, kind: r.kind, name: contactNameOf(otherId) };
+    });
+  }
+  function docsCountFor(id) { return DOCS.filter(function (d) { return d.contact_id === id; }).length; }
+
   function renderContacts() {
     var qStr = ($('#contactsQ').value || '').trim();
     var filt = $('#contactsFilter').value;
@@ -593,20 +634,223 @@
     var body = view.map(function (c) {
       var nm = esc(c.full_name || c.surname);
       var tags = (c.tags||[]).map(function (t) { return '<span class="kind" style="margin-inline-start:4px">' + esc(t) + '</span>'; }).join('');
+      var fam = relRowsFor(c.id).map(function (r) { return esc(r.kind) + ' ' + esc(r.name); }).join(', ');
+      var docN = docsCountFor(c.id);
       return '<tr data-id="' + c.id + '">' +
         '<td><b>' + nm + '</b>' + (c.role ? '<div style="font-size:12.5px;color:#6b6257">' + esc(c.role) + '</div>' : '') + '</td>' +
         '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span style="color:#c00">חסר</span>') + '</td>' +
         '<td>' + (c.email ? '<a href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '<span style="color:#c00">חסר</span>') + '</td>' +
         '<td>' + tags + '</td>' +
-        '<td>—</td>' +
+        '<td style="white-space:normal;font-size:12.5px;color:#6b6257;max-width:160px">' + (fam || '—') + '</td>' +
+        '<td>' + (docN ? docN + ' 📎' : '—') + '</td>' +
         '<td>' + esc(c.campaign_status || '') + '</td>' +
-        '<td><button class="btn btn-s small" data-act="edit">עריכה</button></td>' +
+        '<td><button type="button" class="btn btn-s small" data-contact-edit="' + c.id + '">עריכה</button></td>' +
       '</tr>';
     }).join('');
-    $('#contactsRows').innerHTML = body || '<tr><td colspan="7" style="padding:16px;color:#6b6257">אין תוצאות.</td></tr>';
+    $('#contactsRows').innerHTML = body || '<tr><td colspan="8" style="padding:16px;color:#6b6257">אין תוצאות.</td></tr>';
   }
   var $cq = $('#contactsQ'); if ($cq) $cq.addEventListener('input', renderContacts);
   var $cf = $('#contactsFilter'); if ($cf) $cf.addEventListener('change', renderContacts);
+  $('#contactsRows').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-contact-edit]');
+    if (b) openContactEdit(Number(b.dataset.contactEdit));
+  });
+
+  /* ── עריכה/הוספה של כרטיס איש קשר ─────────────────────────────── */
+  var CE_EDIT_ID = null; /* null = כרטיס חדש */
+  var CE_REL_MAP = {};   /* שם→id, למימוש ה-datalist של בחירת קרוב */
+
+  function renderCeRelPicker() {
+    var dl = $('#ceRelOptions');
+    CE_REL_MAP = {};
+    dl.innerHTML = CONTACTS.filter(function (c) { return c.id !== CE_EDIT_ID; }).map(function (c) {
+      var nm = c.full_name || c.surname || ('#' + c.id);
+      CE_REL_MAP[nm] = c.id;
+      return '<option value="' + esc(nm) + '">';
+    }).join('');
+  }
+  function renderCeRelList() {
+    var list = $('#ceRelList');
+    if (!CE_EDIT_ID) { list.innerHTML = '<span class="hint" style="margin:0">שומרים את הכרטיס קודם, ואז אפשר לקשר.</span>'; return; }
+    var rows = relRowsFor(CE_EDIT_ID);
+    list.innerHTML = rows.length ? rows.map(function (r) {
+      return '<span class="rel-tag">' + esc(r.kind) + ' · ' + esc(r.name) +
+        '<button type="button" data-rel-del="' + r.relId + '" title="הסרת הקישור">✕</button></span>';
+    }).join('') : '<span class="hint" style="margin:0">אין קישורים עדיין.</span>';
+  }
+  function renderCeDocs() {
+    var wrap = $('#ceDocsList');
+    if (!CE_EDIT_ID) { wrap.textContent = 'שומרים את הכרטיס קודם.'; return; }
+    var rows = DOCS.filter(function (d) { return d.contact_id === CE_EDIT_ID; });
+    if (!rows.length) { wrap.textContent = 'אין מסמכים.'; return; }
+    wrap.innerHTML = rows.map(function (d) {
+      var when = d.created_at ? new Date(d.created_at).toLocaleDateString('he-IL') : '';
+      return '<div>📎 ' + esc(d.original_name || d.kind) + ' <span style="color:#9b9484">(' + esc(when) + ')</span></div>';
+    }).join('');
+  }
+
+  function openContactEdit(id) {
+    CE_EDIT_ID = id || null;
+    var c = id ? CONTACTS.filter(function (x) { return x.id === id; })[0] : null;
+    $('#ceTitle').textContent = id ? 'עריכת איש קשר' : 'איש קשר חדש';
+    $('#ceSurname').value  = c ? (c.surname || '') : '';
+    $('#ceFullName').value = c ? (c.full_name || '') : '';
+    $('#cePhone').value    = c ? (c.phone || '') : '';
+    $('#ceEmail').value    = c ? (c.email || '') : '';
+    $('#ceIdNum').value    = c ? (c.id_num || '') : '';
+    $('#ceAddress').value  = c ? (c.address || '') : '';
+    $('#ceRole').value     = c ? (c.role || '') : '';
+    $('#ceTags').value     = c ? (c.tags || []).join(', ') : '';
+    $('#ceTier').value     = c ? (c.tier || '') : '';
+    $('#ceCampaign').value = c ? (c.campaign_status || 'new') : 'new';
+    $('#ceNote').value     = c ? (c.match_note || '') : '';
+    $('#ceDelete').hidden  = !id;
+    $('#ceHint').textContent = '';
+    $('#ceRelPick').value = '';
+    renderCeRelPicker();
+    renderCeRelList();
+    renderCeDocs();
+    $('#contactEditModal').hidden = false;
+    setTimeout(function () { $('#ceSurname').focus(); }, 50);
+  }
+  function closeContactEdit() { $('#contactEditModal').hidden = true; CE_EDIT_ID = null; }
+
+  function saveContact() {
+    var surname = $('#ceSurname').value.trim();
+    if (!surname) { $('#ceHint').textContent = 'שם משפחה חובה.'; $('#ceSurname').focus(); return; }
+    var body = {
+      surname: surname,
+      full_name: $('#ceFullName').value.trim() || null,
+      phone: $('#cePhone').value.trim() || null,
+      email: $('#ceEmail').value.trim() || null,
+      id_num: $('#ceIdNum').value.trim() || null,
+      address: $('#ceAddress').value.trim() || null,
+      role: $('#ceRole').value.trim() || null,
+      tags: $('#ceTags').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+      tier: $('#ceTier').value || null,
+      campaign_status: $('#ceCampaign').value,
+      match_note: $('#ceNote').value.trim() || null,
+    };
+    $('#ceHint').textContent = 'שומר…';
+    $('#ceSave').disabled = true;
+    var isNew = !CE_EDIT_ID;
+    var p = isNew
+      ? db('congregants', { method: 'POST', body: JSON.stringify(body), prefer: 'return=representation' })
+      : db('congregants?id=eq.' + CE_EDIT_ID, { method: 'PATCH', body: JSON.stringify(body), prefer: 'return=representation' });
+    p.then(function (r) { return r.text().then(function (t) { return { ok: r.ok, t: t }; }); })
+     .then(function (res) {
+       $('#ceSave').disabled = false;
+       if (!res.ok) { $('#ceHint').textContent = 'שמירה נכשלה — ' + (res.t || '').slice(0, 120); return; }
+       closeContactEdit();
+       loadContacts();
+     });
+  }
+  function deleteContact() {
+    if (!CE_EDIT_ID) return;
+    if (!confirm('למחוק את הכרטיס לצמיתות? אי אפשר לשחזר.')) return;
+    db('congregants?id=eq.' + CE_EDIT_ID, { method: 'DELETE' }).then(function (r) {
+      if (!r.ok) { $('#ceHint').textContent = 'מחיקה נכשלה.'; return; }
+      closeContactEdit();
+      loadContacts();
+    });
+  }
+
+  $('#contactsAddOpen').addEventListener('click', function () { openContactEdit(null); });
+  $('#ceCancel').addEventListener('click', closeContactEdit);
+  $('#ceSave').addEventListener('click', saveContact);
+  $('#ceDelete').addEventListener('click', deleteContact);
+  $('#ceRelAdd').addEventListener('click', function () {
+    if (!CE_EDIT_ID) { $('#ceHint').textContent = 'שומרים את הכרטיס קודם.'; return; }
+    var name = $('#ceRelPick').value.trim();
+    var otherId = CE_REL_MAP[name];
+    if (!otherId) { $('#ceHint').textContent = 'בוחרים שם מהרשימה המוצעת.'; return; }
+    var kind = $('#ceRelKind').value;
+    db('congregant_relations', { method: 'POST', body: JSON.stringify({ a_id: CE_EDIT_ID, b_id: otherId, kind: kind }) })
+      .then(function (r) {
+        if (!r.ok) { $('#ceHint').textContent = 'הקישור נכשל (אולי כבר קיים).'; return; }
+        $('#ceRelPick').value = '';
+        return loadContacts().then(renderCeRelList);
+      });
+  });
+  $('#ceRelList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-rel-del]');
+    if (!b) return;
+    db('congregant_relations?id=eq.' + b.dataset.relDel, { method: 'DELETE' }).then(function (r) {
+      if (r.ok) loadContacts().then(renderCeRelList);
+    });
+  });
+
+  /* ── זיהוי כפילויות + מיזוג ─────────────────────────────────────── */
+  var MERGE_A = null, MERGE_B = null;
+  var MERGE_FIELDS = [
+    ['surname', 'שם משפחה'], ['full_name', 'שם מלא'], ['phone', 'טלפון'], ['email', 'מייל'],
+    ['address', 'כתובת'], ['id_num', 'ת״ז'], ['role', 'תפקיד'], ['match_note', 'הערה'],
+  ];
+
+  function openDupCheck() {
+    $('#dupList').innerHTML = 'בודק…';
+    $('#dupModal').hidden = false;
+    db('rpc/dup_candidates', { method: 'POST', body: '{}' }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rows) {
+        if (!rows) { $('#dupList').innerHTML = '<p class="hint">שגיאה בבדיקה.</p>'; return; }
+        if (!rows.length) { $('#dupList').innerHTML = '<p class="hint" style="margin:0">לא נמצאו כפילויות חשודות כרגע.</p>'; return; }
+        $('#dupList').innerHTML = rows.map(function (d) {
+          return '<div class="dup-item"><div style="flex:1">' +
+            '<b>' + esc(d.a_name) + '</b> ↔ <b>' + esc(d.b_name) + '</b>' +
+            '<div class="reason">' + esc(d.reason) + (d.score < 1 ? ' · דמיון ' + Math.round(d.score * 100) + '%' : '') + '</div></div>' +
+            '<button type="button" class="btn btn-g small" data-merge-a="' + d.a_id + '" data-merge-b="' + d.b_id + '">בדיקה למיזוג</button></div>';
+        }).join('');
+      }).catch(function () { $('#dupList').innerHTML = '<p class="hint">שגיאה בבדיקה.</p>'; });
+  }
+  $('#contactsDupCheck').addEventListener('click', openDupCheck);
+  $('#dupClose').addEventListener('click', function () { $('#dupModal').hidden = true; });
+  $('#dupList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-merge-a]');
+    if (b) openMerge(Number(b.dataset.mergeA), Number(b.dataset.mergeB));
+  });
+
+  function openMerge(aId, bId) {
+    var a = CONTACTS.filter(function (x) { return x.id === aId; })[0];
+    var b = CONTACTS.filter(function (x) { return x.id === bId; })[0];
+    if (!a || !b) return;
+    MERGE_A = aId; MERGE_B = bId;
+    $('#dupModal').hidden = true;
+    var rows = MERGE_FIELDS.map(function (f) {
+      var key = f[0], label = f[1];
+      var av = a[key] || '', bv = b[key] || '';
+      return '<div class="merge-row">' +
+        '<label><input type="radio" name="mf_' + key + '" value="a"' + (av ? ' checked' : '') + '>' + (esc(av) || '<span class="hint" style="margin:0">(ריק)</span>') + '</label>' +
+        '<div class="lbl">' + esc(label) + '</div>' +
+        '<label><input type="radio" name="mf_' + key + '" value="b"' + (!av && bv ? ' checked' : '') + '>' + (esc(bv) || '<span class="hint" style="margin:0">(ריק)</span>') + '</label>' +
+      '</div>';
+    }).join('');
+    $('#mergeFields').innerHTML =
+      '<div class="merge-row" style="font-weight:700"><span>' + esc(a.full_name || a.surname) + ' — יישאר</span><div class="lbl">שדה</div><span>' + esc(b.full_name || b.surname) + ' — יימחק</span></div>' +
+      rows;
+    $('#mergeModal').hidden = false;
+  }
+  $('#mergeCancel').addEventListener('click', function () { $('#mergeModal').hidden = true; });
+  $('#mergeConfirm').addEventListener('click', function () {
+    var a = CONTACTS.filter(function (x) { return x.id === MERGE_A; })[0];
+    var b = CONTACTS.filter(function (x) { return x.id === MERGE_B; })[0];
+    if (!a || !b) return;
+    var fields = {};
+    MERGE_FIELDS.forEach(function (f) {
+      var key = f[0];
+      var sel = document.querySelector('input[name="mf_' + key + '"]:checked');
+      var v = (sel && sel.value === 'b') ? b[key] : a[key];
+      if (v) fields[key] = v;
+    });
+    $('#mergeConfirm').disabled = true;
+    db('rpc/merge_congregants', {
+      method: 'POST', body: JSON.stringify({ keep_id: MERGE_A, drop_id: MERGE_B, fields: fields }),
+    }).then(function (r) {
+      $('#mergeConfirm').disabled = false;
+      if (!r.ok) { alert('המיזוג נכשל.'); return; }
+      $('#mergeModal').hidden = true;
+      loadContacts();
+    });
+  });
   var $cex = $('#contactsExport'); if ($cex) $cex.addEventListener('click', function () {
     var lines = ['שם,טלפון,מייל,רמה,סכום,תגיות,קמפיין'];
     CONTACTS.forEach(function (c) {
@@ -917,6 +1161,7 @@
   });
 
   $('#logout').addEventListener('click', function () {
+    if (window.MTRealtime) window.MTRealtime.stop();
     clearSes();
     location.reload();
   });
