@@ -40,11 +40,14 @@
           });
         });
       });
-      channel.subscribe();
-    } catch (e) { /* אין Realtime — הפאנל ממשיך לעבוד בלי עדכון חי */ }
+      channel.subscribe(function (status, err) {
+        console.log('[MTRealtime] subscribe status:', status, err || '');
+      });
+    } catch (e) { console.log('[MTRealtime] start() threw:', e); }
   }
 
   function onChange(fn) { listeners.push(fn); }
+  function debugState() { return { hasClient: !!client, hasChannel: !!channel, channelState: channel && channel.state, listenerCount: listeners.length }; }
 
   function stop() {
     try { if (client) client.removeAllChannels(); } catch (e) { /* לא קריטי */ }
@@ -53,5 +56,5 @@
     if (dotEl) dotEl.hidden = true;
   }
 
-  window.MTRealtime = { start: start, onChange: onChange, stop: stop };
+  window.MTRealtime = { start: start, onChange: onChange, stop: stop, debugState: debugState };
 })();
