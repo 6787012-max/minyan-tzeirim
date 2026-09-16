@@ -798,6 +798,7 @@
       if (xhr.status >= 200 && xhr.status < 300) {
         CE_SCAN_PATH = 'id-scans/' + path; CE_SCAN_NAME = file.name; CE_SCAN_MIME = file.type || '';
         hint.textContent = hint.textContent + ' · נשמר לצירוף לכרטיס.';
+        $('#ceScanPrecise').disabled = false; /* צריך CE_SCAN_PATH קיים כדי ש-extract-scan יוכל לקרוא את הקובץ */
       } else {
         hint.textContent = hint.textContent + ' (שמירת הקובץ עצמו נכשלה — הזיהוי בכל זאת תקף)';
       }
@@ -811,6 +812,7 @@
     if (!window.MTOcr) { hint.textContent = 'מנוע הזיהוי לא נטען — נסה לרענן את הדף.'; return; }
     CE_SCAN_PATH = ''; CE_SCAN_NAME = ''; CE_SCAN_MIME = ''; CE_SCAN_FAMILY = null;
     $('#ceScanSuggest').hidden = true;
+    $('#ceScanPrecise').disabled = true;
     hint.textContent = 'טוען מנוע זיהוי (חינמי, רץ בדפדפן — לוקח כמה שניות)…';
     window.MTOcr.scanFile(file, function (msg) { hint.textContent = msg; })
       .then(function (res) {
@@ -827,6 +829,34 @@
   $('#ceScanFile').addEventListener('change', function (e) {
     var f = e.target.files && e.target.files[0];
     if (f) scanCeFile(f);
+  });
+  /* "נסה זיהוי מדויק יותר" — רק לפי בקשה מפורשת, לא רץ אוטומטית. קורא
+     ל-Edge Function extract-scan (Gemini) שכבר בנוי ופרוס — לא הוסר,
+     רק הפסיק להיות ברירת המחדל. עולה כסף קטן לכל קריאה, ולכן דורש
+     לחיצה יזומה כל פעם, לא flag "תמיד תשתמש ב-AI" שיישכח דלוק. */
+  $('#ceScanPrecise').addEventListener('click', function () {
+    if (!CE_SCAN_PATH) return;
+    var btn = $('#ceScanPrecise');
+    var hint = $('#ceScanHint');
+    btn.disabled = true;
+    btn.textContent = 'בודק עם זיהוי מדויק יותר…';
+    fetch(API + '/functions/v1/extract-scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: ANON, Authorization: 'Bearer ' + (SES && SES.access_token) },
+      body: JSON.stringify({ scan_path: CE_SCAN_PATH }),
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        btn.disabled = false;
+        btn.textContent = 'הזיהוי חלש? נסה זיהוי מדויק יותר (בתשלום קטן)';
+        if (!res.ok || !res.j || !res.j.family) { hint.textContent = 'הזיהוי המדויק יותר נכשל — נשאר עם הזיהוי החינמי.'; return; }
+        CE_SCAN_FAMILY = res.j.family;
+        hint.textContent = 'עודכן לזיהוי מדויק יותר: ' + CE_SCAN_NAME;
+        renderCeScanSuggest();
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = 'הזיהוי חלש? נסה זיהוי מדויק יותר (בתשלום קטן)';
+        hint.textContent = 'הזיהוי המדויק יותר נכשל (בעיית רשת) — נשאר עם הזיהוי החינמי.';
+      });
   });
   $('#ceScanApply').addEventListener('click', function () {
     var f = CE_SCAN_FAMILY;
@@ -894,6 +924,7 @@
     $('#ceScanFile').value = '';
     $('#ceScanHint').textContent = 'לא נבחר קובץ.';
     $('#ceScanSuggest').hidden = true;
+    $('#ceScanPrecise').disabled = true;
     renderCeKids();
     renderCeRelPicker();
     renderCeRelList();

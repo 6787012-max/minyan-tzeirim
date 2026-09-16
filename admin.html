@@ -231,7 +231,10 @@
             <p class="hint" id="ceScanHint" style="margin:6px 0 0">לא נבחר קובץ.</p>
             <div id="ceScanSuggest" hidden style="margin-top:8px;background:var(--cream);border:1px solid var(--line);border-radius:9px;padding:10px 12px">
               <div id="ceScanSuggestText" style="font-size:13px;color:var(--navy)"></div>
-              <button type="button" class="btn btn-g small" id="ceScanApply" style="margin-top:8px">מילוי אוטומטי מהחילוץ</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+                <button type="button" class="btn btn-g small" id="ceScanApply">מילוי אוטומטי מהחילוץ</button>
+                <button type="button" class="btn btn-s small" id="ceScanPrecise" disabled>הזיהוי חלש? נסה זיהוי מדויק יותר (בתשלום קטן)</button>
+              </div>
             </div>
           </div>
 
@@ -698,7 +701,7 @@
 <script src="js/vendor/tesseract/tesseract.min.js"></script>
 <script src="js/vendor/pdfjs/pdf.min.js"></script>
 <script src="js/ocr-scan.js?v=1"></script>
-<script src="js/admin.js?v=34"></script>
+<script src="js/admin.js?v=35"></script>
 <script src="js/admin-ads.js?v=3"></script>
 <script src="js/admin-forms.js?v=1"></script>
 <script src="js/realtime.js?v=4"></script>
