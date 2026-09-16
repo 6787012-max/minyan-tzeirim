@@ -762,10 +762,14 @@
     renderCeKids();
   });
 
-  /* ── העלאת ספח ישירות מהכרטיס + חילוץ אוטומטי (Gemini, Edge Function
-     extract-scan) — בנפרד מהעלאה דרך טופס simchat.html הציבורי: כאן
-     ההעלאה עצמה כבר authenticated+admin (RLS על storage.objects, לא
-     anon), וה-extraction דורש JWT admin כי הוא עולה כסף לקריאה. */
+  /* ── העלאת ספח ישירות מהכרטיס + חילוץ אוטומטי ──────────────────────
+     בכוונה *לא* מודל AI בתשלום (יוסף: "לא רוצה שיעלה כסף, שיהיה
+     חינמי") — הזיהוי (js/ocr-scan.js, Tesseract+PDF.js) רץ **לגמרי
+     בדפדפן**, בלי לשלוח את התמונה לשום שירות חיצוני. הקובץ המקורי
+     כן מועלה ל-Storage אחרי הזיהוי, רק כדי שיישאר מצורף לכרטיס
+     (זה Supabase Storage רגיל, לא קריאת AI — לא עולה כסף לפי-שימוש).
+     דיוק ה-OCR החינמי נמוך משמעותית ממודל AI מסחרי, בפרט על ספח עם
+     הרבה ילדים — ה"הצעה" חייבת תמיד עריכה/אישור, לא מילוי סופי. */
   function renderCeScanSuggest() {
     var f = CE_SCAN_FAMILY;
     if (!f) { $('#ceScanSuggest').hidden = true; return; }
@@ -773,59 +777,56 @@
     if (f.head_of_household && f.head_of_household.name) {
       lines.push('ראש משפחה: ' + f.head_of_household.name + (f.head_of_household.id ? ' · ' + f.head_of_household.id : ''));
     }
-    if (f.spouse && f.spouse.name) lines.push('בן/בת זוג: ' + f.spouse.name);
+    if (f.spouse && f.spouse.name) lines.push('בן/בת זוג: ' + f.spouse.name + (f.spouse.id ? ' · ' + f.spouse.id : ''));
     if (f.address || f.city) lines.push('כתובת: ' + [f.address, f.city].filter(Boolean).join(', '));
     if (Array.isArray(f.children) && f.children.length) lines.push(f.children.length + ' ילדים זוהו בספח');
-    $('#ceScanSuggestText').innerHTML = lines.length ? lines.map(esc).join('<br>') : 'לא זוהה מידע ברור בספח.';
+    $('#ceScanSuggestText').innerHTML = (lines.length ? lines.map(esc).join('<br>') : 'לא זוהה מידע ברור בספח.') +
+      '<div style="margin-top:4px;font-size:11.5px;color:#8A5A16">זיהוי חינמי (לא AI בתשלום) — תמיד לבדוק לפני מילוי.</div>';
     $('#ceScanSuggest').hidden = false;
-  }
-  function callExtractScan() {
-    var hint = $('#ceScanHint');
-    return fetch(API + '/functions/v1/extract-scan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: ANON, Authorization: 'Bearer ' + (SES && SES.access_token) },
-      body: JSON.stringify({ scan_path: CE_SCAN_PATH }),
-    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) {
-        if (!res.ok || !res.j || !res.j.family) {
-          hint.textContent = 'הועלה: ' + CE_SCAN_NAME + ' — חילוץ אוטומטי לא הצליח, אפשר למלא ידנית.';
-          return;
-        }
-        CE_SCAN_FAMILY = res.j.family;
-        hint.textContent = 'הועלה: ' + CE_SCAN_NAME;
-        renderCeScanSuggest();
-      }).catch(function () { hint.textContent = 'הועלה: ' + CE_SCAN_NAME + ' — חילוץ נכשל (בעיית רשת).'; });
   }
   function uploadCeScan(file) {
     var hint = $('#ceScanHint');
-    if (file.size > 30 * 1024 * 1024) { hint.textContent = 'הקובץ גדול מ-30 מגה.'; return; }
     var ext = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
     var key = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2);
     var path = 'contacts/' + key + '.' + ext;
-    hint.textContent = 'מעלה: ' + file.name + '…';
     var xhr = new XMLHttpRequest();
     xhr.open('POST', API + '/storage/v1/object/id-scans/' + path, true);
     xhr.setRequestHeader('Authorization', 'Bearer ' + (SES && SES.access_token));
     xhr.setRequestHeader('apikey', ANON);
     xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-    xhr.upload.onprogress = function (ev) {
-      if (ev.lengthComputable) hint.textContent = 'מעלה: ' + file.name + ' — ' + Math.round(ev.loaded * 100 / ev.total) + '%';
-    };
     xhr.onload = function () {
       if (xhr.status >= 200 && xhr.status < 300) {
         CE_SCAN_PATH = 'id-scans/' + path; CE_SCAN_NAME = file.name; CE_SCAN_MIME = file.type || '';
-        hint.textContent = 'הועלה: ' + file.name + ' — מחלץ פרטים…';
-        callExtractScan();
+        hint.textContent = hint.textContent + ' · נשמר לצירוף לכרטיס.';
       } else {
-        hint.textContent = 'העלאה נכשלה (' + xhr.status + ').';
+        hint.textContent = hint.textContent + ' (שמירת הקובץ עצמו נכשלה — הזיהוי בכל זאת תקף)';
       }
     };
-    xhr.onerror = function () { hint.textContent = 'העלאה נכשלה — בעיית רשת.'; };
+    xhr.onerror = function () { hint.textContent = hint.textContent + ' (שמירת הקובץ נכשלה — בעיית רשת)'; };
     xhr.send(file);
+  }
+  function scanCeFile(file) {
+    var hint = $('#ceScanHint');
+    if (file.size > 30 * 1024 * 1024) { hint.textContent = 'הקובץ גדול מ-30 מגה.'; return; }
+    if (!window.MTOcr) { hint.textContent = 'מנוע הזיהוי לא נטען — נסה לרענן את הדף.'; return; }
+    CE_SCAN_PATH = ''; CE_SCAN_NAME = ''; CE_SCAN_MIME = ''; CE_SCAN_FAMILY = null;
+    $('#ceScanSuggest').hidden = true;
+    hint.textContent = 'טוען מנוע זיהוי (חינמי, רץ בדפדפן — לוקח כמה שניות)…';
+    window.MTOcr.scanFile(file, function (msg) { hint.textContent = msg; })
+      .then(function (res) {
+        CE_SCAN_FAMILY = res.family;
+        hint.textContent = 'זוהה: ' + file.name + (res.viaOcr ? '' : ' (טקסט מדויק מה-PDF, לא OCR)');
+        renderCeScanSuggest();
+        uploadCeScan(file);
+      })
+      .catch(function (e) {
+        hint.textContent = 'לא הצליח לזהות פרטים (' + ((e && e.message) || 'שגיאה') + ') — אפשר למלא ידנית.';
+        uploadCeScan(file); /* עדיין שומרים את הקובץ גם אם הזיהוי נכשל */
+      });
   }
   $('#ceScanFile').addEventListener('change', function (e) {
     var f = e.target.files && e.target.files[0];
-    if (f) uploadCeScan(f);
+    if (f) scanCeFile(f);
   });
   $('#ceScanApply').addEventListener('click', function () {
     var f = CE_SCAN_FAMILY;
