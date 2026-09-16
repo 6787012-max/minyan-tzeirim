@@ -11,7 +11,7 @@
 <link rel="icon" href="img/favicon.ico" sizes="any">
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css?v=20">
-<link rel="stylesheet" href="css/admin.css?v=26">
+<link rel="stylesheet" href="css/admin.css?v=27">
 </head>
 <body class="adm">
 
@@ -173,6 +173,10 @@
           <option value="no-hok">בלי הוראת קבע</option>
           <option value="waad">חברי ועדה</option>
           <option value="incomplete">חסרי פרטים (טלפון/מייל)</option>
+          <option value="pw-v">מתפלל אצלנו (V)</option>
+          <option value="pw-x">לא מתפלל אצלנו (X)</option>
+          <option value="pw-maybe">אולי מתפלל אצלנו</option>
+          <option value="pw-unset">טרם סומן — מתפלל אצלנו?</option>
         </select>
         <button type="button" class="btn btn-s small" id="contactsExport">ייצוא CSV</button>
         <button type="button" class="btn btn-s small" id="contactsDupCheck">בדיקת כפילויות</button>
@@ -182,7 +186,7 @@
       <div class="tbl-wrap">
         <table class="tbl" id="contactsTable">
           <thead><tr>
-            <th>שם</th><th>טלפון</th><th>מייל</th><th>תגיות</th><th>משפחה</th><th>מסמכים</th><th>תרומות</th><th>קמפיין</th><th></th>
+            <th>שם</th><th>טלפון</th><th>מייל</th><th>תגיות</th><th>מתפלל אצלנו?</th><th>משפחה</th><th>מסמכים</th><th>תרומות</th><th>קמפיין</th><th></th>
           </tr></thead>
           <tbody id="contactsRows"></tbody>
         </table>
@@ -206,6 +210,14 @@
             <label class="fld" style="flex:1 1 160px"><span>תפקיד</span><input id="ceRole" placeholder="גבאי / ועדה / …"></label>
             <label class="fld" style="flex:1 1 200px"><span>תגיות (מופרד בפסיקים)</span><input id="ceTags"></label>
           </div>
+          <label class="fld" style="max-width:260px"><span>מתפלל אצלנו במניין הצעירים?</span>
+            <select id="cePraysWithUs">
+              <option value="">טרם סומן</option>
+              <option value="V">V — כן, מתפלל אצלנו</option>
+              <option value="X">X — לא</option>
+              <option value="אולי">אולי</option>
+            </select>
+          </label>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <label class="fld" style="flex:1 1 160px"><span>רמת קמפיין</span>
               <select id="ceTier"><option value="">—</option><option value="שותף">שותף</option><option value="מחזיק">מחזיק</option><option value="תורם">תורם</option></select>
@@ -708,7 +720,7 @@
 <script src="js/vendor/tesseract/tesseract.min.js"></script>
 <script src="js/vendor/pdfjs/pdf.min.js"></script>
 <script src="js/ocr-scan.js?v=1"></script>
-<script src="js/admin.js?v=35"></script>
+<script src="js/admin.js?v=36"></script>
 <script src="js/admin-ads.js?v=4"></script>
 <script src="js/admin-forms.js?v=1"></script>
 <script src="js/realtime.js?v=4"></script>

@@ -650,7 +650,7 @@
 
   function loadContacts() {
     return Promise.all([
-      db('congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status,match_note,children&order=surname')
+      db('congregants?select=id,surname,full_name,phone,email,tier,tier_amount,tags,role,address,id_num,last_contact_at,campaign_status,match_note,children,prays_with_us&order=surname')
         .then(function (r) { return r.ok ? r.json() : []; }),
       db('contact_docs?select=id,contact_id,kind,file_path,original_name,created_at')
         .then(function (r) { return r.ok ? r.json() : []; }),
@@ -689,15 +689,23 @@
       if (filt === 'no-hok') return !c.tier && (c.tags||[]).indexOf('הוראת קבע') < 0;
       if (filt === 'waad') return (c.tags||[]).indexOf('ועדה') >= 0 || c.role === 'ועדה';
       if (filt === 'incomplete') return !c.phone || !c.email;
+      if (filt === 'pw-v') return c.prays_with_us === 'V';
+      if (filt === 'pw-x') return c.prays_with_us === 'X';
+      if (filt === 'pw-maybe') return c.prays_with_us === 'אולי';
+      if (filt === 'pw-unset') return !c.prays_with_us;
       return true;
     });
     var total = CONTACTS.length;
     var hasHok = CONTACTS.filter(function (c) { return c.tier; }).length;
     var missing = CONTACTS.filter(function (c) { return !c.phone || !c.email; }).length;
+    var praysWithUs = CONTACTS.filter(function (c) { return c.prays_with_us === 'V'; }).length;
+    var praysUnset = CONTACTS.filter(function (c) { return !c.prays_with_us; }).length;
     $('#contactsKpi').innerHTML =
       '<div class="card"><div class="k">סה״כ אנשי קשר</div><div class="v">' + total + '</div></div>' +
       '<div class="card"><div class="k">עם הוראת קבע</div><div class="v">' + hasHok + '</div></div>' +
       '<div class="card"><div class="k">חסרי פרטים</div><div class="v">' + missing + '</div></div>' +
+      '<div class="card"><div class="k">מתפלל אצלנו</div><div class="v">' + praysWithUs + '</div></div>' +
+      '<div class="card"><div class="k">טרם סומן</div><div class="v"' + (praysUnset ? ' style="color:#8A5A16"' : '') + '>' + praysUnset + '</div></div>' +
       '<div class="card"><div class="k">מוצגים</div><div class="v">' + view.length + '</div></div>';
     var body = view.map(function (c) {
       var nm = esc(c.full_name || c.surname);
@@ -706,11 +714,20 @@
       var docN = docsCountFor(c.id);
       var don = donationsFor(c.id);
       var donCell = don ? '₪' + Number(don.total_amount).toLocaleString('he-IL') + ' · ' + don.tx_count : '—';
+      var pw = c.prays_with_us || '';
+      var pwClass = pw === 'V' ? 'pw-v' : pw === 'X' ? 'pw-x' : pw === 'אולי' ? 'pw-maybe' : 'pw-unset';
+      var pwCell = '<select class="pw-sel ' + pwClass + '" data-pw-id="' + c.id + '" title="מתפלל אצלנו במניין הצעירים?">' +
+        '<option value=""' + (pw === '' ? ' selected' : '') + '>—</option>' +
+        '<option value="V"' + (pw === 'V' ? ' selected' : '') + '>V · כן</option>' +
+        '<option value="X"' + (pw === 'X' ? ' selected' : '') + '>X · לא</option>' +
+        '<option value="אולי"' + (pw === 'אולי' ? ' selected' : '') + '>אולי</option>' +
+      '</select>';
       return '<tr data-id="' + c.id + '">' +
         '<td><b>' + nm + '</b>' + (c.role ? '<div style="font-size:12.5px;color:#6b6257">' + esc(c.role) + '</div>' : '') + '</td>' +
         '<td>' + (c.phone ? '<a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a>' : '<span style="color:#c00">חסר</span>') + '</td>' +
         '<td>' + (c.email ? '<a href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a>' : '<span style="color:#c00">חסר</span>') + '</td>' +
         '<td>' + tags + '</td>' +
+        '<td>' + pwCell + '</td>' +
         '<td style="white-space:normal;font-size:12.5px;color:#6b6257;max-width:160px">' + (fam || '—') + '</td>' +
         '<td>' + (docN ? docN + ' 📎' : '—') + '</td>' +
         '<td>' + donCell + '</td>' +
@@ -718,13 +735,29 @@
         '<td><button type="button" class="btn btn-s small" data-contact-edit="' + c.id + '">עריכה</button></td>' +
       '</tr>';
     }).join('');
-    $('#contactsRows').innerHTML = body || '<tr><td colspan="9" style="padding:16px;color:#6b6257">אין תוצאות.</td></tr>';
+    $('#contactsRows').innerHTML = body || '<tr><td colspan="10" style="padding:16px;color:#6b6257">אין תוצאות.</td></tr>';
   }
   var $cq = $('#contactsQ'); if ($cq) $cq.addEventListener('input', renderContacts);
   var $cf = $('#contactsFilter'); if ($cf) $cf.addEventListener('change', renderContacts);
   $('#contactsRows').addEventListener('click', function (e) {
     var b = e.target.closest('[data-contact-edit]');
     if (b) openContactEdit(Number(b.dataset.contactEdit));
+  });
+  /* טוגל "מתפלל אצלנו" ישירות מהטבלה — נשמר מיד, בלי לפתוח את כרטיס העריכה
+     (185 בתי-אב לסמן; מודל בכל שורה היה הופך את זה לעבודה של שעות). */
+  $('#contactsRows').addEventListener('change', function (e) {
+    var sel = e.target.closest('.pw-sel');
+    if (!sel) return;
+    var id = Number(sel.dataset.pwId);
+    var val = sel.value || null;
+    sel.disabled = true;
+    db('congregants?id=eq.' + id, { method: 'PATCH', body: JSON.stringify({ prays_with_us: val }) })
+      .then(function (r) {
+        if (!r.ok) { alert('העדכון נכשל — נסו שוב.'); renderContacts(); return; }
+        var c = CONTACTS.filter(function (x) { return x.id === id; })[0];
+        if (c) c.prays_with_us = val;
+        renderContacts();
+      });
   });
 
   /* ── עריכה/הוספה של כרטיס איש קשר ─────────────────────────────── */
@@ -913,6 +946,7 @@
     $('#ceAddress').value  = c ? (c.address || '') : '';
     $('#ceRole').value     = c ? (c.role || '') : '';
     $('#ceTags').value     = c ? (c.tags || []).join(', ') : '';
+    $('#cePraysWithUs').value = c ? (c.prays_with_us || '') : '';
     $('#ceTier').value     = c ? (c.tier || '') : '';
     $('#ceCampaign').value = c ? (c.campaign_status || 'new') : 'new';
     $('#ceNote').value     = c ? (c.match_note || '') : '';
@@ -948,6 +982,7 @@
       address: $('#ceAddress').value.trim() || null,
       role: $('#ceRole').value.trim() || null,
       tags: $('#ceTags').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
+      prays_with_us: $('#cePraysWithUs').value || null,
       tier: $('#ceTier').value || null,
       campaign_status: $('#ceCampaign').value,
       match_note: $('#ceNote').value.trim() || null,
@@ -1016,6 +1051,7 @@
   var MERGE_FIELDS = [
     ['surname', 'שם משפחה'], ['full_name', 'שם מלא'], ['phone', 'טלפון'], ['email', 'מייל'],
     ['address', 'כתובת'], ['id_num', 'ת״ז'], ['role', 'תפקיד'], ['match_note', 'הערה'],
+    ['prays_with_us', 'מתפלל אצלנו'],
   ];
 
   function openDupCheck() {
@@ -1083,9 +1119,9 @@
     });
   });
   var $cex = $('#contactsExport'); if ($cex) $cex.addEventListener('click', function () {
-    var lines = ['שם,טלפון,מייל,רמה,סכום,תגיות,קמפיין'];
+    var lines = ['שם,טלפון,מייל,מתפלל אצלנו,רמה,סכום,תגיות,קמפיין'];
     CONTACTS.forEach(function (c) {
-      var csv = [c.full_name || c.surname, c.phone||'', c.email||'', c.tier||'',
+      var csv = [c.full_name || c.surname, c.phone||'', c.email||'', c.prays_with_us||'', c.tier||'',
                  c.tier_amount||'', (c.tags||[]).join('; '), c.campaign_status||''];
       lines.push(csv.map(function (v) {
         v = String(v == null ? '' : v);
