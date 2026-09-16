@@ -31,14 +31,17 @@
     try {
       client = window.supabase.createClient(url, anonKey, { auth: { persistSession: false } });
       client.realtime.setAuth(accessToken);
+      /* בדיקה חיה גילתה ש-4 בינדינגים נפרדים (אחד לכל טבלה, table: X)
+         על אותו channel לא קלטו שום אירוע בפועל — למרות ש-subscribe
+         חוזר SUBSCRIBED בלי שגיאה, ואותו client עם בינדינג יחיד (בלי
+         table, ברמת schema) כן קלט. בינדינג יחיד + סינון table בקוד. */
       channel = client.channel('minyan-admin-live');
-      TABLES.forEach(function (table) {
-        channel.on('postgres_changes', { event: '*', schema: 'minyan', table: table }, function (payload) {
-          console.log('[MTRealtime] event received:', table, payload.eventType);
-          pulse();
-          listeners.forEach(function (fn) {
-            try { fn(table, payload); } catch (e) { /* מאזין בודד לא מפיל את השאר */ }
-          });
+      channel.on('postgres_changes', { event: '*', schema: 'minyan' }, function (payload) {
+        var table = payload.table;
+        if (TABLES.indexOf(table) < 0) return;
+        pulse();
+        listeners.forEach(function (fn) {
+          try { fn(table, payload); } catch (e) { /* מאזין בודד לא מפיל את השאר */ }
         });
       });
       channel.subscribe(function (status, err) {
