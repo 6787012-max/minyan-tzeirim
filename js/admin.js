@@ -664,9 +664,12 @@
   var SEUDAH_ROWS = [];
 
   function loadSeudah() {
+    /* ref_key כולל מ-16/09 גם סיומת טלפון (ref_key:digits) כדי לאפשר כמה
+       משפחות להירשם — eq. המדויק הישן כבר לא תופס אף שורה. like. עם *
+       בסוף תואם גם רשומות ישנות בלי סיומת וגם חדשות איתה. */
     var q = 'signups?select=id,name,phone,qty,details,mail_status,created_at,status,' +
-            'family_extracted,extraction_status,extraction_error&ref_key=eq.'
-          + encodeURIComponent(SEUDAH_REF) + '&order=created_at.desc';
+            'family_extracted,extraction_status,extraction_error&ref_key=like.'
+          + encodeURIComponent(SEUDAH_REF + '*') + '&order=created_at.desc';
     db(q).then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) { SEUDAH_ROWS = rows || []; renderSeudah(); })
       .catch(function () { $('#seudahNote').textContent = 'שגיאה בטעינה.'; });
