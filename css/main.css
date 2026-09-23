@@ -384,29 +384,63 @@ footer a:hover{text-decoration:underline}
   .gabai-row .lbl{font-size:15px}
 }
 
-.news-panel{background:var(--navy);opacity:0;transform:translateY(-8px);
+/* ── לוח הקהילה ─────────────────────────────────────────────────
+   שלוש ההודעות האחרונות, ככרטיסים על הרקע הכהה. קודם זה היה פס אחד
+   מתחלף: שלוש מתוך ארבע ההודעות היו מוסתרות בכל רגע נתון, ובנייד
+   התקציר הוסתר לגמרי ונשארה שורת כותרת בודדת. */
+/* padding:0 מבטל את ה-clamp(56px,7vw,96px) של section — הוא הוסיף כאן
+   כ-90px ריקים מעל ומתחת, והפס נראה כמו שדה ריק עם שורת טקסט אחת. */
+.news-panel{padding:0;background:var(--navy);
+  background-image:radial-gradient(120% 150% at 88% 0,rgba(176,141,62,.17),transparent 60%);
+  opacity:0;transform:translateY(-8px);
   transition:opacity .5s cubic-bezier(.22,.7,.25,1),transform .5s cubic-bezier(.22,.7,.25,1)}
 .news-panel.show{opacity:1;transform:none}
-.news-panel .wrap{padding-block:22px}
-.np-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
-.np-k{font-weight:700;font-size:13px;color:var(--gold-lt,var(--gold));letter-spacing:1.8px}
-.np-more{font-size:13.5px;font-weight:600;color:#fff;opacity:.75;text-decoration:none;white-space:nowrap}
-.np-more:hover{opacity:1;text-decoration:underline}
-.np-stage{position:relative;min-height:64px}
-.np-item{position:absolute;inset:0;display:flex;align-items:center;gap:12px;
-  opacity:0;transform:translateY(6px);pointer-events:none;will-change:opacity;
-  transition:opacity .55s cubic-bezier(.22,.7,.25,1),transform .55s cubic-bezier(.22,.7,.25,1)}
-.np-item.on{opacity:1;transform:none;pointer-events:auto;z-index:1}
-.np-item::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:var(--gold)}
-.np-item b{font-size:17px;font-weight:700;color:#fff;line-height:1.4}
-.np-item span{font-size:14px;color:#D6D2C8;line-height:1.5}
-.np-dots{display:flex;gap:7px;margin-top:16px}
-.np-dots b{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);
-  cursor:pointer;transition:background .25s,transform .25s;border:0;padding:0}
-.np-dots b.on{background:var(--gold);transform:scale(1.3)}
-@media(max-width:700px){
-  .np-item b{font-size:15.5px}
-  .np-item span{display:none}
+.news-panel .wrap{padding-block:30px 32px}
+
+.np-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+  margin-bottom:18px}
+.np-k{display:block;font-weight:600;font-size:12.5px;color:var(--gold-lt);letter-spacing:1.8px}
+.np-head h2{margin-top:5px;font-size:26px;color:#fff}
+.np-more,.np-foot{font-size:14.5px;font-weight:600;color:var(--gold-lt);
+  text-decoration:none;white-space:nowrap;padding-bottom:3px;
+  border-bottom:1px solid transparent;transition:border-color .2s}
+.np-more:hover,.np-foot:hover{border-bottom-color:var(--gold-lt)}
+
+.np-grid{display:grid;gap:12px;grid-template-columns:repeat(3,1fr)}
+.np-card{display:flex;gap:12px;align-items:flex-start;text-decoration:none;
+  background:rgba(255,255,255,.055);border:1px solid rgba(235,220,182,.16);
+  border-radius:var(--r);padding:14px 15px;
+  transition:background .22s,border-color .22s,transform .22s}
+.np-card:hover{background:rgba(255,255,255,.1);border-color:rgba(217,190,124,.45);
+  transform:translateY(-2px)}
+.np-thumb{flex:none;width:58px;height:58px;border-radius:10px;object-fit:cover;
+  border:1px solid rgba(235,220,182,.2);background:#0D1B31}
+.np-txt{flex:1;min-width:0}
+.np-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.np-cat{font-size:11.5px;font-weight:600;color:var(--gold-lt);white-space:nowrap;
+  border:1px solid rgba(217,190,124,.38);border-radius:999px;padding:1px 9px}
+.np-ago{font-size:12px;color:#9AA6BB;white-space:nowrap;margin-inline-start:auto}
+.np-card b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;font-family:'Frank',Georgia,serif;font-weight:500;font-size:18px;
+  color:#fff;line-height:1.35;overflow-wrap:anywhere}
+.np-d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;margin-top:5px;font-size:14px;line-height:1.55;color:#C3C9D6;
+  overflow-wrap:anywhere}
+.np-foot{display:none;margin-top:16px}
+
+@media(max-width:900px){
+  .np-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .news-panel .wrap{padding-block:24px 26px}
+  .np-head{margin-bottom:14px}
+  .np-head h2{font-size:22px}
+  .np-head .np-more{display:none}
+  .np-card b{font-size:16.5px}
+  .np-foot{display:inline-block}
+  /* בנייד הכרטיס השלישי דוחף את פס הזמנים של היום מתחת לקיפול פעמיים.
+     שניים הם טעימה מספקת — "לכל ההודעות" ממש מתחתיהם. */
+  .np-grid>:nth-child(3){display:none}
 }
 
 /* ── תנועה ─────────────────────────────────────────────────────

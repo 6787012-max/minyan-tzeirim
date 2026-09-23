@@ -636,65 +636,92 @@
   }
 })();
 
-/* פאנל "לוח הקהילה" — קרוסלה מתחלפת אוטומטית מ-4 החדשות המאושרות
- * האחרונות. נשארת מוסתרת אם אין אף הודעה מאושרת, כדי שלא יופיע קטע
- * ריק. אותו news_public כמו news.js — אין דרך להגיע דרך זה למה
- * שלא אושר. */
+/* פאנל "לוח הקהילה" — שלוש ההודעות המאושרות האחרונות, ככרטיסים.
+ * נשאר מוסתר אם אין אף הודעה מאושרת, כדי שלא יופיע קטע ריק.
+ * אותו news_public כמו news.js — אין דרך להגיע דרך זה למה שלא אושר. */
 (function () {
   'use strict';
   var panel = document.getElementById('newsStrip');
   if (!panel) return;
   function esc(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* גוף ההודעה מגיע מהמייל עם זנב: טקסט ה-OCR של המודעה המצורפת אחרי
+     "מתוך המודעה", שורת קו תחתון, סמני [image: …] ו-BOM. בתקציר קצר
+     הזנב הזה תופס את כל השורה ומסתיר את ההודעה עצמה. */
+  function clean(s) {
+    s = String(s == null ? '' : s).replace(/\r/g, '');
+    s = s.split('מתוך המודעה')[0];
+    s = s.split(/_{6,}/)[0];
+    s = s.replace(/\[image:[^\]]*\]/g, ' ');
+    s = s.replace(/<https?:\/\/[^>]*>/g, ' ');
+    s = s.replace(/[﻿​-‏‪-‮]/g, '');
+    /* חתימת המייל ("בברכה, פלוני") לא מוסיפה כלום לתקציר בן שורתיים.
+       נחתך רק אם נשאר לפניה תוכן של ממש — בהודעה קצרה כמו
+       "למי יש? בבקשה / בברכה / <טלפון>" הטלפון הוא כל העניין. */
+    var sig = s.search(/(^|\n)[ \t]*\**[ \t]*בברכ(ה|ת)/);
+    if (sig > 15) s = s.slice(0, sig);
+    s = s.replace(/\*/g, ' ');
+    s = s.replace(/^[\s—\-_]+/, '');
+    return s.replace(/\s+/g, ' ').trim();
   }
   function snippet(s, max) {
-    s = String(s == null ? '' : s).trim().replace(/\s+/g, ' ');
-    return s.length > max ? s.slice(0, max).trim() + '…' : s;
+    s = clean(s);
+    if (s.length <= max) return s;
+    return s.slice(0, max).replace(/\s+\S*$/, '') + '…';
   }
+
+  /* "לפני שעתיים" קריא יותר מתאריך מלא כשרוב ההודעות מהיום — זהה ל-news.js */
+  function when(iso) {
+    var d = new Date(iso), diff = (Date.now() - d.getTime()) / 6e4;
+    if (diff < 2) return 'ממש עכשיו';
+    if (diff < 60) return 'לפני ' + Math.round(diff) + ' דקות';
+    if (diff < 24 * 60) {
+      var h = Math.round(diff / 60);
+      return 'לפני ' + (h === 1 ? 'שעה' : h + ' שעות');
+    }
+    var days = Math.round(diff / 1440);
+    if (days === 1) return 'אתמול';
+    if (days < 7) return 'לפני ' + days + ' ימים';
+    return d.toLocaleDateString('he-IL');
+  }
+
   fetch('data/site.json', { cache: 'no-cache' })
     .then(function (r) { return r.json(); })
     .then(function (c) {
-      return fetch(c.api.url + '/rest/v1/news_public?select=title,body,msg_date,created_at&order=msg_date.desc&limit=4', {
+      return fetch(c.api.url + '/rest/v1/news_public?select=title,body,category,image_url,images,msg_date,created_at&order=msg_date.desc&limit=8', {
         headers: { 'apikey': c.api.anon, 'Authorization': 'Bearer ' + c.api.anon, 'Accept-Profile': 'minyan' }
       });
     })
     .then(function (r) { return r.ok ? r.json() : []; })
     .then(function (rows) {
-      rows = (rows || []).filter(function (n) { return n.title; });
+      rows = (rows || []).filter(function (n) { return n.title; }).slice(0, 3);
       if (!rows.length) return;
 
       var stage = document.getElementById('newsStripItems');
-      var dotsEl = document.getElementById('newsStripDots');
-      stage.innerHTML = rows.map(function (n, i) {
-        return '<div class="np-item' + (i === 0 ? ' on' : '') + '">' +
-          '<b>' + esc(n.title) + '</b>' +
-          (n.body ? '<span> — ' + esc(snippet(n.body, 90)) + '</span>' : '') +
-          '</div>';
+      stage.innerHTML = rows.map(function (n) {
+        var imgs = Array.isArray(n.images) ? n.images : (n.image_url ? [n.image_url] : []);
+        var d = snippet(n.body, 100);
+        return '<a class="np-card" href="news.html">' +
+          (imgs[0] ? '<img class="np-thumb" src="' + esc(imgs[0]) +
+                     '" alt="" loading="lazy" width="58" height="58">' : '') +
+          '<span class="np-txt">' +
+            '<span class="np-meta">' +
+              (n.category ? '<span class="np-cat">' + esc(n.category) + '</span>' : '') +
+              '<span class="np-ago">' + esc(when(n.msg_date || n.created_at)) + '</span>' +
+            '</span>' +
+            '<b>' + esc(n.title) + '</b>' +
+            (d ? '<span class="np-d">' + esc(d) + '</span>' : '') +
+          '</span></a>';
       }).join('');
-      dotsEl.innerHTML = rows.map(function (_, i) {
-        return '<button type="button" class="' + (i === 0 ? 'on' : '') + '" aria-label="פריט ' + (i + 1) + '"></button>';
-      }).join('');
-      dotsEl.hidden = rows.length < 2;
 
-      var items = stage.querySelectorAll('.np-item');
-      var dots = dotsEl.querySelectorAll('b, button');
-      var cur = 0, timer = null;
-      function go(i) {
-        items[cur].classList.remove('on');
-        dots[cur].classList.remove('on');
-        cur = i;
-        items[cur].classList.add('on');
-        dots[cur].classList.add('on');
-      }
-      function next() { go((cur + 1) % items.length); }
-      function restart() {
-        if (timer) clearInterval(timer);
-        if (items.length > 1) timer = setInterval(next, 5500);
-      }
-      Array.prototype.forEach.call(dots, function (d, i) {
-        d.addEventListener('click', function () { go(i); restart(); });
+      /* תמונה שנכשלת משאירה ריבוע שבור בכרטיס — עדיף בלעדיה.
+         onerror בתוך ה-HTML חסום ע"י ה-CSP, לכן מאזין אמיתי. */
+      Array.prototype.forEach.call(stage.querySelectorAll('.np-thumb'), function (im) {
+        im.addEventListener('error', function () { im.remove(); });
       });
-      restart();
 
       panel.hidden = false;
       requestAnimationFrame(function () { requestAnimationFrame(function () { panel.classList.add('show'); }); });
