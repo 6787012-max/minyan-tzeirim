@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>חתימה על מכתב · פיצול גן ניסנית ודגנית</title>
 <meta name="description" content="דף חתימה להורים על המכתב למשרד החינוך ולמועצת גוש עציון בדבר פיצול גן ניסנית ודגנית במעלה עמוס.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#12233F">
 <meta name="robots" content="noindex,nofollow">
@@ -20,7 +20,7 @@
       <div class="eyebrow">חתימת הורים</div>
       <h1>פיצול גן ניסנית ודגנית</h1>
       <p class="lead">קוראים את המכתב, ממלאים פרטים, חותמים באצבע על המסך ולוחצים &quot;שליחה&quot;.
-        נוצר קובץ PDF חתום, שאותו שולחים לאילה שניידר.</p>
+        המכתב החתום נשלח אוטומטית לאילה שניידר, ואין צורך להעלות או לשלוח שום קובץ.</p>
     </div>
   </section>
 
@@ -69,14 +69,16 @@
 
     <section class="done card" id="done" hidden>
       <h2>✔ המכתב נחתם</h2>
-      <p>קובץ ה-PDF החתום נוצר. <b>השלב האחרון:</b> שולחים אותו לאילה שניידר —
-        בוואטסאפ או במייל <span dir="ltr" class="mail" id="mailTxt"></span>.</p>
-      <div class="acts">
-        <button type="button" class="send" id="btnShare">שיתוף / שליחה</button>
-        <button type="button" class="ghost" id="btnDl">שמירת הקובץ</button>
-        <a class="ghost" id="btnMail" href="#">פתיחת מייל לאילה</a>
+      <p class="status" id="sendStatus">שולחים את המכתב החתום לאילה שניידר…</p>
+      <div class="manual" id="manual" hidden>
+        <p>השליחה האוטומטית לא הצליחה, ולכן יש לשלוח את הקובץ בעצמכם לאילה שניידר —
+          בוואטסאפ או במייל <span dir="ltr" class="mail" id="mailTxt"></span>.</p>
+        <div class="acts">
+          <button type="button" class="send" id="btnShare">שיתוף / שליחה</button>
+          <a class="ghost" id="btnMail" href="#">פתיחת מייל לאילה</a>
+        </div>
       </div>
-      <p class="small">במייל יש לצרף את הקובץ ששמרתם. תודה רבה!</p>
+      <div class="acts one"><button type="button" class="ghost" id="btnDl">שמירת עותק של הקובץ</button></div>
     </section>
   </section>
 </main>
@@ -84,7 +86,7 @@
 <footer>
   <div class="wrap">
     <div class="foot-bot" style="border:0;padding-top:0">
-      <span>הפרטים נשארים במכשיר שלכם בלבד — הדף לא שומר ולא שולח כלום לשרת.</span>
+      <span>בלחיצה על שליחה, המכתב החתום (עם הפרטים והחתימה) נשלח במייל לאילה שניידר בלבד, ואינו נשמר באתר.</span>
     </div>
   </div>
 </footer>

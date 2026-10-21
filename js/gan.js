@@ -163,7 +163,7 @@
     var J = window.jspdf.jsPDF, doc = new J({ unit: 'mm', format: 'a4', orientation: 'p' });
     pages.forEach(function (p, i) {
       if (i) doc.addPage();
-      doc.addImage(p.c.toDataURL('image/jpeg', 0.93), 'JPEG', 0, 0, 210, 297);
+      doc.addImage(p.c.toDataURL('image/jpeg', 0.82), 'JPEG', 0, 0, 210, 297);
     });
     return doc.output('blob');
   }
@@ -186,11 +186,38 @@
         '&body=' + encodeURIComponent('שלום אילה, מצורף הקובץ החתום (' + pdfName + ').');
       download();
       $('done').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      autoSend(data);
     };
     if (document.fonts && document.fonts.load) {
       Promise.all([document.fonts.load('30px Asst'), document.fonts.load('600 30px Asst')]).then(go, go);
     } else go();
   });
+
+  function autoSend(data) {
+    var st = $('sendStatus');
+    var fail = function () {
+      st.textContent = 'הקובץ נשמר במכשיר, אך השליחה האוטומטית לא הצליחה.';
+      st.className = 'status bad'; $('manual').hidden = false;
+    };
+    var fr = new FileReader();
+    fr.onload = function () {
+      var b64 = String(fr.result).split(',')[1] || '';
+      fetch('data/site.json').then(function (r) { return r.json(); }).then(function (d) {
+        var api = d.api || {};
+        return fetch(api.url + '/functions/v1/gan-sign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': api.anon, 'Authorization': 'Bearer ' + api.anon },
+          body: JSON.stringify({ name: data.name, child: data.child, gan: data.gan, phone: data.phone, pdf: b64 })
+        });
+      }).then(function (r) { return r.json().then(function (j) { return r.ok && j && j.ok; }); })
+        .then(function (ok) {
+          if (ok) { st.textContent = '✔ נשלח אוטומטית לאילה שניידר. אין צורך לשלוח או להעלות את הקובץ — התהליך הסתיים. תודה רבה!'; st.className = 'status good'; }
+          else fail();
+        }, fail);
+    };
+    fr.onerror = fail;
+    fr.readAsDataURL(pdfBlob);
+  }
 
   function download() {
     var a = document.createElement('a'); a.href = URL.createObjectURL(pdfBlob); a.download = pdfName;
