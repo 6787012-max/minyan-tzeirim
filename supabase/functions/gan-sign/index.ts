@@ -24,6 +24,17 @@ function json(body: unknown, status: number, origin: string | null) {
   });
 }
 
+const URL_ = Deno.env.get('SUPABASE_URL')!;
+const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+async function db(path: string, init: RequestInit & { prefer?: string } = {}) {
+  const h: Record<string, string> = {
+    'apikey': SERVICE, 'Authorization': 'Bearer ' + SERVICE, 'Content-Type': 'application/json',
+    'Accept-Profile': 'minyan', 'Content-Profile': 'minyan',
+  };
+  if (init.prefer) h['Prefer'] = init.prefer;
+  return await fetch(URL_ + '/rest/v1/' + path, { ...init, headers: h });
+}
+
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 function b64(s: string) {
@@ -138,12 +149,33 @@ Deno.serve(async (req) => {
   if (!pdf.startsWith('JVBER') || pdf.length > 4_000_000 || /[^A-Za-z0-9+/=]/.test(pdf)) {
     return json({ ok: false, error: 'pdf' }, 400, origin);
   }
+  /* קודם שומרים — אם המייל ייכשל החתימה כבר במסד */
+  const ins = await db('gan_signatures', {
+    method: 'POST', prefer: 'return=minimal',
+    body: JSON.stringify({ name, child, gan, phone }),
+  });
+  if (!ins.ok) console.error('save failed', ins.status);
+  let all: { name: string; child: string; gan: string; created_at: string }[] = [];
+  try {
+    const q = await db('gan_signatures?select=name,child,gan,created_at&order=created_at.asc&limit=1000');
+    if (q.ok) all = await q.json();
+  } catch { /* הסיכום אופציונלי */ }
+  const total = all.length;
+  const byGan: Record<string, number> = {};
+  for (const x of all) byGan[x.gan] = (byGan[x.gan] ?? 0) + 1;
+  const rows = all.map((x, i) =>
+    '<tr><td style="padding:2px 8px">' + (i + 1) + '</td><td style="padding:2px 8px">' + esc(x.name) +
+    '</td><td style="padding:2px 8px">' + esc(x.child) + '</td><td style="padding:2px 8px">' + esc(x.gan) + '</td></tr>').join('');
   const html = '<div dir="rtl" style="font-family:Arial;font-size:16px">' +
     '<p>התקבלה חתימה חדשה על מכתב פיצול הגן.</p>' +
     '<p><b>שם האם:</b> ' + esc(name) + '<br><b>הילד/ה:</b> ' + esc(child) +
     '<br><b>הגן:</b> ' + esc(gan) + '<br><b>טלפון:</b> ' + esc(phone || '—') + '</p>' +
-    '<p>הקובץ החתום מצורף. נשלח אוטומטית מדף החתימה.</p></div>';
-  const r = await sendWithPdf('חתימה על מכתב פיצול הגן – ' + name + ' (' + gan + ')', html,
+    '<p>הקובץ החתום מצורף. נשלח אוטומטית מדף החתימה.</p>' +
+    (total ? '<hr><p><b>סיכום עד כה: ' + (total === 1 ? 'חתימה אחת' : total + ' חתימות') + '</b> (' +
+      Object.entries(byGan).map(([g, n]) => esc(g) + ': ' + n).join(' · ') + ')</p>' +
+      '<table dir="rtl" style="border-collapse:collapse;font-size:15px"><tr style="background:#eee"><th style="padding:2px 8px">#</th><th style="padding:2px 8px">שם האם</th><th style="padding:2px 8px">הילד/ה</th><th style="padding:2px 8px">הגן</th></tr>' + rows + '</table>' : '') +
+    '</div>';
+  const r = await sendWithPdf('חתימה על מכתב פיצול הגן – ' + name + ' (' + gan + ') · סה״כ ' + (total || '?'), html,
     'חתימה_' + name.replace(/[^֐-׿a-zA-Z0-9 ]/g, '').replace(/ +/g, '_') + '.pdf', pdf);
   if (!r.ok) { console.error('mail failed', r.err); return json({ ok: false, error: 'mail' }, 502, origin); }
   return json({ ok: true }, 200, origin);
