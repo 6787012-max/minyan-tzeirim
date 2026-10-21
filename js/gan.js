@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  var AYALA_MAIL = 'a0533177636@gmail.com';
+  var ORG_MAIL = 'a0533177636@gmail.com';
   var LETTER_DATE = '20/10/26';
 
   // נוסח המכתב — מקור אחד גם לתצוגה וגם ל-PDF
@@ -181,9 +181,9 @@
       pdfBlob = buildPdf(data);
       pdfName = 'חתימה_גן_' + data.name.replace(/[^֐-׿a-zA-Z0-9 ]/g, '').replace(/ +/g, '_') + '.pdf';
       $('signForm').hidden = true; $('done').hidden = false;
-      $('mailTxt').textContent = AYALA_MAIL;
-      $('btnMail').href = 'mailto:' + AYALA_MAIL + '?subject=' + encodeURIComponent('חתימה על מכתב פיצול הגן – ' + data.name) +
-        '&body=' + encodeURIComponent('שלום אילה, מצורף הקובץ החתום (' + pdfName + ').');
+      $('mailTxt').textContent = ORG_MAIL;
+      $('btnMail').href = 'mailto:' + ORG_MAIL + '?subject=' + encodeURIComponent('חתימה על מכתב פיצול הגן – ' + data.name) +
+        '&body=' + encodeURIComponent('שלום, מצורף הקובץ החתום (' + pdfName + ').');
       download();
       $('done').scrollIntoView({ behavior: 'smooth', block: 'start' });
       autoSend(data);
@@ -211,7 +211,7 @@
         });
       }).then(function (r) { return r.json().then(function (j) { return r.ok && j && j.ok; }); })
         .then(function (ok) {
-          if (ok) { st.textContent = '✔ נשלח אוטומטית לאילה שניידר. אין צורך לשלוח או להעלות את הקובץ — התהליך הסתיים. תודה רבה!'; st.className = 'status good'; }
+          if (ok) { st.textContent = '✔ נשלח אוטומטית למארגנים. אין צורך לשלוח או להעלות את הקובץ — התהליך הסתיים. תודה רבה!'; st.className = 'status good'; }
           else fail();
         }, fail);
     };
