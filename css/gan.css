@@ -1,0 +1,58 @@
+.gan-hero{background:linear-gradient(180deg,var(--navy),var(--navy-2));color:#fff;padding:44px 0 38px;text-align:center}
+.gan-hero .eyebrow{color:var(--gold-lt);letter-spacing:.14em;font-size:15px;margin-bottom:8px}
+.gan-hero h1{font-size:clamp(30px,6vw,46px);color:#fff}
+.gan-hero .lead{max-width:640px;margin:14px auto 0;color:#E4DDC8;font-size:18px}
+.gan-body{max-width:760px;padding-top:26px;padding-bottom:50px}
+
+.steps{display:flex;gap:8px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+.steps span{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--cream-2);
+  border:1px solid var(--line);color:var(--muted);font-size:15px;font-weight:600}
+.steps span i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--gold-pale);color:var(--navy);
+  display:grid;place-items:center;font-size:13px}
+.steps span.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.steps span.on i{background:var(--gold);color:#fff}
+.steps span.ok i{background:var(--gold);color:#fff}
+
+.letter{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+  padding:28px 26px;max-height:62vh;overflow-y:auto;font-size:17.5px;line-height:1.75;position:relative}
+.letter .bsd{text-align:left;color:var(--muted);font-size:15px;margin-bottom:6px;direction:ltr}
+.letter .to{font-weight:600;margin-bottom:10px}
+.letter .re{font-family:'Frank',Georgia,serif;font-size:20px;line-height:1.4;margin:14px 0 14px;
+  padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.letter p{margin:0 0 .9em}
+.letter ol{padding-inline-start:1.4em;margin:0 0 1em}
+.letter li{margin-bottom:.5em}
+.letter .sign-off{margin-top:1.4em;font-weight:600}
+.scrollhint{text-align:center;color:var(--gold);font-size:15px;margin:10px 0 18px;font-weight:600}
+.scrollhint.hide{visibility:hidden}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px 24px 26px;margin-top:6px}
+.card h2{font-size:26px;margin-bottom:12px}
+.card label{display:block;margin:14px 0 6px;font-weight:600;font-size:16px}
+.card input[type=text],.card input[type=tel],.card select{width:100%;font:inherit;font-size:18px;padding:11px 13px;
+  border:1px solid #C9C2AE;border-radius:10px;background:var(--cream-2);color:var(--ink)}
+.card input:focus,.card select:focus{outline:2px solid var(--gold);outline-offset:1px}
+.card label.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;margin:18px 0 6px;line-height:1.5}
+.card label.check input{width:22px;height:22px;margin-top:3px;accent-color:var(--navy);flex:none}
+.form-locked{opacity:.5;pointer-events:none}
+
+.pad{position:relative;border:2px dashed var(--gold);border-radius:12px;background:#FFFEFA;height:190px}
+.pad canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;border-radius:12px}
+.pad .padhint{position:absolute;inset:0;display:grid;place-items:center;color:#B9AE8D;font-size:22px;pointer-events:none}
+.pad.signed .padhint{display:none}
+.pad .clear{position:absolute;top:8px;left:8px;z-index:2;font:inherit;font-size:14px;padding:4px 12px;border-radius:8px;
+  border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+
+.send{display:block;width:100%;margin-top:20px;font:inherit;font-size:20px;font-weight:600;padding:14px;border:0;border-radius:12px;
+  background:var(--navy);color:#fff;cursor:pointer}
+.send:disabled{background:#B7BDC9;cursor:not-allowed}
+.send:not(:disabled):hover{background:var(--navy-2)}
+.why{text-align:center;color:var(--muted);font-size:14.5px;margin:10px 0 0}
+.done{margin-top:20px;border-color:var(--gold)}
+.done .acts{display:grid;gap:10px;margin-top:14px}
+.done .send{margin-top:0}
+.ghost{display:block;text-align:center;font:inherit;font-size:18px;font-weight:600;padding:12px;border-radius:12px;
+  border:1px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer;text-decoration:none}
+.done .small{color:var(--muted);font-size:15px;margin:14px 0 0}
+.mail{font-weight:600;word-break:break-all}
+@media(min-width:640px){.done .acts{grid-template-columns:1fr 1fr 1fr}}

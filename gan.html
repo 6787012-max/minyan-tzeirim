@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>חתימה על מכתב · פיצול גן ניסנית ודגנית</title>
+<meta name="description" content="דף חתימה להורים על המכתב למשרד החינוך ולמועצת גוש עציון בדבר פיצול גן ניסנית ודגנית במעלה עמוס.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#12233F">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="stylesheet" href="css/main.css?v=20">
+<link rel="stylesheet" href="css/gan.css?v=1">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <img src="img/mark@64.png" alt="" width="30" height="30">
+      <b>מניין הצעירים<span class="dot"> · </span><span class="pl">מעלה עמוס</span></b>
+    </a>
+  </div>
+</header>
+
+<main>
+  <section class="gan-hero">
+    <div class="wrap">
+      <div class="eyebrow">חתימת הורים</div>
+      <h1>פיצול גן ניסנית ודגנית</h1>
+      <p class="lead">קוראים את המכתב, ממלאים פרטים, חותמים באצבע על המסך ולוחצים &quot;שליחה&quot;.
+        נוצר קובץ PDF חתום, שאותו שולחים לאילה שניידר.</p>
+    </div>
+  </section>
+
+  <section class="wrap gan-body">
+    <div class="steps">
+      <span class="on" id="st1"><i>1</i>קריאת המכתב</span>
+      <span id="st2"><i>2</i>פרטים</span>
+      <span id="st3"><i>3</i>חתימה</span>
+    </div>
+
+    <article class="letter" id="letter" tabindex="0" aria-label="נוסח המכתב"></article>
+    <p class="scrollhint" id="scrollHint">יש לגלול ולקרוא את המכתב עד סופו לפני החתימה ↓</p>
+
+    <form id="signForm" class="card" autocomplete="off" novalidate>
+      <h2>פרטי החותמת</h2>
+
+      <label for="fName">שם האם החותמת</label>
+      <input id="fName" type="text" maxlength="60" placeholder="שם פרטי ומשפחה" required>
+
+      <label for="fChild">שם הילד/ה</label>
+      <input id="fChild" type="text" maxlength="60" placeholder="שם הילד/ה" required>
+
+      <label for="fGan">הגן</label>
+      <select id="fGan">
+        <option value="">בחרו גן…</option>
+        <option>גן ניסנית</option>
+        <option>גן דגנית</option>
+      </select>
+
+      <label for="fPhone">טלפון (לא חובה)</label>
+      <input id="fPhone" type="tel" inputmode="tel" maxlength="20" placeholder="05X-XXXXXXX">
+
+      <label class="check"><input id="fOk" type="checkbox">
+        <span>קראתי את המכתב במלואו, ואני מאשרת לחתום עליו בשמי כהורה לילד/ה בגן.</span></label>
+
+      <label>חתימה בכתב יד (אצבע או עכבר)</label>
+      <div class="pad">
+        <canvas id="sig" aria-label="אזור חתימה"></canvas>
+        <button type="button" class="clear" id="sigClear">ניקוי</button>
+        <span class="padhint" id="padHint">חתמו כאן</span>
+      </div>
+
+      <button type="submit" id="send" class="send" disabled>שליחה — יצירת PDF חתום</button>
+      <p class="why" id="why">הכפתור יתאפשר אחרי קריאת המכתב, מילוי השם, הילד והגן, אישור וחתימה.</p>
+    </form>
+
+    <section class="done card" id="done" hidden>
+      <h2>✔ המכתב נחתם</h2>
+      <p>קובץ ה-PDF החתום נוצר. <b>השלב האחרון:</b> שולחים אותו לאילה שניידר —
+        בוואטסאפ או במייל <span dir="ltr" class="mail" id="mailTxt"></span>.</p>
+      <div class="acts">
+        <button type="button" class="send" id="btnShare">שיתוף / שליחה</button>
+        <button type="button" class="ghost" id="btnDl">שמירת הקובץ</button>
+        <a class="ghost" id="btnMail" href="#">פתיחת מייל לאילה</a>
+      </div>
+      <p class="small">במייל יש לצרף את הקובץ ששמרתם. תודה רבה!</p>
+    </section>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bot" style="border:0;padding-top:0">
+      <span>הפרטים נשארים במכשיר שלכם בלבד — הדף לא שומר ולא שולח כלום לשרת.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/vendor/jspdf.umd.min.js"></script>
+<script src="js/gan.js?v=1"></script>
+</body>
+</html>
