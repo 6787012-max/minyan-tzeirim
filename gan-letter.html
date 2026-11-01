@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>המכתב שלכם למועצה · פיצול גן ניסנית ודגנית</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<style>
+body { font-family: Arial, sans-serif; direction: rtl; margin: 0 auto; max-width: 760px; padding: 14px; background: #f4f1ea; color: #1b2a44; font-size: 17px; line-height: 1.6; }
+.how { background: #fff6d6; border: 2px solid #e0b84a; border-radius: 10px; padding: 12px 14px; }
+.how b { color: #8a5a00; }
+.warn { color: #a01818; font-weight: bold; }
+h2 { font-size: 16px; margin: 18px 0 6px; }
+.sub { background: #fff; border: 2px solid #1b2a44; border-radius: 10px; padding: 10px 12px; direction: rtl; }
+.letter { background: #fff; border: 2px solid #1b2a44; border-radius: 10px; padding: 12px; white-space: pre-wrap; }
+.fld { display: block; background: #ffecec; border: 2px dashed #d33; border-radius: 8px; padding: 8px; margin: 6px 0; white-space: normal; }
+.fld.filled { background: #eaf7ea; border-color: #2e7d32; border-style: solid; }
+.fld.none { background: #eee; border-color: #999; }
+.fld label { display: block; font-size: 14px; font-weight: bold; color: #a01818; }
+.fld.filled label { color: #2e7d32; }
+.fld input, .fld textarea { width: 100%; box-sizing: border-box; font-size: 17px; padding: 6px; border: 1px solid #bbb; border-radius: 6px; font-family: Arial; }
+.fld textarea { min-height: 70px; }
+.fld .skip { display: inline-block; margin-top: 4px; font-size: 14px; background: none; color: #555; border: 1px solid #999; border-radius: 6px; padding: 4px 10px; width: auto; cursor: pointer; }
+.btns button { display: block; width: 100%; margin: 10px 0 0; padding: 14px; font-size: 18px; font-weight: bold; background: #1b2a44; color: #fff; border: 0; border-radius: 10px; cursor: pointer; }
+.btns button.done { background: #2e7d32; }
+.btns button.gm { background: #2e7d32; font-size: 22px; padding: 18px; }
+#msg { color: #a01818; font-weight: bold; margin-top: 8px; }
+#err { display: none; background: #fff; border: 2px solid #a01818; border-radius: 10px; padding: 14px; }
+</style>
+</head>
+<body>
+<div id="err">הקישור אינו תקין. נא לפנות למי ששלח לכם אותו.</div>
+<div id="main">
+<div class="how">
+<b id="hello">שלום,</b><br>
+תודה שאתם חלק מהמאבק על פיצול הגנים. זה המכתב שלכם (מס' <span id="num"></span>).<br>
+<b>מתי לשלוח:</b> <span id="when"></span><br>
+<b>למי:</b> <span id="to"></span><br>
+<span id="note" class="warn"></span>
+<br><b>מה עושים (במחשב, כשאתם מחוברים לג'ימייל):</b><br>
+1. ממלאים את <b>המשבצות האדומות</b> שבתוך המכתב למטה. כשמשבצת מלאה היא הופכת לירוקה.
+<b>הכי חשוב: משפט אחד אמיתי על הילד שלכם</b> (מה הוא סיפר, מה ראיתם). אם אין מה להוסיף, לוחצים "אין לי תוספת" והמשבצת יורדת מהמכתב.<br>
+2. לוחצים על הכפתור הירוק <b>"פתח בג'ימייל"</b>. נפתח מייל חדש, ובו כבר הכתובת, הנושא והמכתב.<br>
+3. בתוך ג'ימייל מותר ורצוי לשנות כל מילה, לקצר או להוסיף. זה המכתב שלכם.<br>
+4. <span class="warn">לא לוחצים "שליחה"!</span> לוחצים על החץ הקטן שליד "שליחה" ← "תזמון שליחה" ← "בחירת תאריך ושעה" ← בוחרים את היום והשעה שכתובים כאן למעלה ← "תזמון שליחה".<br>
+אם משהו לא נפתח, יש למטה גם כפתורי העתקה רגילים.<br>
+<b>כותבים רק דברים אמיתיים.</b> אין שום טענה כלפי הגננות והצוות; הטענה היא כלפי מי שמחליט.
+</div>
+
+<h2>כתובת המייל</h2>
+<div class="sub" id="addr"></div>
+<h2>נושא</h2>
+<div class="sub" id="subj"></div>
+<h2>המכתב (ממלאים את המשבצות האדומות)</h2>
+<div class="letter" id="letter"></div>
+
+<div class="btns">
+<button id="bG" class="gm" type="button">פתח בג'ימייל ←</button>
+<div id="msg"></div>
+<p style="margin:16px 0 0;font-size:15px;color:#555">אם הכפתור הירוק לא עובד, אפשר להעתיק ידנית למייל חדש:</p>
+<button id="bA" type="button">העתק כתובת</button>
+<button id="bS" type="button">העתק נושא</button>
+<button id="bL" type="button">העתק מכתב</button>
+</div>
+</div>
+<script src="js/gan-letter.js?v=1"></script>
+</body>
+</html>
