@@ -16,3 +16,4 @@ _dns-backup.txt
 _sql_out.json
 _news.log
 moda/out/
+supabase/functions/gan-letter/
