@@ -41,7 +41,7 @@
   }).catch(fail);
 
   function fail() { $('login').hidden = true; $('main').hidden = true; $('err').hidden = false; }
-  $('logout').onclick = function (e) { e.preventDefault(); store('ganLetter', null); location.href = 'gan-letter.html'; };
+  $('out').onclick = function () { store('ganLetter', null); location.href = 'gan-letter.html'; };
 
   // ---------- כניסה ----------
   var needDetails = false;
@@ -81,7 +81,7 @@
     var L = (LETTERS || []).filter(function (x) { return x.n === n; })[0];
     if (!L) return false;
     DATA = L; person = p;
-    $('login').hidden = true; $('main').hidden = false;
+    $('login').hidden = true; $('main').hidden = false; $('out').hidden = false;
     $('hello').textContent = person && person.name ? person.name + ' – המכתב שלכם למועצה' : 'המכתב שלכם למועצה';
     var chips = $('chips'); chips.innerHTML = '';
     [['when', 'לשלוח: ' + L.date + ' בשעה ' + L.time], ['', 'אל: ' + L.to_role]].forEach(function (c) {
@@ -178,6 +178,7 @@
   $('mCancel').onclick = function () { $('modal').classList.remove('on'); };
   function mark(stage) {
     if (!api || !api.url) return;
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;   // בדיקות מקומיות לא נרשמות במעקב
     callFn({ action: 'mark', n: DATA.n, stage: stage, name: person && person.name || '' }).catch(function () {});
   }
   $('mGo').onclick = function () {

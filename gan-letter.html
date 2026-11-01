@@ -12,7 +12,10 @@
 * { box-sizing: border-box; }
 body { font-family: Arial, sans-serif; direction: rtl; margin: 0; background: var(--bg); color: var(--navy); font-size: 16px; line-height: 1.55; }
 .wrap { max-width: 720px; margin: 0 auto; padding: 14px; }
-header { background: var(--navy); color: #fff; border-radius: 12px; padding: 14px 16px; }
+header { background: var(--navy); color: #fff; border-radius: 12px; padding: 14px 16px; position: relative; }
+#out { position: absolute; left: 12px; top: 12px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.5); border-radius: 8px; padding: 4px 10px; font-size: 13px; cursor: pointer; }
+#out:hover { background: rgba(255,255,255,.15); }
+header h1 { padding-left: 70px; }
 header h1 { font-size: 20px; margin: 0 0 6px; }
 header p { margin: 0; font-size: 14px; opacity: .9; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -67,6 +70,7 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
 <body>
 <div class="wrap">
 <header>
+  <button id="out" type="button" hidden>יציאה</button>
   <h1 id="hello">מכתבי ההורים למועצה – פיצול גן ניסנית ודגנית</h1>
   <p id="sub">כל הורה שולח מכתב אישי אחד, ביום ובשעה שנקבעו לו. כך, יום אחרי יום, הנושא לא יורד מהשולחן.</p>
   <div class="chips" id="chips"></div>
@@ -79,8 +83,8 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
   </div>
   <div id="step2" hidden>
     <b>עוד לא הכרנו – כמה פרטים, פעם אחת בלבד:</b>
-    <input id="pname" placeholder="שם ההורה (למשל: רות גלזר)">
-    <input id="kname" placeholder="שם הילד (למשל: אלישע)">
+    <input id="pname" placeholder="שם ההורה – שם פרטי ושם משפחה">
+    <input id="kname" placeholder="שם הילד">
     <select id="gan"><option value="">באיזה גן?</option><option>גן דגנית</option><option>גן ניסנית</option></select>
   </div>
   <button class="go" id="lgo" type="button">כניסה</button>
@@ -118,7 +122,7 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
       <div id="contacts"></div>
     </details>
   </div>
-  <p style="font-size:13px;color:#777;margin-top:12px">אין במכתבים שום טענה כלפי הגננות והצוות – הכול מופנה למי שמחליט. ‏<a href="#" id="logout">לא אתם? כניסה מחדש</a></p>
+  <p style="font-size:13px;color:#777;margin-top:12px">אין במכתבים שום טענה כלפי הגננות והצוות – הכול מופנה למי שמחליט.</p>
 </div>
 </div>
 
@@ -140,6 +144,6 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
   </div>
 </div>
 <div id="err" hidden style="max-width:720px;margin:20px auto;background:#fff;border:2px solid #b3261e;border-radius:10px;padding:14px">הקישור אינו תקין. <a href="gan-letter.html">כניסה רגילה</a></div>
-<script src="js/gan-letter.js?v=5"></script>
+<script src="js/gan-letter.js?v=6"></script>
 </body>
 </html>
