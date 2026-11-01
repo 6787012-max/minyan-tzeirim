@@ -36,7 +36,7 @@
     var n = parseInt(qs.get('n'), 10);
     if (!isNaN(n)) { if (!openLetter(n, qs.get('p') ? decodeP(qs.get('p')) : null)) fail(); return; }
     var saved = load('ganLetter');
-    if (saved && openLetter(saved.n, saved.person)) return;
+    if (saved && openLetter(saved.n, saved.person)) { LOGIN_KEY = saved.login || ''; return; }
     $('login').hidden = false;
   }).catch(fail);
 
@@ -64,7 +64,7 @@
       if (!d.ok) { $('lmsg').textContent = 'לא הצלחנו להיכנס. בדקו את הפרטים ונסו שוב.'; return; }
       var p = { name: d.name, kids: d.kids, gans: d.gans };
       if (!openLetter(d.n, p)) { $('lmsg').textContent = 'תקלה בטעינת המכתב.'; return; }
-      store('ganLetter', { n: d.n, person: p });
+      LOGIN_KEY = key; store('ganLetter', { n: d.n, person: p, login: key });
     }).catch(function () { btn.disabled = false; $('lmsg').textContent = 'אין חיבור כרגע. נסו שוב.'; });
   };
   $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('lgo').click(); });
@@ -77,8 +77,24 @@
     if (label === 'הגן') return (person.gans || []).join(' ו');
     return '';
   }
-  function openLetter(n, p) {
+  var LOGIN_KEY = '', REQ = ['שם מלא', 'שם הילד', 'הגן'];
+  // נוסח שיוסף ערך בדף המעקב (אם יש) מחליף את הנוסח המקורי
+  function fromOverride(L, ov) {
+    var parts = [];
+    ov.body.split(/\[\[(.+?)\]\]/).forEach(function (seg, k) {
+      if (k % 2 === 0) parts.push({ t: seg });
+      else parts.push({ f: seg, v: seg === 'התאריך' ? 'יום חמישי, 19/11' : '', req: REQ.indexOf(seg) >= 0, short: REQ.indexOf(seg) >= 0 || seg === 'התאריך' });
+    });
+    var c = {}; for (var k2 in L) c[k2] = L[k2];
+    c.parts = parts; if (ov.subject) c.subject = ov.subject;
+    return c;
+  }
+  function openLetter(n, p, ov) {
     var L = (LETTERS || []).filter(function (x) { return x.n === n; })[0];
+    if (L && ov) L = fromOverride(L, ov);
+    if (L && !ov && api && api.url) {
+      callFn({ action: 'letter', n: n }).then(function (d) { if (d.ok && d.override && DATA && DATA.n === n) openLetter(n, p, d.override); }).catch(function () {});
+    }
     if (!L) return false;
     DATA = L; person = p;
     $('login').hidden = true; $('main').hidden = false; $('out').hidden = false;
@@ -179,7 +195,8 @@
   function mark(stage) {
     if (!api || !api.url) return;
     if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;   // בדיקות מקומיות לא נרשמות במעקב
-    callFn({ action: 'mark', n: DATA.n, stage: stage, name: person && person.name || '' }).catch(function () {});
+    callFn({ action: 'mark', n: DATA.n, stage: stage, name: person && person.name || '', login: LOGIN_KEY,
+             subject: ($('subj').value || DATA.subject), body: letterText() }).catch(function () {});
   }
   $('mGo').onclick = function () {
     if (!$('ack').checked) return;

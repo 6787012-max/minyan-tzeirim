@@ -9,31 +9,76 @@
 <meta name="robots" content="noindex,nofollow">
 <style>
 body { font-family: Arial, sans-serif; direction: rtl; margin: 0; background: #f4f1ea; color: #1b2a44; font-size: 14.5px; }
-.wrap { max-width: 980px; margin: 0 auto; padding: 14px; }
-h1 { font-size: 20px; margin: 0 0 8px; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 14px; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: #777; margin: 0 0 10px; }
 .sum { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .sum div { background: #fff; border-radius: 10px; padding: 8px 14px; border: 1px solid #e3dccb; }
 .sum b { font-size: 22px; display: block; }
 table { width: 100%; border-collapse: collapse; background: #fff; }
 td, th { border-bottom: 1px solid #eee; padding: 5px 8px; text-align: right; }
 th { background: #1b2a44; color: #fff; position: sticky; top: 0; }
+#rows tr { cursor: pointer; } #rows tr:hover { background: #f0ece0; }
 .ok { color: #2e7d32; font-weight: bold; } .half { color: #b07a00; font-weight: bold; } .no { color: #b3261e; }
+.ml { direction: ltr; text-align: left; font-size: 12.5px; color: #555; }
+.ed { color: #8a5a00; }
 tr.today { background: #fff6d6; }
+.filters { margin-bottom: 8px; }
 .filters button { padding: 5px 10px; border-radius: 8px; border: 1px solid #1b2a44; background: #fff; cursor: pointer; margin-left: 4px; }
 .filters button.on { background: #1b2a44; color: #fff; }
 #err { color: #b3261e; font-weight: bold; }
+.panel { position: fixed; inset: 0; background: rgba(10,20,40,.6); display: none; align-items: flex-start; justify-content: center; padding: 20px 12px; overflow: auto; z-index: 9; }
+.panel.on { display: flex; }
+.pbox { background: #fff; border-radius: 14px; max-width: 1000px; width: 100%; padding: 16px 18px; }
+.pbox h2 { margin: 0 0 6px; font-size: 19px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 10px; }
+.cols h3 { font-size: 14px; margin: 0 0 6px; color: #8a7a55; }
+#pSubj { width: 100%; font-weight: bold; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; font-size: 14.5px; box-sizing: border-box; }
+#pBody { width: 100%; min-height: 380px; margin-top: 6px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; font-size: 14.5px; line-height: 1.55; box-sizing: border-box; }
+.small { font-size: 12.5px; color: #777; }
+.btn { padding: 8px 14px; border-radius: 8px; border: 0; background: #2e7d32; color: #fff; font-weight: bold; cursor: pointer; margin-top: 6px; }
+.btn.gray { background: #fff; color: #1b2a44; border: 1px solid #1b2a44; }
+#pMsg { font-weight: bold; color: #2e7d32; margin-top: 6px; }
+#pSent { background: #f7f7f7; border-radius: 8px; padding: 10px; min-height: 120px; }
+#pSent .when { font-size: 12.5px; color: #777; } #pSent .subj { font-weight: bold; margin: 4px 0; } #pSent .body { white-space: pre-wrap; line-height: 1.55; }
+#pSent .none { color: #777; }
+@media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
 <h1>מעקב מכתבי ההורים – פיצול גן ניסנית ודגנית</h1>
+<p class="hint">לחיצה על שורה פותחת את המכתב של ההורה: הנוסח שהוכן (אפשר לערוך ולשמור), מה שנשלח בפועל, ומייל ההורה.</p>
 <div id="err"></div>
 <div class="sum" id="sum"></div>
 <div class="filters" id="filters"></div>
-<table><thead><tr><th>#</th><th>הורה</th><th>מתי לשלוח</th><th>למי</th><th>מצב</th><th>מתי סימן</th></tr></thead><tbody id="rows"></tbody></table>
+<table><thead><tr><th>#</th><th>הורה</th><th>מתי לשלוח</th><th>למי</th><th>מצב</th><th>מייל ההורה</th><th>מתי סימן</th></tr></thead><tbody id="rows"></tbody></table>
 <h2 style="font-size:16px">משתתפים חדשים (לא חתמו בדף החתימות)</h2>
-<table><thead><tr><th>מכתב</th><th>הורה</th><th>ילד</th><th>גן</th><th>נרשם</th></tr></thead><tbody id="newRows"></tbody></table>
+<table><thead><tr><th>מכתב</th><th>הורה</th><th>ילד</th><th>גן</th><th>מייל/טלפון</th><th>נרשם</th></tr></thead><tbody id="newRows"></tbody></table>
 </div>
-<script src="js/gan-status.js?v=1"></script>
+
+<div class="panel" id="panel">
+  <div class="pbox">
+    <h2 id="pTitle"></h2>
+    <div id="pInfo" class="small"></div>
+    <div class="cols">
+      <div>
+        <h3>המכתב שהוכן להורה · <span id="pState"></span></h3>
+        <input id="pSubj">
+        <textarea id="pBody"></textarea>
+        <div class="small">[[שם מלא]], [[שם הילד]] וכדומה – משבצות שההורה ממלא. אפשר להוסיף, למחוק או לשנות.</div>
+        <button class="btn" id="pSave" type="button">שמור נוסח</button>
+        <button class="btn gray" id="pReset" type="button" hidden>חזרה לנוסח המקורי</button>
+        <div id="pMsg"></div>
+      </div>
+      <div>
+        <h3>מה ההורה העביר לג'ימייל בפועל</h3>
+        <div id="pSent"></div>
+      </div>
+    </div>
+    <button class="btn gray" id="pClose" type="button" style="margin-top:12px">סגירה</button>
+  </div>
+</div>
+<script src="js/gan-status.js?v=2"></script>
 </body>
 </html>
