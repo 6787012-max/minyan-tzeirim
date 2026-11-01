@@ -211,6 +211,16 @@
   document.addEventListener('visibilitychange', askDone);
   window.addEventListener('focus', askDone);
 
+  // ---------- העתקה ידנית (למי שאין ג'ימייל) ----------
+  function copyBtn(btn, t) { copy(t); if (!/✓$/.test(btn.textContent)) btn.textContent += ' ✓'; }
+  $('bA').onclick = function () { if (!DATA.addr) { msg.textContent = 'את הכתובת תקבלו בנפרד.'; return; } copyBtn(this, DATA.addr); };
+  $('bS').onclick = function () { copyBtn(this, $('subj').value.trim() || DATA.subject); };
+  $('bL').onclick = function () {
+    var r = buildText();
+    if (r.miss.length) { msg.textContent = 'חסר למלא במשבצת האדומה: ' + r.miss.join(' · ') + ' (או ללחוץ "אין לי תוספת").'; return; }
+    msg.textContent = ''; copyBtn(this, r.text); mark('opened'); awaitingDone = true;
+  };
+
   // ---------- אנשי קשר ----------
   function renderContacts(list) {
     var root = $('contacts'), g = '';

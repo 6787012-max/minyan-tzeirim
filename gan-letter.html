@@ -53,6 +53,7 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
 .ct { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14.5px; }
 .ct small { color: #777; display: block; }
 .ct .m { direction: ltr; font-size: 13px; color: #555; }
+.cp { margin: 4px 0 0 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--navy); background: #fff; cursor: pointer; }
 .ct button { flex: none; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--navy); background: #fff; cursor: pointer; font-size: 13px; }
 .gh { margin: 10px 0 2px; font-size: 13px; color: #8a7a55; font-weight: bold; }
 .modal { position: fixed; inset: 0; background: rgba(10,20,40,.65); display: none; align-items: center; justify-content: center; padding: 14px; z-index: 9; }
@@ -89,13 +90,14 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
   </div>
   <button class="go" id="lgo" type="button">כניסה</button>
   <div id="lmsg"></div>
-  <p style="font-size:13px;color:#777;margin:6px 0 0">בפעם הבאה נכנסים עם אותו מייל או טלפון ומגיעים לאותו מכתב.</p>
+  <p style="font-size:13px;color:#777;margin:6px 0 0">זה אתר מניין הצעירים – אותו אתר של דף החתימות. הפרטים משמשים רק כדי להציג לכם את המכתב שלכם. בפעם הבאה נכנסים עם אותו מייל או טלפון ומגיעים לאותו מכתב. אם שני ההורים רוצים לשלוח – כל אחד נכנס בנפרד עם המייל שלו.</p>
 </div>
 
 <div id="main" hidden>
   <div class="card idea" id="idea">
-    <b>הרעיון:</b> המועצה השיבה שפיצול הגנים "אינו אפשרי בשלב זה". במשך שבועיים, בכל יום כמה הורים שולחים מכתב אישי לגורם אחר. לכל הורה נקבעו יום, שעה ונמען, כדי שהמכתבים יגיעו בצורה מסודרת ולא כולם ביחד.
-    המכתב למטה הוא הצעה בלבד – <b>אפשר לשנות בו כל מילה</b>, להוסיף או לקצר. כותבים רק דברים אמיתיים.
+    <b>הרעיון:</b> המועצה השיבה שפיצול הגנים "אינו אפשרי בשלב זה". לכן, במשך שבועיים, בכל יום כמה הורים שולחים מכתב אישי.
+    <b>כל המכתבים תוכננו מראש כמהלך אחד מסודר:</b> לכל הורה נקבעו יום, שעה ונמען, והתוכן של כל מכתב מותאם למקום שלו ברצף – בהתחלה דרישה, אחר כך "עברו כך וכך ימים ואין תשובה", ובסוף בקשה להחלטה. כך המועצה מקבלת פניות כל יום, מכתובות שונות ולגורמים שונים.
+    <b>לכן חשוב לשמור על היום, השעה והנמען.</b> את הניסוח מותר ורצוי לשנות ולהתאים לעצמכם. כותבים רק דברים אמיתיים.
     <div class="steps">
       <div class="step"><b>שלב 1</b>ממלאים את המשבצות האדומות, ומשנים בטקסט מה שרוצים</div>
       <div class="step"><b>שלב 2</b>לוחצים על הכפתור הירוק – נפתח מייל מוכן בג'ימייל</div>
@@ -116,6 +118,13 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
     <button class="go" id="bDone" type="button" style="margin-top:4px">✔ תזמנתי בג'ימייל – סיימתי</button>
   </div>
 
+  <div class="card">
+    <details>
+      <summary style="cursor:pointer;font-weight:bold">אין לכם ג'ימייל? העתקה ידנית לכל תוכנת מייל</summary>
+      <p style="font-size:14px;margin:6px 0">ממלאים קודם את המשבצות האדומות, ואז מעתיקים כל חלק למייל חדש ומתזמנים לפי היום והשעה שלמעלה.</p>
+      <button class="cp" id="bA" type="button">העתק כתובת</button><button class="cp" id="bS" type="button">העתק נושא</button><button class="cp" id="bL" type="button">העתק מכתב</button>
+    </details>
+  </div>
   <div class="card">
     <details class="contacts">
       <summary>רוצים לכתוב גם מכתב אישי משלכם לגורם מסוים? כל אנשי הקשר</summary>
@@ -144,6 +153,6 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
   </div>
 </div>
 <div id="err" hidden style="max-width:720px;margin:20px auto;background:#fff;border:2px solid #b3261e;border-radius:10px;padding:14px">הקישור אינו תקין. <a href="gan-letter.html">כניסה רגילה</a></div>
-<script src="js/gan-letter.js?v=6"></script>
+<script src="js/gan-letter.js?v=7"></script>
 </body>
 </html>
