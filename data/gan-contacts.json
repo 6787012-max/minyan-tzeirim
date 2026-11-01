@@ -1,0 +1,15 @@
+[
+ {"g": "מועצה אזורית גוש עציון", "name": "ירון רוזנטל", "role": "ראש המועצה", "mail": "yaronr@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "מורית ינון", "role": "מנהלת לשכת ראש המועצה", "mail": "lishka@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "אורי חבר", "role": "מנכ\"ל המועצה", "mail": "mankal-ge@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "רות וינשטוק", "role": "לשכת ראש המועצה והמנכ\"ל", "mail": "mlishka@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "אגף החינוך", "role": "מנהל האגף ולשכתו", "mail": "hinuh@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "ברכה שפלר", "role": "מנהלת מחלקת גנים", "mail": "brahas@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "תמר שטרוך", "role": "מזכירת מחלקת גנים", "mail": "ganim@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "אביגיל דוידי", "role": "מנהלת השירות הפסיכולוגי (שפ\"ח)", "mail": "avigayil@gush-etzion.org.il"},
+ {"g": "מועצה אזורית גוש עציון", "name": "דוד שטרק", "role": "מבקר המועצה וממונה תלונות הציבור", "mail": "mevaker@gush-etzion.org.il"},
+ {"g": "משרד החינוך", "name": "אפרת", "role": "המפקחת על הגנים", "mail": "efratbh@education.gov.il"},
+ {"g": "משרד החינוך", "name": "כרמית הרוש", "role": "מנהלת מחוז ירושלים", "mail": "Carmitha@education.gov.il"},
+ {"g": "משרד החינוך", "name": "עפרה נחום", "role": "מנהלת לשכת מנהלת המחוז", "mail": "ofrana@education.gov.il"},
+ {"g": "גורמים נוספים", "name": "נציבות תלונות הציבור", "role": "משרד מבקר המדינה", "mail": "ombudsman@mevaker.gov.il"}
+]

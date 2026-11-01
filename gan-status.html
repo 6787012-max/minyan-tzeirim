@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מעקב מכתבי ההורים · פיצול הגנים</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<style>
+body { font-family: Arial, sans-serif; direction: rtl; margin: 0; background: #f4f1ea; color: #1b2a44; font-size: 14.5px; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 14px; }
+h1 { font-size: 20px; margin: 0 0 8px; }
+.sum { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.sum div { background: #fff; border-radius: 10px; padding: 8px 14px; border: 1px solid #e3dccb; }
+.sum b { font-size: 22px; display: block; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+td, th { border-bottom: 1px solid #eee; padding: 5px 8px; text-align: right; }
+th { background: #1b2a44; color: #fff; position: sticky; top: 0; }
+.ok { color: #2e7d32; font-weight: bold; } .half { color: #b07a00; font-weight: bold; } .no { color: #b3261e; }
+tr.today { background: #fff6d6; }
+.filters button { padding: 5px 10px; border-radius: 8px; border: 1px solid #1b2a44; background: #fff; cursor: pointer; margin-left: 4px; }
+.filters button.on { background: #1b2a44; color: #fff; }
+#err { color: #b3261e; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>מעקב מכתבי ההורים – פיצול גן ניסנית ודגנית</h1>
+<div id="err"></div>
+<div class="sum" id="sum"></div>
+<div class="filters" id="filters"></div>
+<table><thead><tr><th>#</th><th>הורה</th><th>מתי לשלוח</th><th>למי</th><th>מצב</th><th>מתי סימן</th></tr></thead><tbody id="rows"></tbody></table>
+<h2 style="font-size:16px">משתתפים חדשים (לא חתמו בדף החתימות)</h2>
+<table><thead><tr><th>מכתב</th><th>הורה</th><th>ילד</th><th>גן</th><th>נרשם</th></tr></thead><tbody id="newRows"></tbody></table>
+</div>
+<script src="js/gan-status.js?v=1"></script>
+</body>
+</html>

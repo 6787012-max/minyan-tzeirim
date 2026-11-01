@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>המכתב שלכם למועצה · פיצול גן ניסנית ודגנית</title>
+<title>מכתבי ההורים למועצה · פיצול גן ניסנית ודגנית</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
@@ -13,91 +13,102 @@
 body { font-family: Arial, sans-serif; direction: rtl; margin: 0; background: var(--bg); color: var(--navy); font-size: 16px; line-height: 1.55; }
 .wrap { max-width: 720px; margin: 0 auto; padding: 14px; }
 header { background: var(--navy); color: #fff; border-radius: 12px; padding: 14px 16px; }
-header h1 { font-size: 20px; margin: 0 0 8px; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+header h1 { font-size: 20px; margin: 0 0 6px; }
+header p { margin: 0; font-size: 14px; opacity: .9; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .chip { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); border-radius: 20px; padding: 3px 12px; font-size: 14px; }
-.chip.when { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: bold; }
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.chip.when { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: bold; font-size: 16px; }
+.card { background: #fff; border-radius: 12px; border: 1px solid #e3dccb; padding: 12px 14px; margin-top: 10px; }
+.card h2 { font-size: 13px; color: #8a7a55; margin: 0 0 4px; font-weight: normal; }
+.idea { font-size: 14.5px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
 .step { background: #fff; border-radius: 10px; padding: 8px 10px; font-size: 14px; border: 1px solid #e3dccb; }
 .step b { display: block; color: var(--gold); font-size: 13px; }
-.card { background: #fff; border-radius: 12px; border: 1px solid #e3dccb; padding: 12px 14px; margin-bottom: 10px; }
-.card h2 { font-size: 13px; color: #8a7a55; margin: 0 0 4px; font-weight: normal; }
-.subj { font-weight: bold; }
-.letter { white-space: pre-wrap; }
-.fld { display: block; background: #fff1f1; border: 2px dashed var(--red); border-radius: 8px; padding: 6px 8px; margin: 6px 0; white-space: normal; }
-.fld.filled { background: #edf7ee; border: 2px solid var(--green); }
-.fld.none { background: #f1f1f1; border: 2px solid #aaa; opacity: .7; }
-.fld label { display: block; font-size: 13px; font-weight: bold; color: var(--red); }
-.fld.filled label { color: var(--green); }
-.fld input, .fld textarea { width: 100%; font-size: 16px; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; }
-.fld textarea { min-height: 56px; }
-.skip { margin-top: 4px; font-size: 13px; background: none; color: #555; border: 1px solid #999; border-radius: 6px; padding: 3px 10px; cursor: pointer; }
-.go { display: block; width: 100%; padding: 16px; font-size: 20px; font-weight: bold; background: var(--green); color: #fff; border: 0; border-radius: 12px; cursor: pointer; }
+.subj { width: 100%; font-weight: bold; font-size: 16px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; }
+#letter { width: 100%; min-height: 420px; font-size: 16px; line-height: 1.6; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: Arial; resize: vertical; }
+.hint { font-size: 13.5px; color: var(--red); font-weight: bold; margin: 4px 0 0; }
+.go { display: block; width: 100%; padding: 16px; font-size: 20px; font-weight: bold; background: var(--green); color: #fff; border: 0; border-radius: 12px; cursor: pointer; margin-top: 12px; }
+.go:disabled { background: #9bb79d; cursor: not-allowed; }
 #msg { color: var(--red); font-weight: bold; margin: 8px 0; min-height: 1em; }
-details { margin-top: 10px; font-size: 14px; }
-details button { margin: 4px 0 0 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--navy); background: #fff; cursor: pointer; }
-/* login */
-.login { background: #fff; border-radius: 12px; padding: 18px; border: 1px solid #e3dccb; margin-top: 12px; }
-.login input { width: 100%; font-size: 20px; padding: 10px; border: 2px solid var(--navy); border-radius: 8px; margin: 6px 0 10px; direction: ltr; text-align: center; }
-.login input.he { direction: rtl; text-align: right; font-size: 17px; }
-.login .alt { font-size: 14px; color: #555; background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 10px; }
+.login input, .login select { width: 100%; font-size: 18px; padding: 10px; border: 2px solid var(--navy); border-radius: 8px; margin: 6px 0 8px; font-family: Arial; }
+#key { direction: ltr; text-align: center; }
 #lmsg { color: var(--red); font-weight: bold; min-height: 1em; }
-/* modal */
+.after { display: none; background: #fff6d6; border: 2px solid var(--gold); border-radius: 12px; padding: 12px; margin-top: 12px; }
+.after b { display: block; margin-bottom: 8px; }
+.done { background: #edf7ee; border-color: var(--green); color: var(--green); font-weight: bold; }
+details.contacts summary { cursor: pointer; font-weight: bold; }
+.ct { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14.5px; }
+.ct small { color: #777; display: block; }
+.ct .m { direction: ltr; font-size: 13px; color: #555; }
+.ct button { flex: none; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--navy); background: #fff; cursor: pointer; font-size: 13px; }
+.gh { margin: 10px 0 2px; font-size: 13px; color: #8a7a55; font-weight: bold; }
 .modal { position: fixed; inset: 0; background: rgba(10,20,40,.65); display: none; align-items: center; justify-content: center; padding: 14px; z-index: 9; }
 .modal.on { display: flex; }
 .box { background: #fff; border-radius: 14px; max-width: 520px; width: 100%; padding: 18px; border-top: 8px solid var(--red); }
 .box h3 { margin: 0 0 6px; color: var(--red); font-size: 22px; }
 .big { background: #fff6d6; border: 2px solid var(--gold); border-radius: 10px; padding: 10px; text-align: center; font-size: 22px; font-weight: bold; margin: 10px 0; }
 .box ol { margin: 6px 0 10px; padding-right: 22px; }
-.box li { margin-bottom: 3px; }
 .ack { display: flex; gap: 8px; align-items: flex-start; background: #f7f7f7; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; }
 .ack input { width: 22px; height: 22px; flex: none; margin-top: 2px; }
-.box .go:disabled { background: #9bb79d; cursor: not-allowed; }
 .cancel { display: block; margin: 8px auto 0; background: none; border: 0; color: #555; text-decoration: underline; cursor: pointer; }
-.after { display: none; background: #fff6d6; border: 2px solid var(--gold); border-radius: 12px; padding: 10px 12px; margin-top: 10px; font-weight: bold; }
 @media (max-width: 560px) { .steps { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1 id="hello">המכתב שלכם למועצה</h1>
-  <div class="chips" id="chips"><span class="chip">פיצול גן ניסנית ודגנית · מעלה עמוס</span></div>
+  <h1 id="hello">מכתבי ההורים למועצה – פיצול גן ניסנית ודגנית</h1>
+  <p id="sub">כל הורה שולח מכתב אישי אחד, ביום ובשעה שנקבעו לו. כך, יום אחרי יום, הנושא לא יורד מהשולחן.</p>
+  <div class="chips" id="chips"></div>
 </header>
 
-<div class="login" id="login" hidden>
-  <div id="byPhone">
-    <b>כניסה לפי מספר הטלפון שרשמתם בדף החתימות</b>
-    <input id="phone" type="tel" inputmode="tel" placeholder="05X-XXXXXXX" autocomplete="tel">
+<div class="card login" id="login" hidden>
+  <div id="step1">
+    <b>כניסה: מקלידים כתובת מייל או מספר טלפון</b>
+    <input id="key" type="text" inputmode="email" placeholder="name@gmail.com או 05X-XXXXXXX" autocomplete="email">
   </div>
-  <div id="byName" hidden>
-    <b>כניסה לפי שם</b>
-    <input id="pname" class="he" placeholder="שם ההורה כפי שחתמתם (למשל: רות גלזר)">
-    <input id="kname" class="he" placeholder="שם הילד (למשל: אלישע)">
+  <div id="step2" hidden>
+    <b>עוד לא הכרנו – כמה פרטים, פעם אחת בלבד:</b>
+    <input id="pname" placeholder="שם ההורה (למשל: רות גלזר)">
+    <input id="kname" placeholder="שם הילד (למשל: אלישע)">
+    <select id="gan"><option value="">באיזה גן?</option><option>גן דגנית</option><option>גן ניסנית</option></select>
   </div>
   <button class="go" id="lgo" type="button">כניסה</button>
   <div id="lmsg"></div>
-  <button class="alt" id="swap" type="button">לא רשמתם טלפון? כניסה לפי שם ההורה ושם הילד</button>
+  <p style="font-size:13px;color:#777;margin:6px 0 0">בפעם הבאה נכנסים עם אותו מייל או טלפון ומגיעים לאותו מכתב.</p>
 </div>
 
 <div id="main" hidden>
-  <div class="steps">
-    <div class="step"><b>שלב 1</b>ממלאים את המשבצות האדומות במכתב</div>
-    <div class="step"><b>שלב 2</b>לוחצים על הכפתור הירוק למטה</div>
-    <div class="step"><b>שלב 3</b>בג'ימייל: <u>תזמון שליחה</u>, לא "שליחה"</div>
+  <div class="card idea" id="idea">
+    <b>הרעיון:</b> המועצה השיבה שפיצול הגנים "אינו אפשרי בשלב זה". במשך שבועיים, בכל יום כמה הורים שולחים מכתב אישי לגורם אחר. לכל הורה נקבעו יום, שעה ונמען, כדי שהמכתבים יגיעו בצורה מסודרת ולא כולם ביחד.
+    המכתב למטה הוא הצעה בלבד – <b>אפשר לשנות בו כל מילה</b>, להוסיף או לקצר. כותבים רק דברים אמיתיים.
+    <div class="steps">
+      <div class="step"><b>שלב 1</b>עוברים על המכתב וכותבים במקום המסומן ✍️</div>
+      <div class="step"><b>שלב 2</b>לוחצים על הכפתור הירוק – נפתח מייל מוכן בג'ימייל</div>
+      <div class="step"><b>שלב 3</b>בג'ימייל: <u>תזמון שליחה</u> ליום ולשעה שלכם, ואז "תזמנתי" כאן</div>
+    </div>
   </div>
   <div class="card"><h2>אל</h2><div id="toLine"></div></div>
-  <div class="card"><h2>נושא</h2><div class="subj" id="subj"></div></div>
-  <div class="card"><h2>המכתב · מותר לשנות כל מילה גם בג'ימייל</h2><div class="letter" id="letter"></div></div>
+  <div class="card"><h2>נושא (אפשר לשנות)</h2><input class="subj" id="subj"></div>
+  <div class="card"><h2>המכתב – פתוח לעריכה מלאה</h2>
+    <textarea id="letter"></textarea>
+    <p class="hint" id="hint">כתבו במקומות המסומנים ✍️ (או מחקו אותם), ואחר כך לחצו על הכפתור הירוק.</p>
+  </div>
   <div id="note" class="card" hidden style="border-color:var(--red);color:var(--red);font-weight:bold"></div>
   <button class="go" id="bG" type="button">המשך לג'ימייל ←</button>
   <div id="msg"></div>
-  <div class="after" id="after"></div>
-  <details>
-    <summary>אין ג'ימייל / הכפתור לא עובד? העתקה ידנית</summary>
-    <button id="bA" type="button">העתק כתובת</button><button id="bS" type="button">העתק נושא</button><button id="bL" type="button">העתק מכתב</button>
-  </details>
-  <p style="font-size:13px;color:#777;margin-top:14px">כותבים רק דברים אמיתיים. אין שום טענה כלפי הגננות והצוות – הטענה היא כלפי מי שמחליט.</p>
+  <div class="after" id="after">
+    <b id="afterText"></b>
+    <button class="go" id="bDone" type="button" style="margin-top:4px">✔ תזמנתי בג'ימייל – סיימתי</button>
+  </div>
+
+  <div class="card">
+    <details class="contacts">
+      <summary>רוצים לכתוב גם מכתב אישי משלכם לגורם מסוים? כל אנשי הקשר</summary>
+      <div id="contacts"></div>
+    </details>
+  </div>
+  <p style="font-size:13px;color:#777;margin-top:12px">אין במכתבים שום טענה כלפי הגננות והצוות – הכול מופנה למי שמחליט. ‏<a href="#" id="logout">לא אתם? כניסה מחדש</a></p>
 </div>
 </div>
 
@@ -106,11 +117,11 @@ details button { margin: 4px 0 0 6px; padding: 6px 12px; border-radius: 8px; bor
     <h3 id="mTitle">רגע! לא לוחצים "שליחה"</h3>
     <div id="mBody"></div>
     <label class="ack"><input type="checkbox" id="ack"> <span id="ackText"></span></label>
-    <button class="go" id="mGo" type="button" disabled style="margin-top:12px">פתח בג'ימייל</button>
+    <button class="go" id="mGo" type="button" disabled>פתח בג'ימייל</button>
     <button class="cancel" id="mCancel" type="button">חזרה למכתב</button>
   </div>
 </div>
-<div id="err" hidden style="max-width:720px;margin:20px auto;background:#fff;border:2px solid #b3261e;border-radius:10px;padding:14px">הקישור אינו תקין. נא לפנות למי ששלח לכם אותו.</div>
-<script src="js/gan-letter.js?v=2"></script>
+<div id="err" hidden style="max-width:720px;margin:20px auto;background:#fff;border:2px solid #b3261e;border-radius:10px;padding:14px">הקישור אינו תקין. <a href="gan-letter.html">כניסה רגילה</a></div>
+<script src="js/gan-letter.js?v=3"></script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 (function () {
   'use strict';
-  // דף מכתב אישי להורה (קמפיין פיצול הגנים).
-  // כניסה: קישור אישי (?n=&p=) או זיהוי לפי טלפון / שם+ילד דרך הפונקציה gan-letter.
-  // המכתבים ב-data/gan-letters.json — בלי שמות הורים.
+  // מכתבי ההורים למועצה (קמפיין פיצול הגנים).
+  // כניסה: מייל/טלפון דרך הפונקציה gan-letter (מוכר → המכתב שלו; לא מוכר → שם+ילד+גן → מכתב פנוי),
+  // או קישור אישי ?n=&p=. המכתבים ב-data/gan-letters.json — בלי שמות הורים.
   var $ = function (id) { return document.getElementById(id); };
   var qs = new URLSearchParams(location.search);
-  var LETTERS = null, DATA = null, person = null, fields = [], api = null;
+  var LETTERS = null, DATA = null, person = null, api = null;
+  var MARK = '✍️ ';
 
   function decodeP(p) {
     try {
@@ -18,55 +19,55 @@
   }
   function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function load(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  function callFn(body) {
+    return fetch(api.url + '/functions/v1/gan-letter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': api.anon, 'Authorization': 'Bearer ' + api.anon },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); });
+  }
 
   Promise.all([
-    fetch('data/gan-letters.json?v=2', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
-    fetch('data/site.json').then(function (r) { return r.json(); }).then(function (d) { api = d.api || {}; }).catch(function () {})
+    fetch('data/gan-letters.json?v=3', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
+    fetch('data/site.json').then(function (r) { return r.json(); }).then(function (d) { api = d.api || {}; }).catch(function () {}),
+    fetch('data/gan-contacts.json?v=1').then(function (r) { return r.json(); }).then(renderContacts).catch(function () {})
   ]).then(function (res) {
     LETTERS = res[0];
     var n = parseInt(qs.get('n'), 10);
-    if (!isNaN(n)) {
-      var p = qs.get('p') ? decodeP(qs.get('p')) : null;
-      if (!open(n, p)) fail();
-      return;
-    }
+    if (!isNaN(n)) { if (!openLetter(n, qs.get('p') ? decodeP(qs.get('p')) : null)) fail(); return; }
     var saved = load('ganLetter');
-    if (saved && open(saved.n, saved.person)) return;
+    if (saved && openLetter(saved.n, saved.person)) return;
     $('login').hidden = false;
   }).catch(fail);
 
   function fail() { $('login').hidden = true; $('main').hidden = true; $('err').hidden = false; }
+  $('logout').onclick = function (e) { e.preventDefault(); store('ganLetter', null); location.href = 'gan-letter.html'; };
 
   // ---------- כניסה ----------
-  var byName = false;
-  $('swap').onclick = function () {
-    byName = !byName; $('byName').hidden = !byName; $('byPhone').hidden = byName;
-    this.textContent = byName ? 'כניסה לפי מספר טלפון' : 'לא רשמתם טלפון? כניסה לפי שם ההורה ושם הילד';
-    $('lmsg').textContent = '';
-  };
+  var needDetails = false;
   $('lgo').onclick = function () {
-    var body = byName ? { name: $('pname').value.trim(), kid: $('kname').value.trim() } : { phone: $('phone').value.trim() };
-    if (byName ? (body.name.length < 2 || body.kid.length < 2) : body.phone.replace(/\D/g, '').length < 9) {
-      $('lmsg').textContent = byName ? 'נא למלא שם הורה ושם ילד.' : 'נא להקליד מספר טלפון מלא.'; return;
+    var key = $('key').value.trim();
+    var okKey = /@/.test(key) ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key) : key.replace(/\D/g, '').length >= 9;
+    if (!okKey) { $('lmsg').textContent = 'נא להקליד כתובת מייל או מספר טלפון מלא.'; return; }
+    var body = { key: key };
+    if (needDetails) {
+      body.name = $('pname').value.trim(); body.kid = $('kname').value.trim(); body.gan = $('gan').value;
+      if (body.name.length < 2 || body.kid.length < 2 || !body.gan) { $('lmsg').textContent = 'נא למלא שם הורה, שם ילד וגן.'; return; }
     }
     if (!api || !api.url) { $('lmsg').textContent = 'תקלה זמנית. נסו שוב בעוד רגע.'; return; }
     var btn = this; btn.disabled = true; $('lmsg').textContent = 'בודק…';
-    fetch(api.url + '/functions/v1/gan-letter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': api.anon, 'Authorization': 'Bearer ' + api.anon },
-      body: JSON.stringify(body)
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      btn.disabled = false;
-      if (!d.ok) {
-        $('lmsg').textContent = byName ? 'לא מצאנו את השם ברשימת החותמים. נסו כפי שכתבתם בדף החתימות.'
-                                       : 'המספר לא נמצא ברשימת החותמים. נסו כניסה לפי שם, או פנו ליוסף שניידר.';
-        return;
+    callFn(body).then(function (d) {
+      btn.disabled = false; $('lmsg').textContent = '';
+      if (d.need === 'details') {
+        needDetails = true; $('step2').hidden = false; $('key').readOnly = true; btn.textContent = 'המשך'; return;
       }
+      if (!d.ok) { $('lmsg').textContent = 'לא הצלחנו להיכנס. בדקו את הפרטים ונסו שוב.'; return; }
       var p = { name: d.name, kids: d.kids, gans: d.gans };
-      if (!open(d.n, p)) { $('lmsg').textContent = 'תקלה בטעינת המכתב.'; return; }
+      if (!openLetter(d.n, p)) { $('lmsg').textContent = 'תקלה בטעינת המכתב.'; return; }
       store('ganLetter', { n: d.n, person: p });
     }).catch(function () { btn.disabled = false; $('lmsg').textContent = 'אין חיבור כרגע. נסו שוב.'; });
   };
+  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('lgo').click(); });
 
   // ---------- המכתב ----------
   function prefill(label) {
@@ -76,85 +77,49 @@
     if (label === 'הגן') return (person.gans || []).join(' ו');
     return '';
   }
-  function open(n, p) {
+  function openLetter(n, p) {
     var L = (LETTERS || []).filter(function (x) { return x.n === n; })[0];
     if (!L) return false;
     DATA = L; person = p;
     $('login').hidden = true; $('main').hidden = false;
-    $('hello').textContent = person && person.name ? person.name + ', זה המכתב שלכם' : 'המכתב שלכם למועצה';
+    $('hello').textContent = person && person.name ? person.name + ' – המכתב שלכם למועצה' : 'המכתב שלכם למועצה';
     var chips = $('chips'); chips.innerHTML = '';
-    [['when', 'לשלוח: ' + L.date + ' בשעה ' + L.time], ['', 'אל: ' + L.to_role], ['', 'מכתב מס\' ' + L.n]].forEach(function (c) {
+    [['when', 'לשלוח: ' + L.date + ' בשעה ' + L.time], ['', 'אל: ' + L.to_role]].forEach(function (c) {
       var s = document.createElement('span'); s.className = 'chip ' + c[0]; s.textContent = c[1]; chips.appendChild(s);
     });
     $('toLine').textContent = L.addr || 'את הכתובת תקבלו בנפרד';
     $('toLine').style.direction = L.addr ? 'ltr' : 'rtl';
-    $('subj').textContent = L.subject;
+    $('subj').value = L.subject;
     if (L.note) { $('note').hidden = false; $('note').textContent = L.note; }
-    var root = $('letter'); root.innerHTML = ''; fields = [];
+    var t = '';
     L.parts.forEach(function (pt) {
-      if (pt.t !== undefined) { root.appendChild(document.createTextNode(pt.t)); return; }
-      var box = document.createElement('span'); box.className = 'fld';
-      var lab = document.createElement('label'); lab.textContent = pt.f; box.appendChild(lab);
-      var inp = document.createElement(pt.short ? 'input' : 'textarea');
-      inp.value = pt.v || prefill(pt.f); inp.placeholder = pt.f; box.appendChild(inp);
-      var f = { p: pt, box: box, inp: inp, none: false };
-      if (!pt.req) {
-        var sk = document.createElement('button'); sk.className = 'skip'; sk.type = 'button'; sk.textContent = 'אין לי תוספת';
-        sk.onclick = function () { f.none = !f.none; inp.disabled = f.none; sk.textContent = f.none ? 'בכל זאת להוסיף' : 'אין לי תוספת'; paint(f); };
-        box.appendChild(sk);
-      }
-      inp.oninput = function () { paint(f); };
-      fields.push(f); root.appendChild(box); paint(f);
+      if (pt.t !== undefined) { t += pt.t; return; }
+      var v = pt.v || prefill(pt.f);
+      t += v ? v : MARK + '[כאן כותבים: ' + pt.f + ']';
     });
+    $('letter').value = t;
+    $('after').style.display = 'none';
     return true;
   }
-  function paint(f) { f.box.className = 'fld' + (f.none ? ' none' : (f.inp.value.trim() ? ' filled' : '')); }
+  function letterText() { return $('letter').value.replace(/\n{3,}/g, '\n\n').trim(); }
 
-  function buildText() {
-    var miss = [], s = '';
-    DATA.parts.forEach(function (pt) {
-      if (pt.t !== undefined) { s += pt.t; return; }
-      var f = fields.filter(function (x) { return x.p === pt; })[0];
-      var v = f.inp.value.trim();
-      if (f.none) { s += '\u0000'; return; }
-      if (!v) { miss.push(pt.f); return; }
-      s += v;
-    });
-    s = s.split('\n').filter(function (l) { return l.indexOf('\u0000') < 0 || l.replace(/\u0000/g, '').trim(); })
-         .join('\n').replace(/\u0000/g, '').replace(/\n{3,}/g, '\n\n').trim();
-    return { text: s, miss: miss };
-  }
-  window.buildText = buildText;
-
-  function copy(t, btn) {
-    var done = function () { if (btn && !/✓$/.test(btn.textContent)) btn.textContent += ' ✓'; };
-    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, function () { fb(t); done(); });
-    else { fb(t); done(); }
-  }
-  function fb(t) { var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove(); }
+  function copy(t) { if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () {}); }
   var msg = $('msg');
-  function needAll() {
-    var r = buildText();
-    if (r.miss.length) { msg.textContent = 'חסר למלא במכתב: ' + r.miss.join(' · ') + ' (או ללחוץ "אין לי תוספת").'; return null; }
-    msg.textContent = ''; return r;
-  }
 
   // ---------- חלון האזהרה לפני ג'ימייל ----------
-  var pending = null;
   function timing() {
-    var t = new Date(DATA.iso + ':00'), now = new Date(), diff = (t - now) / 60000;
-    if (diff > 15) return 'future';
-    if (diff > -360) return 'now';
-    return 'late';
+    var t = new Date(DATA.iso + ':00'), diff = (t - new Date()) / 60000;
+    return diff > 15 ? 'future' : (diff > -360 ? 'now' : 'late');
   }
   $('bG').onclick = function () {
-    var r = needAll(); if (!r) return;
-    pending = r;
+    var text = letterText();
+    if (text.indexOf('✍️') >= 0) { msg.textContent = 'נשאר מקום מסומן ✍️ במכתב: כתבו בו משפט אמיתי, או מחקו את השורה.'; $('letter').focus(); return; }
+    if (text.length < 40) { msg.textContent = 'המכתב קצר מדי.'; return; }
+    msg.textContent = '';
     var when = DATA.date + ' בשעה ' + DATA.time, mode = timing(), body = $('mBody');
-    $('ack').checked = false; $('mGo').disabled = true;
+    $('ack').checked = false; $('mGo').disabled = true; body.innerHTML = '';
     if (mode === 'future') {
-      $('mTitle').textContent = 'רגע! לא לוחצים "שליחה"';
-      body.innerHTML = '';
+      $('mTitle').textContent = 'רגע! לא לוחצים "שליחה"'; $('mTitle').style.color = '';
       var p1 = document.createElement('div'); p1.textContent = 'המייל הזה צריך לצאת בדיוק ב:'; body.appendChild(p1);
       var big = document.createElement('div'); big.className = 'big'; big.textContent = when; body.appendChild(big);
       var ol = document.createElement('ol');
@@ -172,22 +137,44 @@
   };
   $('ack').onchange = function () { $('mGo').disabled = !this.checked; };
   $('mCancel').onclick = function () { $('modal').classList.remove('on'); };
+  function mark(stage) {
+    if (!api || !api.url) return;
+    callFn({ action: 'mark', n: DATA.n, stage: stage, name: person && person.name || '' }).catch(function () {});
+  }
   $('mGo').onclick = function () {
-    if (!$('ack').checked || !pending) return;
-    var base = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(DATA.addr || '') + '&su=' + encodeURIComponent(DATA.subject);
-    var url = base + '&body=' + encodeURIComponent(pending.text);
-    copy(pending.text, null);
-    var extra = '';
+    if (!$('ack').checked) return;
+    var text = letterText(), subj = $('subj').value.trim() || DATA.subject;
+    var base = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(DATA.addr || '') + '&su=' + encodeURIComponent(subj);
+    var url = base + '&body=' + encodeURIComponent(text), extra = '';
+    copy(text);
     if (url.length > 7500) { url = base; extra = ' המכתב הועתק – בג\'ימייל לוחצים בגוף המייל ומדביקים (Ctrl+V).'; }
     if (!DATA.addr) extra += ' את כתובת הנמען תקבלו בנפרד – יש להוסיף אותה בשורת "אל".';
     $('modal').classList.remove('on');
-    var a = $('after'); a.style.display = 'block';
-    a.textContent = (timing() === 'future' ? 'זכרו: תזמון שליחה ל' + DATA.date + ' בשעה ' + DATA.time + ', לא "שליחה".' : 'אפשר ללחוץ "שליחה" בג\'ימייל.') + extra;
+    $('after').style.display = 'block';
+    $('afterText').textContent = (timing() === 'future' ? 'זכרו: תזמון שליחה ל' + DATA.date + ' בשעה ' + DATA.time + ', לא "שליחה". אחרי שתזמנתם – לחצו כאן:' : 'אחרי שליחת המייל בג\'ימייל – לחצו כאן:') + extra;
+    mark('opened');
     window.open(url, '_blank');
   };
+  $('bDone').onclick = function () {
+    mark('scheduled');
+    this.disabled = true; this.textContent = '✔ תודה! נרשם שסיימתם';
+    $('after').classList.add('done');
+    store('ganDone_' + DATA.n, true);
+  };
 
-  // ---------- העתקה ידנית ----------
-  $('bA').onclick = function () { if (!DATA.addr) { msg.textContent = 'את הכתובת תקבלו בנפרד.'; return; } copy(DATA.addr, this); };
-  $('bS').onclick = function () { copy(DATA.subject, this); };
-  $('bL').onclick = function () { var r = needAll(); if (r) copy(r.text, this); };
+  // ---------- אנשי קשר ----------
+  function renderContacts(list) {
+    var root = $('contacts'), g = '';
+    list.forEach(function (c) {
+      if (c.g !== g) { g = c.g; var h = document.createElement('div'); h.className = 'gh'; h.textContent = g; root.appendChild(h); }
+      var row = document.createElement('div'); row.className = 'ct';
+      var info = document.createElement('div');
+      var nm = document.createElement('b'); nm.textContent = c.name; info.appendChild(nm);
+      var sm = document.createElement('small'); sm.textContent = c.role; info.appendChild(sm);
+      var m = document.createElement('div'); m.className = 'm'; m.textContent = c.mail; info.appendChild(m);
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = 'כתבו בג\'ימייל';
+      b.onclick = function () { window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(c.mail), '_blank'); };
+      row.appendChild(info); row.appendChild(b); root.appendChild(row);
+    });
+  }
 })();
