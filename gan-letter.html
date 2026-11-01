@@ -25,7 +25,17 @@ header p { margin: 0; font-size: 14px; opacity: .9; }
 .step { background: #fff; border-radius: 10px; padding: 8px 10px; font-size: 14px; border: 1px solid #e3dccb; }
 .step b { display: block; color: var(--gold); font-size: 13px; }
 .subj { width: 100%; font-weight: bold; font-size: 16px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; }
-#letter { width: 100%; min-height: 420px; font-size: 16px; line-height: 1.6; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: Arial; resize: vertical; }
+#letter { border: 1px solid #ccc; border-radius: 8px; padding: 8px; }
+.seg { display: block; width: 100%; border: 1px solid transparent; border-radius: 6px; padding: 2px 4px; font-size: 16px; line-height: 1.6; font-family: Arial; resize: none; overflow: hidden; background: transparent; color: inherit; }
+.seg:hover, .seg:focus { border-color: #c9c2ae; background: #fffdf6; outline: none; }
+.fld { display: block; background: #fff1f1; border: 2px dashed var(--red); border-radius: 8px; padding: 6px 8px; margin: 6px 0; }
+.fld.filled { background: #edf7ee; border: 2px solid var(--green); }
+.fld.none { background: #f1f1f1; border: 2px solid #aaa; opacity: .7; }
+.fld label { display: block; font-size: 13px; font-weight: bold; color: var(--red); }
+.fld.filled label { color: var(--green); }
+.fld input, .fld textarea { width: 100%; font-size: 16px; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-family: Arial; }
+.fld textarea { min-height: 56px; }
+.skip { margin-top: 4px; font-size: 13px; background: none; color: #555; border: 1px solid #999; border-radius: 6px; padding: 3px 10px; cursor: pointer; }
 .hint { font-size: 13.5px; color: var(--red); font-weight: bold; margin: 4px 0 0; }
 .go { display: block; width: 100%; padding: 16px; font-size: 20px; font-weight: bold; background: var(--green); color: #fff; border: 0; border-radius: 12px; cursor: pointer; margin-top: 12px; }
 .go:disabled { background: #9bb79d; cursor: not-allowed; }
@@ -83,7 +93,7 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
     <b>הרעיון:</b> המועצה השיבה שפיצול הגנים "אינו אפשרי בשלב זה". במשך שבועיים, בכל יום כמה הורים שולחים מכתב אישי לגורם אחר. לכל הורה נקבעו יום, שעה ונמען, כדי שהמכתבים יגיעו בצורה מסודרת ולא כולם ביחד.
     המכתב למטה הוא הצעה בלבד – <b>אפשר לשנות בו כל מילה</b>, להוסיף או לקצר. כותבים רק דברים אמיתיים.
     <div class="steps">
-      <div class="step"><b>שלב 1</b>עוברים על המכתב וכותבים במקום המסומן ✍️</div>
+      <div class="step"><b>שלב 1</b>ממלאים את המשבצות האדומות, ומשנים בטקסט מה שרוצים</div>
       <div class="step"><b>שלב 2</b>לוחצים על הכפתור הירוק – נפתח מייל מוכן בג'ימייל</div>
       <div class="step"><b>שלב 3</b>בג'ימייל: <u>תזמון שליחה</u> ליום ולשעה שלכם, ואז "תזמנתי" כאן</div>
     </div>
@@ -91,8 +101,8 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
   <div class="card"><h2>אל</h2><div id="toLine"></div></div>
   <div class="card"><h2>נושא (אפשר לשנות)</h2><input class="subj" id="subj"></div>
   <div class="card"><h2>המכתב – פתוח לעריכה מלאה</h2>
-    <textarea id="letter"></textarea>
-    <p class="hint" id="hint">כתבו במקומות המסומנים ✍️ (או מחקו אותם), ואחר כך לחצו על הכפתור הירוק.</p>
+    <div id="letter"></div>
+    <p class="hint" id="hint">ממלאים את המשבצות האדומות (או "אין לי תוספת"). את כל שאר הטקסט אפשר לשנות – פשוט לוחצים עליו וכותבים.</p>
   </div>
   <div id="note" class="card" hidden style="border-color:var(--red);color:var(--red);font-weight:bold"></div>
   <button class="go" id="bG" type="button">המשך לג'ימייל ←</button>
@@ -121,7 +131,15 @@ details.contacts summary { cursor: pointer; font-weight: bold; }
     <button class="cancel" id="mCancel" type="button">חזרה למכתב</button>
   </div>
 </div>
+<div class="modal" id="doneModal">
+  <div class="box" style="border-top-color:var(--green)">
+    <h3 style="color:var(--green)">תזמנתם את המייל בג'ימייל?</h3>
+    <p>חשוב לנו לדעת שהמכתב בדרך. אם תזמנתם (או שלחתם בזמן) – לחצו כאן:</p>
+    <button class="go" id="dYes" type="button">✔ כן, תזמנתי</button>
+    <button class="cancel" id="dNo" type="button">עוד לא – אחזור לזה</button>
+  </div>
+</div>
 <div id="err" hidden style="max-width:720px;margin:20px auto;background:#fff;border:2px solid #b3261e;border-radius:10px;padding:14px">הקישור אינו תקין. <a href="gan-letter.html">כניסה רגילה</a></div>
-<script src="js/gan-letter.js?v=3"></script>
+<script src="js/gan-letter.js?v=5"></script>
 </body>
 </html>

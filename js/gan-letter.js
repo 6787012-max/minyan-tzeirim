@@ -91,17 +91,53 @@
     $('toLine').style.direction = L.addr ? 'ltr' : 'rtl';
     $('subj').value = L.subject;
     if (L.note) { $('note').hidden = false; $('note').textContent = L.note; }
-    var t = '';
+    // המכתב: קטעי טקסט פתוחים לעריכה + משבצות אדומות (חובה למלא או "אין לי תוספת")
+    var root = $('letter'); root.innerHTML = ''; segs = [];
     L.parts.forEach(function (pt) {
-      if (pt.t !== undefined) { t += pt.t; return; }
-      var v = pt.v || prefill(pt.f);
-      t += v ? v : MARK + '[כאן כותבים: ' + pt.f + ']';
+      if (pt.t !== undefined) {
+        if (!pt.t.trim() && pt.t.indexOf('\n') < 0) { segs.push({ t: pt.t }); return; }
+        var ta = document.createElement('textarea'); ta.className = 'seg'; ta.value = pt.t.replace(/^\n+|\n+$/g, '');
+        ta.rows = 1; ta.oninput = function () { grow(ta); };
+        root.appendChild(ta); segs.push({ ta: ta, lead: /^\n/.test(pt.t), trail: /\n$/.test(pt.t) });
+        return;
+      }
+      var box = document.createElement('div'); box.className = 'fld';
+      var lab = document.createElement('label'); lab.textContent = pt.f; box.appendChild(lab);
+      var inp = document.createElement(pt.short ? 'input' : 'textarea');
+      inp.value = pt.v || prefill(pt.f); inp.placeholder = pt.f; box.appendChild(inp);
+      var f = { p: pt, box: box, inp: inp, none: false };
+      if (!pt.req) {
+        var sk = document.createElement('button'); sk.className = 'skip'; sk.type = 'button'; sk.textContent = 'אין לי תוספת';
+        sk.onclick = function () { f.none = !f.none; inp.disabled = f.none; sk.textContent = f.none ? 'בכל זאת להוסיף' : 'אין לי תוספת'; paint(f); };
+        box.appendChild(sk);
+      }
+      inp.oninput = function () { paint(f); };
+      root.appendChild(box); segs.push({ f: f }); paint(f);
     });
-    $('letter').value = t;
+    segs.forEach(function (s) { if (s.ta) grow(s.ta); });
+    setTimeout(function () { segs.forEach(function (s) { if (s.ta) grow(s.ta); }); }, 50);
     $('after').style.display = 'none';
     return true;
   }
-  function letterText() { return $('letter').value.replace(/\n{3,}/g, '\n\n').trim(); }
+  var segs = [];
+  function grow(ta) { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; }
+  function paint(f) { f.box.className = 'fld' + (f.none ? ' none' : (f.inp.value.trim() ? ' filled' : '')); }
+  function buildText() {
+    var miss = [], s = '';
+    segs.forEach(function (x) {
+      if (x.t !== undefined) { s += x.t; return; }
+      if (x.ta) { s += (x.lead ? '\n' : '') + x.ta.value + (x.trail ? '\n' : ''); return; }
+      var f = x.f, v = f.inp.value.trim();
+      if (f.none) { s += '\u0000'; return; }
+      if (!v) { miss.push(f.p.f); return; }
+      s += v;
+    });
+    s = s.split('\n').filter(function (l) { return l.indexOf('\u0000') < 0 || l.replace(/\u0000/g, '').trim(); })
+         .join('\n').replace(/\u0000/g, '').replace(/\n{3,}/g, '\n\n').trim();
+    return { text: s, miss: miss };
+  }
+  window.buildText = buildText;
+  function letterText() { return buildText().text; }
 
   function copy(t) { if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () {}); }
   var msg = $('msg');
@@ -112,8 +148,8 @@
     return diff > 15 ? 'future' : (diff > -360 ? 'now' : 'late');
   }
   $('bG').onclick = function () {
-    var text = letterText();
-    if (text.indexOf('✍️') >= 0) { msg.textContent = 'נשאר מקום מסומן ✍️ במכתב: כתבו בו משפט אמיתי, או מחקו את השורה.'; $('letter').focus(); return; }
+    var r = buildText(), text = r.text;
+    if (r.miss.length) { msg.textContent = 'חסר למלא במשבצת האדומה: ' + r.miss.join(' · ') + ' (או ללחוץ "אין לי תוספת").'; return; }
     if (text.length < 40) { msg.textContent = 'המכתב קצר מדי.'; return; }
     msg.textContent = '';
     var when = DATA.date + ' בשעה ' + DATA.time, mode = timing(), body = $('mBody');
@@ -125,6 +161,9 @@
       var ol = document.createElement('ol');
       ['בג\'ימייל, לוחצים על החץ הקטן ▾ שצמוד לכפתור "שליחה"', 'בוחרים "תזמון שליחה"', 'בוחרים "בחירת תאריך ושעה"', 'מזינים את התאריך והשעה שלמעלה', 'לוחצים "תזמון שליחה"']
         .forEach(function (s) { var li = document.createElement('li'); li.textContent = s; ol.appendChild(li); });
+      var li6 = document.createElement('li'); li6.style.fontWeight = 'bold'; li6.style.color = 'var(--green)';
+      li6.textContent = 'חוזרים לדף הזה ולוחצים "✔ תזמנתי" – כך אנחנו יודעים שהמכתב בדרך';
+      ol.appendChild(li6);
       body.appendChild(ol);
       $('ackText').textContent = 'קראתי: אני לא לוחץ/ת "שליחה", אלא מתזמן/ת ל' + when + '.';
     } else {
@@ -153,14 +192,23 @@
     $('after').style.display = 'block';
     $('afterText').textContent = (timing() === 'future' ? 'זכרו: תזמון שליחה ל' + DATA.date + ' בשעה ' + DATA.time + ', לא "שליחה". אחרי שתזמנתם – לחצו כאן:' : 'אחרי שליחת המייל בג\'ימייל – לחצו כאן:') + extra;
     mark('opened');
+    awaitingDone = true;
     window.open(url, '_blank');
   };
-  $('bDone').onclick = function () {
-    mark('scheduled');
-    this.disabled = true; this.textContent = '✔ תודה! נרשם שסיימתם';
-    $('after').classList.add('done');
+  var awaitingDone = false;
+  function markDone() {
+    mark('scheduled'); awaitingDone = false;
+    var b = $('bDone'); b.disabled = true; b.textContent = '✔ תודה! נרשם שסיימתם';
+    $('after').classList.add('done'); $('doneModal').classList.remove('on');
     store('ganDone_' + DATA.n, true);
-  };
+  }
+  $('bDone').onclick = markDone;
+  $('dYes').onclick = markDone;
+  $('dNo').onclick = function () { $('doneModal').classList.remove('on'); };
+  // כשחוזרים לדף מג'ימייל — שואלים אם תזמנו
+  function askDone() { if (awaitingDone && document.visibilityState === 'visible') setTimeout(function () { if (awaitingDone) $('doneModal').classList.add('on'); }, 700); }
+  document.addEventListener('visibilitychange', askDone);
+  window.addEventListener('focus', askDone);
 
   // ---------- אנשי קשר ----------
   function renderContacts(list) {
