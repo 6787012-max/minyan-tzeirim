@@ -28,7 +28,7 @@
   }
 
   Promise.all([
-    fetch('data/gan-letters.json?v=4', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
+    fetch('data/gan-letters.json?v=5', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
     fetch('data/site.json').then(function (r) { return r.json(); }).then(function (d) { api = d.api || {}; }).catch(function () {}),
     fetch('data/gan-contacts.json?v=1').then(function (r) { return r.json(); }).then(renderContacts).catch(function () {})
   ]).then(function (res) {
