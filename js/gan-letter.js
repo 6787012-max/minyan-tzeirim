@@ -28,7 +28,7 @@
   }
 
   Promise.all([
-    fetch('data/gan-letters.json?v=3', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
+    fetch('data/gan-letters.json?v=4', { cache: 'no-cache' }).then(function (r) { return r.json(); }),
     fetch('data/site.json').then(function (r) { return r.json(); }).then(function (d) { api = d.api || {}; }).catch(function () {}),
     fetch('data/gan-contacts.json?v=1').then(function (r) { return r.json(); }).then(renderContacts).catch(function () {})
   ]).then(function (res) {
@@ -36,6 +36,14 @@
     var n = parseInt(qs.get('n'), 10);
     if (!isNaN(n)) { if (!openLetter(n, qs.get('p') ? decodeP(qs.get('p')) : null)) fail(); return; }
     var saved = load('ganLetter');
+    if (saved && saved.login && api && api.url) {
+      // כניסה חוזרת: לשאול את השרת מה המכתב עכשיו (אם המועד עבר בלי שליחה — מקבלים את הבא בתור)
+      callFn({ key: saved.login }).then(function (d) {
+        if (d.ok) { var p = { name: d.name, kids: d.kids, gans: d.gans }; store('ganLetter', { n: d.n, person: p, login: saved.login }); LOGIN_KEY = saved.login; if (openLetter(d.n, p)) return; }
+        if (!openLetter(saved.n, saved.person)) $('login').hidden = false; else LOGIN_KEY = saved.login;
+      }).catch(function () { if (openLetter(saved.n, saved.person)) LOGIN_KEY = saved.login; else $('login').hidden = false; });
+      return;
+    }
     if (saved && openLetter(saved.n, saved.person)) { LOGIN_KEY = saved.login || ''; return; }
     $('login').hidden = false;
   }).catch(fail);
@@ -61,6 +69,7 @@
       if (d.need === 'details') {
         needDetails = true; $('step2').hidden = false; $('key').readOnly = true; btn.textContent = 'המשך'; return;
       }
+      if (d.error === 'full') { $('lmsg').textContent = 'כל המכתבים כבר שובצו להורים. תודה רבה על הנכונות!'; return; }
       if (!d.ok) { $('lmsg').textContent = 'לא הצלחנו להיכנס. בדקו את הפרטים ונסו שוב.'; return; }
       var p = { name: d.name, kids: d.kids, gans: d.gans };
       if (!openLetter(d.n, p)) { $('lmsg').textContent = 'תקלה בטעינת המכתב.'; return; }
@@ -107,6 +116,7 @@
     $('toLine').style.direction = L.addr ? 'ltr' : 'rtl';
     $('subj').value = L.subject;
     if (L.note) { $('note').hidden = false; $('note').textContent = L.note; }
+    $('goalCard').hidden = !L.goal; $('goal').textContent = L.goal || '';
     // המכתב: קטעי טקסט פתוחים לעריכה + משבצות אדומות (חובה למלא או "אין לי תוספת")
     var root = $('letter'); root.innerHTML = ''; segs = [];
     L.parts.forEach(function (pt) {

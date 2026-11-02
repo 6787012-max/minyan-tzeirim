@@ -44,10 +44,11 @@
     DATA.newcomers.forEach(function (c) { newBy[c.n] = c; });
     (DATA.claims || []).forEach(function (c) { if (c.login) (logins[c.n] = logins[c.n] || []).indexOf(c.login) < 0 && logins[c.n].push(c.login); });
     var ovBy = {}; (DATA.overrides || []).forEach(function (o) { ovBy[o.n] = o; });
+    var claimBy = {}; (DATA.claims || []).forEach(function (c) { if (!claimBy[c.n]) claimBy[c.n] = c; });
     var done = 0, opened = 0, none = 0, html = '';
     var today = new Date(), dd = ('0' + today.getDate()).slice(-2) + '/' + ('0' + (today.getMonth() + 1)).slice(-2);
     DATA.sched.forEach(function (x) {
-      var s = st[x.n] || {}, who = x.parent || (newBy[x.n] && newBy[x.n].name + ' (חדש)') || s.name || '—';
+      var s = st[x.n] || {}, c = claimBy[x.n], who = x.parent || (c && c.name + (c.is_new ? ' (חדש)' : '')) || s.name || '— פנוי';
       var state = s.done ? 'done' : (s.opened ? 'opened' : 'none');
       if (state === 'done') done++; else if (state === 'opened') opened++; else none++;
       if (filter !== 'all' && filter !== state) return;
@@ -78,9 +79,10 @@
     var st = stateOf()[n] || { sent: [] }, ov = (DATA.overrides || []).filter(function (o) { return o.n === n; })[0];
     var logins = (DATA.claims || []).filter(function (c) { return c.n === n && c.login; }).map(function (c) { return c.login; });
     if (st.login && logins.indexOf(st.login) < 0) logins.push(st.login);
-    $('pTitle').textContent = 'מכתב ' + n + ' – ' + (x.parent || st.name || 'פנוי');
+    var cl = (DATA.claims || []).filter(function (c) { return c.n === n; })[0];
+    $('pTitle').textContent = 'מכתב ' + n + ' – ' + (x.parent || (cl && cl.name) || st.name || 'עוד לא נתפס');
     $('pInfo').innerHTML = '<b>מתי:</b> ' + esc(x.when) + ' · <b>אל:</b> ' + esc(x.to) + ' (' + esc(L.addr || 'אין כתובת') + ')<br><b>מייל ההורה:</b> ' +
-      (logins.length ? '<span class="ml">' + esc(logins.join(', ')) + '</span>' : 'עוד לא נכנס עם מייל');
+      (logins.length ? '<span class="ml">' + esc(logins.join(', ')) + '</span>' : 'עוד לא נכנס עם מייל') + (L.goal ? '<br><b>התפקיד של המכתב:</b> ' + esc(L.goal) : '');
     $('pSubj').value = ov && ov.subject ? ov.subject : L.subject;
     $('pBody').value = ov ? ov.body : rawOf(L);
     $('pState').textContent = ov ? 'נוסח ערוך (עודכן ' + fmt(ov.updated_at) + ')' : 'נוסח מקורי';
