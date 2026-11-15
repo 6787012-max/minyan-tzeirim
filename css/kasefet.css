@@ -323,3 +323,34 @@
   .kf-prog-h{ font-size:15px; }
 }
 @media (prefers-reduced-motion:reduce){ .kf-ring-fill{ animation:none; } }
+
+/* ── תיקון גרסה 7: המד הראשי מטפס לפי סימונים ───────────────────────────────── */
+.kf-ring-ck{ display:none; }
+.kf-ring.kf-full .kf-ring-ck{ display:block; }
+.kf-ring-pct{ font-size:clamp(40px,11vw,56px); }
+.kf-ring-amt{ font-size:clamp(14px,3.8vw,17px); margin-top:6px; color:var(--gold-lt); line-height:1.3; }
+.kf-ring-cap{ margin-top:4px; color:#FBF6E8; font-size:clamp(14px,3.6vw,16px); }
+.kf-ring.kf-full .kf-ring-cap{ color:var(--gold-lt); font-weight:700; }
+.kf-ring-first{ display:none; max-width:150px; margin:0 auto; color:#FBF6E8; font-family:'Frank',Georgia,serif; font-size:clamp(18px,5vw,22px); line-height:1.35; }
+.kf-ring.kf-zero .kf-ring-pct, .kf-ring.kf-zero .kf-ring-amt, .kf-ring.kf-zero .kf-ring-cap{ display:none; }
+.kf-ring.kf-zero .kf-ring-first{ display:block; }
+.kf-ring.kf-flash > svg{ animation:kfRingFlash 1.4s ease-out; }
+@keyframes kfRingFlash{ 0%{ filter:drop-shadow(0 0 0 rgba(255,246,214,0)); transform:scale(1); } 30%{ filter:drop-shadow(0 0 22px rgba(255,246,214,.95)); transform:scale(1.04); } 100%{ filter:none; transform:scale(1); } }
+.kf-stat-paid b{ color:var(--kf-green); }
+.kf-card .kf-ring-pct{ font-size:26px; }
+.kf-card .kf-ring-amt{ font-size:11px; margin-top:3px; }
+.kf-card .kf-ring-cap{ font-size:11px; margin-top:2px; }
+.kf-card .kf-ring-first{ font-size:13px; max-width:92px; }
+.kf-card .kf-ring-ck{ width:14px; }
+@media (min-width:641px){
+  .kf-card .kf-ring-pct{ font-size:38px; }
+  .kf-card .kf-ring-amt{ font-size:13px; }
+  .kf-card .kf-ring-cap{ font-size:13px; }
+  .kf-card .kf-ring-first{ font-size:17px; max-width:130px; }
+}
+@media (max-width:640px){
+  .kf-card .kf-ring-pct{ font-size:26px; }
+  .kf-card .kf-ring-amt{ font-size:11px; }
+  .kf-card .kf-ring-cap{ font-size:11px; }
+}
+@media (prefers-reduced-motion:reduce){ .kf-ring.kf-flash > svg{ animation:none; } }
