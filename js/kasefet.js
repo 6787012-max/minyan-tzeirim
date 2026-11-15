@@ -35,7 +35,7 @@
   function rpc(name, body) {
     return loadApi().then(function (a) {
       return fetch(a.url + '/rest/v1/rpc/' + name, {
-        method: 'POST',
+        method: 'POST', cache: 'no-store',
         headers: { 'Content-Type': 'application/json', 'apikey': a.anon, 'Authorization': 'Bearer ' + a.anon,
                    'Accept-Profile': 'minyan', 'Content-Profile': 'minyan' },
         body: JSON.stringify(body || {})
@@ -235,8 +235,11 @@
     }
   }
 
+  var SEQ = 0;
   function loadStatus(root) {
+    var my = ++SEQ;
     return rpc('kasefet_public').then(function (d) {
+      if (my !== SEQ) return d;            /* תשובה ישנה שהוחלפה בבקשה חדשה יותר: לא מציירים */
       var note = root.querySelector('[data-kf="err"]');
       if (note) note.hidden = true;
       render(d, root);
@@ -246,6 +249,30 @@
       var note = root.querySelector('[data-kf="err"]');
       if (note) { note.textContent = 'לא הצלחנו לטעון את המצב כרגע. ננסה שוב בעוד רגע.'; note.hidden = false; }
     });
+  }
+
+  /* עדכון אופטימי: מציירים מיד את מה שהמשתמש הרגע שלח, ואז loadStatus מיישר לפי השרת */
+  function optimistic(root, change) {
+    if (!LAST) return;
+    var d = JSON.parse(JSON.stringify(LAST));
+    d.pledged = (Number(d.pledged) || 0) + (Number(change.amountDelta) || 0);
+    if (change.newPartner) {
+      d.partners = (Number(d.partners) || 0) + 1;
+      d.people = (d.people || []).concat([{ name: change.name || '', paid: false }]);
+    }
+    render(d, root);
+    SEQ++;                                  /* מבטל בקשה שיצאה לפני השליחה ועלולה להחזיר נתון ישן */
+  }
+
+  /* רענון חי: כל 8 שניות כשהדף גלוי, ומיד כשחוזרים אליו */
+  function startLive(root) {
+    function tick() { if (!document.hidden) loadStatus(root); }
+    loadStatus(root);
+    if (TIMER) clearInterval(TIMER);
+    TIMER = setInterval(tick, 8000);
+    document.addEventListener('visibilitychange', tick);
+    window.addEventListener('focus', tick);
+    window.addEventListener('pageshow', function () { loadStatus(root); });   /* כולל חזרה מ-bfcache */
   }
 
   /* ── הופעה בגלילה ────────────────────────────────────────────── */
@@ -269,8 +296,7 @@
   /* ── דף הבית ─────────────────────────────────────────────────── */
   function initHome() {
     var home = $('kfHome');
-    loadStatus(home);
-    TIMER = setInterval(function () { loadStatus(home); }, 20000);
+    startLive(home);
     loadCfg().then(function (c) {
       mountPhotos(c);
       if (((c && c.kasefet) || {}).show === false) return;
@@ -374,7 +400,9 @@
       if (document.querySelector('.kf-tab[data-tab="edit"][aria-selected="true"]')) selectTab('join');
     }
 
+    var EDIT_AMT = 0;
     function fillEdit(r) {
+      EDIT_AMT = Number(r.amount) || 0;
       fld(editF, 'name').value = r.name || '';
       fld(editF, 'phone').value = r.phone || '';
       fld(editF, 'amount').value = r.amount || '';
@@ -404,8 +432,7 @@
       });
     }
 
-    loadStatus(page);
-    TIMER = setInterval(function () { loadStatus(page); }, 20000);
+    startLive(page);
     loadCfg().then(function (c) {
       mountPhotos(c);
       setNedarim(NED_AMOUNT);
@@ -435,6 +462,7 @@
         $('kfThanks').hidden = false;
         joinF.reset(); clearErrs(joinF);
         showEditTab(); loadEdit();
+        optimistic(page, { newPartner: true, amountDelta: v.amount, name: v.show ? v.name : '' });
         loadStatus(page);
         confetti();
         $('kfThanks').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
@@ -465,6 +493,8 @@
         msg.className = 'kf-msg ok'; msg.textContent = 'נשמר. תודה!';
         saveTok(token);
         setNedarim(v.amount);              /* הקישור לנדרים פלוס מתעדכן מיד לסכום החדש */
+        optimistic(page, { amountDelta: v.amount - EDIT_AMT });
+        EDIT_AMT = v.amount;
         loadStatus(page);
       }).catch(function () {
         msg.className = 'kf-msg err'; msg.textContent = 'לא הצלחנו לשמור. נא לנסות שוב בעוד רגע.';
