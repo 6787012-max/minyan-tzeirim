@@ -208,6 +208,10 @@
 
 /* ── מותאם מובייל ─────────────────────────────────────────────── */
 @media (max-width:640px){
+  .kf-body .top .wrap{ flex-wrap:wrap; height:auto; gap:4px 10px; padding-top:6px; padding-bottom:6px; }
+  .kf-body .nav{ margin-inline-start:0; flex-wrap:wrap; gap:2px; }
+  .kf-body .nav a{ padding:6px 8px; font-size:15px; }
+  .kf-body .brand b{ font-size:17px; }
   .kf-page{ padding:14px 14px 48px; }
   .kf-tab{ padding:8px 12px; font-size:15px; }
   .kf-hero{ padding:18px 14px 16px; border-radius:20px; }
