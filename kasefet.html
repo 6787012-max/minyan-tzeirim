@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="canonical" href="https://minyan.mokad.co.il/kasefet.html">
 <link rel="stylesheet" href="css/main.css?v=26">
-<link rel="stylesheet" href="css/kasefet.css?v=7">
+<link rel="stylesheet" href="css/kasefet.css?v=8">
 </head>
 <body class="kf-body">
 
@@ -39,7 +39,7 @@
       <div class="kf-visual">
         <div class="kf-col">
           <div class="kf-vault-wrap" data-kf="vault"></div>
-          <p class="kf-left">נשאר לסמן: <bdi data-kf="leftMark"><i class="kf-sk"></i></bdi></p>
+          <p class="kf-left">נשאר לסמן: <bdi data-kf="leftMark"><i class="kf-sk"></i></bdi> · נשאר לשלם: <bdi data-kf="leftPay"><i class="kf-sk"></i></bdi></p>
         </div>
         <figure class="kf-pic" data-kf="photo" hidden></figure>
       </div>
@@ -47,19 +47,24 @@
   </header>
 
   <div class="kf-stats">
-    <div class="kf-stat"><b><bdi data-kf="paid"><i class="kf-sk"></i></bdi></b><span>שולם עד עכשיו</span></div>
+    <div class="kf-stat kf-stat-goal"><b><bdi data-kf="goal">₪10,000</bdi></b><span><i aria-hidden="true">&#10003;</i> התחייבו בשבת</span></div>
     <div class="kf-stat"><b><bdi data-kf="pledged"><i class="kf-sk"></i></bdi></b><span>סימנו את עצמם</span></div>
+    <div class="kf-stat"><b><bdi data-kf="paid"><i class="kf-sk"></i></bdi></b><span>שולם בפועל</span></div>
     <div class="kf-stat"><b><bdi data-kf="partners"><i class="kf-sk"></i></bdi></b><span>שותפים</span></div>
-    <div class="kf-stat"><b><bdi data-kf="leftPay"><i class="kf-sk"></i></bdi></b><span>נשאר לשלם</span></div>
   </div>
   <p class="kf-sr" aria-live="polite" data-kf="sr"></p>
 
-  <div class="kf-bar" aria-hidden="true">
-    <i data-kf="barPledged" style="background:#EBDCB6"></i>
-    <i data-kf="barPaid"></i>
+  <div class="kf-prog">
+    <div class="kf-prog-row kf-prog-pl">
+      <p class="kf-prog-h">סימנו את עצמם: <bdi data-kf="plAmt"><i class="kf-sk"></i></bdi> מתוך <bdi data-kf="goal">₪10,000</bdi></p>
+      <div class="kf-bar" aria-hidden="true"><i data-kf="barPledged"></i></div>
+    </div>
+    <div class="kf-prog-row kf-prog-pd" data-kf="paidRow">
+      <p class="kf-prog-h"><span class="kf-ck" aria-hidden="true">&#10003;</span>שולם בפועל: <bdi data-kf="pdAmt"><i class="kf-sk"></i></bdi> מתוך <bdi data-kf="goal">₪10,000</bdi></p>
+      <div class="kf-bar" aria-hidden="true"><i data-kf="barPaid"></i></div>
+      <p class="kf-prog-note" data-kf="paidNote"></p>
+    </div>
   </div>
-  <div class="kf-bar-cap"><span>שולם מתוך <bdi data-kf="goal">₪10,000</bdi></span></div>
-  <p class="kf-celebrate" data-kf="celebrate" hidden>הכספת שולמה במלואה, יישר כוח לכולם</p>
   <p class="kf-note" data-kf="err" hidden></p>
 
   <ol class="kf-steps">
@@ -192,7 +197,7 @@
   </div>
 </footer>
 
-<script src="js/kasefet.js?v=9"></script>
+<script src="js/kasefet.js?v=10"></script>
 <script src="js/visit.js?v=1" defer></script>
 </body>
 </html>

@@ -259,3 +259,67 @@
   .kf-js .kf-reveal{ opacity:1; transform:none; }
   .kf-confetti{ display:none; }
 }
+
+/* ── גרסה 7: המד חוגג שהסכום התחייב, ושני פסים מראים סימון ותשלום ───────────── */
+:root{ --kf-green:#2E7D5B; --kf-gold-ink:#7A5F22; }
+.kf-card{ --kf-green:#6FCFA0; }
+
+/* כותרת עם קו זהב דק */
+.kf-page .kf-hero h1::after{ content:""; display:block; width:84px; height:2px; margin:12px auto 0; border-radius:2px;
+  background:linear-gradient(90deg,transparent,#D9BE7C,transparent); }
+@media (min-width:641px){
+  .kf-hero{ padding-block:44px 48px; }
+  .kf-hero .kf-lead{ margin-bottom:16px; }
+  .kf-hero .kf-desc{ margin-bottom:12px; }
+  .kf-hero .kf-visual{ margin-top:36px; gap:84px; }
+}
+
+/* טבעת מלאה, זוהרת, עם ברק שנע לאט */
+.kf-ring-fill{ filter:drop-shadow(0 0 7px rgba(242,223,168,.75)); animation:kfGlowPulse 4.5s ease-in-out infinite alternate; }
+.kf-ring-spin{ animation-duration:16s; }
+@keyframes kfGlowPulse{ from{ filter:drop-shadow(0 0 4px rgba(242,223,168,.5)); } to{ filter:drop-shadow(0 0 11px rgba(242,223,168,.95)); } }
+.kf-ring-ck{ width:clamp(22px,6vw,30px); height:auto; margin:0 auto 4px; color:var(--gold-lt); }
+.kf-ring-amt{ font-size:clamp(26px,7.2vw,38px); margin-top:0; color:#FBF6E8; line-height:1.1; }
+.kf-ring-cap{ margin-top:6px; font-size:clamp(13px,3.4vw,15px); color:var(--gold-lt); }
+.kf-card .kf-ring-ck{ width:16px; margin-bottom:1px; }
+.kf-card .kf-ring-cap{ margin-top:2px; font-size:12px; }
+
+/* כרטיסי מונים */
+.kf-stat-goal b{ color:var(--kf-gold-ink); }
+.kf-stat-goal span i{ font-style:normal; color:var(--kf-green); font-weight:800; }
+.kf-left{ font-size:15px; }
+.kf-left bdi{ font-size:17px; }
+
+/* שני הפסים */
+.kf-prog{ display:grid; gap:14px; margin:6px 0 4px; }
+.kf-page > .kf-prog{ margin:4px 0 14px; padding:16px 18px 14px; background:#FFFDF8; border:1px solid var(--line); border-radius:16px; box-shadow:0 6px 18px rgba(18,35,63,.06); }
+.kf-prog-h{ margin:0 0 7px; font-size:16px; line-height:1.5; color:var(--navy); font-weight:600; }
+.kf-prog-h bdi{ font-family:'Frank',Arial,sans-serif; font-weight:500; font-variant-numeric:tabular-nums; }
+.kf-prog .kf-bar{ height:14px; margin:0; }
+.kf-prog .kf-bar i[data-kf="barPledged"]{ background:linear-gradient(90deg,#E6D3A0,#F2DFA8); }
+.kf-prog .kf-bar i[data-kf="barPaid"]{ background:linear-gradient(90deg,#2E7D5B,#3F9873 60%,#2E7D5B); }
+.kf-prog-pd .kf-ck{ display:none; margin-inline-end:6px; color:var(--kf-green); font-weight:800; }
+.kf-prog-pd.kf-has .kf-ck{ display:inline; }
+.kf-prog-note{ margin:7px 0 0; font-size:14px; color:var(--muted); }
+.kf-prog-note.kf-done{ color:var(--kf-green); font-weight:700; font-size:16px; }
+.kf-card .kf-prog{ margin:10px 0 6px; gap:10px; text-align:start; }
+.kf-card .kf-prog-h{ color:#FBF6E8; font-size:14px; margin-bottom:5px; }
+.kf-card .kf-prog .kf-bar{ display:block; height:9px; background:rgba(255,255,255,.16); }
+.kf-card .kf-prog-pl .kf-prog-h bdi{ color:var(--gold-lt); }
+.kf-card .kf-prog-note{ color:#CFC6B2; font-size:13px; margin-top:5px; }
+.kf-card .kf-prog-note.kf-done{ color:var(--kf-green); }
+.kf-card .kf-prog-pd .kf-ck{ color:var(--kf-green); }
+
+/* רשימת השותפים */
+.kf-people li.kf-paid{ background:#F4FBF7; border-color:rgba(46,125,91,.55); }
+.kf-people li.kf-paid .kf-pname::before{ content:none; }
+.kf-tag{ color:var(--kf-gold-ink); background:rgba(217,190,124,.22); padding:2px 9px; border-radius:999px; }
+.kf-tag-paid{ color:#1F5E41; background:rgba(46,125,91,.14); }
+
+@media (max-width:640px){
+  .kf-card .kf-ring-amt{ font-size:18px; margin-top:0; }
+  .kf-card .kf-ring-cap{ font-size:11px; }
+  .kf-page > .kf-prog{ padding:14px 14px 12px; }
+  .kf-prog-h{ font-size:15px; }
+}
+@media (prefers-reduced-motion:reduce){ .kf-ring-fill{ animation:none; } }

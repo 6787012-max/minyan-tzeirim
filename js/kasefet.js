@@ -61,23 +61,22 @@
   }
 
   /* ── טבעת ההתקדמות (SVG בלבד, בלי איורים) ───────────────────────── */
-  function ringHTML() {
+  function ringHTML(cap) {
     return '<div class="kf-ring">' +
       '<svg viewBox="0 0 200 200" focusable="false" aria-hidden="true">' +
         '<defs><linearGradient id="kfRingG" x1="0" y1="0" x2="1" y2="1">' +
-          '<stop offset="0" stop-color="#F2DFA8"/><stop offset=".5" stop-color="#B08D3E"/><stop offset="1" stop-color="#7A5F22"/>' +
+          '<stop offset="0" stop-color="#F2DFA8"/><stop offset=".5" stop-color="#C9A24B"/><stop offset="1" stop-color="#8A6A26"/>' +
         '</linearGradient></defs>' +
         '<circle class="kf-ring-track" cx="100" cy="100" r="86"/>' +
         '<circle class="kf-ring-fill" data-kf="ringFill" cx="100" cy="100" r="86" stroke="url(#kfRingG)" ' +
           'stroke-dasharray="' + C1.toFixed(2) + '" stroke-dashoffset="' + C1.toFixed(2) + '"/>' +
         '<circle class="kf-ring-in-track" cx="100" cy="100" r="70"/>' +
-        '<circle class="kf-ring-in" data-kf="ringIn" cx="100" cy="100" r="70" ' +
-          'stroke-dasharray="' + C2.toFixed(2) + '" stroke-dashoffset="' + C2.toFixed(2) + '"/>' +
         '<g class="kf-ring-spin"><circle class="kf-ring-glow" cx="100" cy="14" r="9"/><circle class="kf-ring-glint" cx="100" cy="14" r="4"/></g>' +
       '</svg>' +
       '<div class="kf-ring-c">' +
-        '<b class="kf-ring-pct" data-kf="pct"><i class="kf-sk"></i></b>' +
-        '<span class="kf-ring-amt"><bdi data-kf="ringAmt"><i class="kf-sk"></i></bdi></span>' +
+        '<svg class="kf-ring-ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '<span class="kf-ring-amt"><bdi data-kf="goal">' + shekel(10000) + '</bdi></span>' +
+        '<span class="kf-ring-cap">' + esc(cap || 'כל הסכום התחייב') + '</span>' +
       '</div>' +
       '<div class="kf-ring-sp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
     '</div>';
@@ -183,31 +182,33 @@
     var grew = !!prev && partners > (Number(prev.partners) || 0);
     var rPaid = Math.max(0, Math.min(1, paid / goal)), rPl = Math.max(0, Math.min(1, pledged / goal));
 
-    /* הפס הראשי והטבעת = שולם בפועל. הפס השני והטבעת הפנימית = מה שסומן */
+    /* הטבעת תמיד מלאה: כל הסכום התחייב בשבת. שני הפסים מראים סימון ותשלום */
     var fillPl = root.querySelector('[data-kf="barPledged"]'), fillPd = root.querySelector('[data-kf="barPaid"]');
     if (fillPl) fillPl.style.width = (rPl * 100).toFixed(2) + '%';
     if (fillPd) fillPd.style.width = (rPaid * 100).toFixed(2) + '%';
-    var rf = root.querySelector('[data-kf="ringFill"]'), ri = root.querySelector('[data-kf="ringIn"]');
-    if (rf) rf.style.strokeDashoffset = (C1 * (1 - rPaid)).toFixed(2);
-    if (ri) ri.style.strokeDashoffset = (C2 * (1 - rPl)).toFixed(2);
 
     tween(root, 'paid', paid, shekel);
     tween(root, 'pledged', pledged, shekel);
+    tween(root, 'plAmt', pledged, shekel);
+    tween(root, 'pdAmt', paid, shekel);
     tween(root, 'partners', partners, intFmt);
     tween(root, 'leftPay', Math.max(0, goal - paid), shekel);
     tween(root, 'leftMark', Math.max(0, goal - pledged), shekel);
-    tween(root, 'ringAmt', paid, shekel);
-    tween(root, 'pct', rPaid * 100, pctFmt);
-    var gl = root.querySelector('[data-kf="goal"]');
-    if (gl) gl.textContent = shekel(goal);
+    root.querySelectorAll('[data-kf="goal"]').forEach(function (g) { g.textContent = shekel(goal); });
+
+    var done = goal > 0 && paid >= goal;
+    var row = root.querySelector('[data-kf="paidRow"]');
+    if (row) { row.classList.toggle('kf-has', paid > 0); row.classList.toggle('kf-full', done); }
+    var note = root.querySelector('[data-kf="paidNote"]');
+    if (note) {
+      note.textContent = done ? 'הכספת שולמה במלואה, יישר כוח לכולם'
+        : (paid > 0 ? 'התשלומים מתקדמים, תודה לכל מי ששילם' : 'התשלומים מתחילים להגיע');
+      note.classList.toggle('kf-done', done);
+    }
 
     var sr = root.querySelector('[data-kf="sr"]');
-    if (sr) sr.textContent = 'שולם ' + shekel(paid) + ' מתוך ' + shekel(goal) + '. סומנו ' + shekel(pledged) + ', ' + partners + ' שותפים.';
+    if (sr) sr.textContent = 'כל הסכום, ' + shekel(goal) + ', התחייב בשבת. סימנו את עצמם ' + shekel(pledged) + '. שולם בפועל ' + shekel(paid) + '. ' + partners + ' שותפים.';
 
-    /* 100%: הודעה מיוחדת, וקונפטי רק במעבר מ"לא שולם" ל"שולם במלואו" */
-    var done = goal > 0 && paid >= goal;
-    var cel = root.querySelector('[data-kf="celebrate"]');
-    if (cel) cel.hidden = !done;
     if (done && prev && !(Number(prev.paid) >= (Number(prev.goal) || goal))) confetti();
 
     /* הרשימה נבנית מחדש רק כשהתוכן השתנה, כדי שכל רענון לא יפעיל את האנימציה שוב */
@@ -221,14 +222,14 @@
           var isNew = grew && i === people.length - 1;
           return '<li class="' + (p.paid ? 'kf-paid' : '') + (isNew ? ' kf-new' : '') + '" style="--i:' + i + '">' +
             '<span class="kf-pname">' + esc(p.name || 'שותף בעילום שם') + '</span>' +
-            (p.paid ? '<span class="kf-tag kf-tag-paid">שילם</span>' : '<span class="kf-tag">ממתין</span>') +
+            (p.paid ? '<span class="kf-tag kf-tag-paid">שילם &#10003;</span>' : '<span class="kf-tag">סימן</span>') +
           '</li>';
         }).join('') : '<li class="kf-empty">היו הראשונים לסמן את עצמכם.</li>';
       }
     }
 
     if (grew) {
-      ['partners', 'pledged', 'leftPay', 'paid'].forEach(function (k) {
+      ['partners', 'pledged', 'paid'].forEach(function (k) {
         var n = root.querySelector('[data-kf="' + k + '"]');
         if (n) bump(n.closest('.kf-stat, .kf-nums > div'));
       });
@@ -511,7 +512,11 @@
 
   function start() {
     document.body.classList.add('kf-js');
-    document.querySelectorAll('[data-kf="vault"]').forEach(function (v) { v.innerHTML = ringHTML(); });
+    document.querySelectorAll('[data-kf="vault"]').forEach(function (v) { v.innerHTML = ringHTML(v.getAttribute('data-cap')); });
+    /* הטבעת מתמלאת בתנועה מיד עם עליית הדף, בלי לחכות לנתונים */
+    setTimeout(function () {
+      document.querySelectorAll('[data-kf="ringFill"]').forEach(function (r) { r.style.strokeDashoffset = '0'; });
+    }, 80);
     initReveal();
     if ($('kfHome')) initHome();
     if ($('kfPage')) initPage();
