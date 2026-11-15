@@ -91,16 +91,20 @@
     if (isNaN(from)) from = 0;
     el.setAttribute('data-v', String(to));
     var id = (el._tw = (el._tw || 0) + 1);
-    if (REDUCED || from === to) { el.textContent = fmt(to); return; }
+    /* הערך הסופי תמיד נכתב מיד. האנימציה רק מוסיפה תנועה, ולכן לא תלויה בפריימים (לשונית ברקע) */
+    el.textContent = fmt(to);
+    if (REDUCED || document.hidden || from === to || !window.requestAnimationFrame) return;
+    el.textContent = fmt(from);
     var t0 = 0;
     function step(ts) {
       if (el._tw !== id) return;
       if (!t0) t0 = ts;
       var k = Math.min(1, (ts - t0) / 900), e = 1 - Math.pow(1 - k, 3);
-      el.textContent = fmt(from + (to - from) * e);
+      el.textContent = k < 1 ? fmt(from + (to - from) * e) : fmt(to);
       if (k < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
+    setTimeout(function () { if (el._tw === id) el.textContent = fmt(to); }, 1200);
   }
 
   function bump(n) {
