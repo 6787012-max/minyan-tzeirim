@@ -1,6 +1,6 @@
 /* network-first על ה-shell עם נפילה ל-cache. מעלים את V ביד בכל דיפלוי — וגם את ?v= בתגיות ה-script/link
    בשלושת קבצי ה-HTML, אחרת דפדפן שכבר ביקר יגיש JS ישן מה-cache שלו. */
-var V = 'mt-v22';
+var V = 'mt-v23';
 var SHELL = [
   './', './index.html', './shas.html', './hok.html', './kibud.html', './news.html',
   './css/main.css', './css/shas.css', './css/hok.css', './css/kibud.css', './css/news.css',
@@ -38,6 +38,8 @@ self.addEventListener('fetch', function (e) {
   var u = new URL(e.request.url);
   if (u.origin !== self.location.origin) return;
   if (u.pathname.indexOf('/admin') === 0 || u.pathname.indexOf('/js/admin') === 0) return;
+  /* דף הגבאים של הכספת: לא נשמר בקאש (הוא מציג שמות וטלפונים אחרי כניסה) */
+  if (u.pathname.indexOf('kasefet-gabai') !== -1 || u.pathname.indexOf('js/kasefet-gabai') !== -1) return;
   e.respondWith(
     fetch(e.request).then(function (r) {
       var copy = r.clone();

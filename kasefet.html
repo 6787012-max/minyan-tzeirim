@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>כספת לארון הקודש · מניין הצעירים</title>
+<meta name="description" content="התרמה לכספת לארון הקודש של מניין הצעירים מעלה עמוס. מצב המגבית, הצטרפות, ואפשרויות תשלום.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://cmsusfmwjtpfewbydzpi.supabase.co; font-src 'self'; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co; form-action 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#12233F">
+<link rel="icon" href="img/favicon.ico" sizes="any">
+<link rel="manifest" href="manifest.json">
+<link rel="canonical" href="https://minyan.mokad.co.il/kasefet.html">
+<link rel="stylesheet" href="css/main.css?v=26">
+<link rel="stylesheet" href="css/kasefet.css?v=1">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="img/mark@64.png" alt="" width="30" height="30">
+      <b>מניין הצעירים<span class="dot"> · </span><span class="pl">מעלה עמוס</span></b>
+    </a>
+    <nav class="nav">
+      <a href="index.html">דף הבית</a>
+      <a href="kasefet.html" aria-current="page">כספת לארון הקודש</a>
+    </nav>
+  </div>
+</header>
+
+<main class="kf-page" id="kfPage">
+  <span class="eyebrow">כספת לארון הקודש</span>
+  <h1>כספת לארון הקודש</h1>
+  <p class="kf-lead">אנחנו מתרימים לכספת ל-4 ספרי התורה של בית הכנסת. היעד 10,000 ש"ח: 8,000 לכספת ו-2,000 להובלה.</p>
+
+  <div class="kf-vault-wrap" style="max-width:300px;margin:0 auto">
+    <div data-kf="vault"></div>
+  </div>
+
+  <div class="kf-stats" aria-live="polite">
+    <div class="kf-stat" id="kfStatPledged"><b data-kf="pledged">—</b><span>התחייבו</span></div>
+    <div class="kf-stat" id="kfStatPaid"><b data-kf="paid">—</b><span>שולם בפועל</span></div>
+    <div class="kf-stat" id="kfStatPartners"><b data-kf="partners">—</b><span>שותפים</span></div>
+    <div class="kf-stat" id="kfStatLeft"><b data-kf="left">—</b><span>נשאר ליעד</span></div>
+  </div>
+
+  <div class="kf-bar" aria-hidden="true">
+    <i data-kf="barPledged" style="background:#EBDCB6"></i>
+    <i data-kf="barPaid"></i>
+  </div>
+  <div class="kf-bar-cap"><span>מתוך <b data-kf="goal">10,000 ₪</b></span><span data-kf="pct">0%</span></div>
+  <p class="kf-note" data-kf="err" hidden></p>
+
+  <div class="kf-tabs" role="tablist">
+    <button class="kf-tab" role="tab" data-tab="status" aria-selected="true">מצב המגבית</button>
+    <button class="kf-tab" role="tab" data-tab="join" aria-selected="false">אני מתחייב</button>
+    <button class="kf-tab" role="tab" data-tab="pay" aria-selected="false">איך משלמים</button>
+    <button class="kf-tab" role="tab" data-tab="edit" aria-selected="false" hidden>ההתחייבות שלי</button>
+  </div>
+
+  <!-- מצב -->
+  <section class="kf-panel" id="panel-status" role="tabpanel">
+    <h2 style="font-size:24px;margin:0 0 6px">השותפים עד כה</h2>
+    <p class="kf-note">שם מופיע רק אם השותף בחר להציג אותו. סימון "שילם" מופיע לאחר שהגבאי רשם את התשלום.</p>
+    <ul class="kf-people" data-kf="people"></ul>
+  </section>
+
+  <!-- הצטרפות -->
+  <section class="kf-panel" id="panel-join" role="tabpanel" hidden>
+    <div id="kfMineBox" hidden style="margin-bottom:14px">
+      <button class="kf-btn kf-ghost" id="kfMineBtn" type="button">לעדכן את ההתחייבות שלי</button>
+    </div>
+    <form class="kf-form" id="kfJoin" autocomplete="on">
+      <label class="f">שם
+        <input type="text" name="name" required minlength="2" maxlength="80" autocomplete="name">
+      </label>
+      <label class="f">טלפון (לא חובה)
+        <input type="tel" name="phone" maxlength="20" inputmode="tel" autocomplete="tel">
+      </label>
+      <label class="f">סכום בש"ח
+        <input type="number" name="amount" required min="1" max="100000" step="1" inputmode="numeric">
+      </label>
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend style="font-weight:600;color:var(--navy);margin-bottom:8px">מתי התחייבת?</legend>
+        <div class="kf-choice">
+          <label><input type="radio" name="source" value="shabbat" checked> <b>התחייבתי בשבת</b> <small>בתפילה, בבית הכנסת</small></label>
+          <label><input type="radio" name="source" value="new"> <b>מצטרף עכשיו</b> <small>לא הייתי בהתרמה</small></label>
+        </div>
+      </fieldset>
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend style="font-weight:600;color:var(--navy);margin-bottom:8px">אופן התשלום</legend>
+        <div class="kf-choice">
+          <label><input type="radio" name="method" value="cash" checked> <b>מזומן לגבאי</b> <small>מועדף. ליוסף שניידר או ליעקב וייס</small></label>
+          <label><input type="radio" name="method" value="nedarim"> <b>נדרים פלוס</b> <small>בכרטיס אשראי, דרך הקישור</small></label>
+        </div>
+      </fieldset>
+      <label class="chk"><input type="checkbox" name="show" checked> להציג את שמי ברשימה</label>
+      <button class="kf-btn" type="submit">שליחה</button>
+      <p class="kf-msg" id="kfJoinMsg" role="status"></p>
+    </form>
+
+    <div class="kf-thanks" id="kfThanks" hidden>
+      <b>תודה רבה!</b> ההתחייבות נרשמה. מומלץ לשמור את הקישור האישי כדי שתוכלו לעדכן אותה בהמשך.
+      <code id="kfThanksLink"></code>
+      <button class="kf-btn kf-ghost" id="kfCopy" type="button">העתקת הקישור</button>
+    </div>
+  </section>
+
+  <!-- תשלום -->
+  <section class="kf-panel" id="panel-pay" role="tabpanel" hidden>
+    <div class="kf-pay">
+      <div class="card">
+        <h3>מזומן לגבאי (מועדף)</h3>
+        <p>אפשר למסור את הסכום ליוסף שניידר או ליעקב וייס, והגבאי ירשום את התשלום בדף.</p>
+      </div>
+      <div class="card">
+        <h3>נדרים פלוס</h3>
+        <p>תשלום בכרטיס אשראי דרך הקישור. בסיום התשלום הגבאי ירשום את התרומה לכספת.</p>
+        <a class="kf-btn" id="kfNedarim" href="#" target="_blank" rel="noopener">לתשלום בנדרים פלוס</a>
+      </div>
+    </div>
+    <p class="kf-note">המוסד אינו מוסד מוכר לסעיף 46, ולכן אין הטבת מס על התרומה.</p>
+  </section>
+
+  <!-- עדכון אישי -->
+  <section class="kf-panel" id="panel-edit" role="tabpanel" hidden>
+    <div id="kfEditBox" hidden>
+      <p id="kfEditIntro" style="font-size:18px"></p>
+      <p id="kfPaidInfo" class="kf-note"></p>
+      <form class="kf-form" id="kfEdit">
+        <label class="f">שם
+          <input type="text" name="name" required minlength="2" maxlength="80">
+        </label>
+        <label class="f">טלפון (לא חובה)
+          <input type="tel" name="phone" maxlength="20" inputmode="tel">
+        </label>
+        <label class="f">סכום בש"ח
+          <input type="number" name="amount" required min="1" max="100000" step="1" inputmode="numeric">
+        </label>
+        <fieldset style="border:0;padding:0;margin:0">
+          <legend style="font-weight:600;color:var(--navy);margin-bottom:8px">אופן התשלום</legend>
+          <div class="kf-choice">
+            <label><input type="radio" name="method" value="cash"> <b>מזומן לגבאי</b></label>
+            <label><input type="radio" name="method" value="nedarim"> <b>נדרים פלוס</b></label>
+          </div>
+        </fieldset>
+        <label class="chk"><input type="checkbox" name="show"> להציג את שמי ברשימה</label>
+        <button class="kf-btn" type="submit">שמירת השינויים</button>
+        <p class="kf-msg" id="kfEditMsg" role="status"></p>
+      </form>
+    </div>
+    <p class="kf-msg err" id="kfEditErr" hidden></p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bot">
+      <span>מניין הצעירים · מעלה עמוס</span>
+      <span><a href="index.html">לדף הבית</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/kasefet.js?v=1"></script>
+</body>
+</html>
