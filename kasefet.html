@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="canonical" href="https://minyan.mokad.co.il/kasefet.html">
 <link rel="stylesheet" href="css/main.css?v=26">
-<link rel="stylesheet" href="css/kasefet.css?v=1">
+<link rel="stylesheet" href="css/kasefet.css?v=2">
 </head>
 <body>
 
@@ -31,25 +31,25 @@
 
 <main class="kf-page" id="kfPage">
   <span class="eyebrow">כספת לארון הקודש</span>
-  <h1>כספת לארון הקודש</h1>
-  <p class="kf-lead">אנחנו מתרימים לכספת ל-4 ספרי התורה של בית הכנסת. היעד 10,000 ש"ח: 8,000 לכספת ו-2,000 להובלה.</p>
+  <h1>ברוך ה', כל הסכום התחייב בשבת</h1>
+  <p class="kf-lead">היעד 10,000 ש"ח לכספת ל-4 ספרי התורה: 8,000 לכספת ו-2,000 להובלה. עכשיו שני שלבים: כל מי שהתחייב מסמן את עצמו, ואז משלם, עדיף במזומן לגבאי.</p>
 
   <div class="kf-vault-wrap" style="max-width:300px;margin:0 auto">
     <div data-kf="vault"></div>
   </div>
 
   <div class="kf-stats" aria-live="polite">
-    <div class="kf-stat" id="kfStatPledged"><b data-kf="pledged">—</b><span>התחייבו</span></div>
-    <div class="kf-stat" id="kfStatPaid"><b data-kf="paid">—</b><span>שולם בפועל</span></div>
-    <div class="kf-stat" id="kfStatPartners"><b data-kf="partners">—</b><span>שותפים</span></div>
-    <div class="kf-stat" id="kfStatLeft"><b data-kf="left">—</b><span>נשאר ליעד</span></div>
+    <div class="kf-stat"><b data-kf="paid">0</b><span>שולם בפועל</span></div>
+    <div class="kf-stat"><b data-kf="pledged">0</b><span>סימנו את עצמם</span></div>
+    <div class="kf-stat"><b data-kf="partners">0</b><span>שותפים</span></div>
+    <div class="kf-stat"><b data-kf="leftPay">10,000 ₪</b><span>נשאר לשלם</span></div>
   </div>
 
   <div class="kf-bar" aria-hidden="true">
     <i data-kf="barPledged" style="background:#EBDCB6"></i>
     <i data-kf="barPaid"></i>
   </div>
-  <div class="kf-bar-cap"><span>מתוך <b data-kf="goal">10,000 ₪</b></span><span data-kf="pct">0%</span></div>
+  <div class="kf-bar-cap"><span>שולם מתוך <b data-kf="goal">10,000 ₪</b></span><span>נשאר לסמן: <b data-kf="leftMark">10,000 ₪</b></span></div>
   <p class="kf-note" data-kf="err" hidden></p>
 
   <div class="kf-tabs" role="tablist">
@@ -61,7 +61,7 @@
 
   <!-- מצב -->
   <section class="kf-panel" id="panel-status" role="tabpanel">
-    <h2 style="font-size:24px;margin:0 0 6px">השותפים עד כה</h2>
+    <h2 style="font-size:24px;margin:0 0 6px">מי כבר סימן את עצמו</h2>
     <p class="kf-note">שם מופיע רק אם השותף בחר להציג אותו. סימון "שילם" מופיע לאחר שהגבאי רשם את התשלום.</p>
     <ul class="kf-people" data-kf="people"></ul>
   </section>
@@ -82,10 +82,10 @@
         <input type="number" name="amount" required min="1" max="100000" step="1" inputmode="numeric">
       </label>
       <fieldset style="border:0;padding:0;margin:0">
-        <legend style="font-weight:600;color:var(--navy);margin-bottom:8px">מתי התחייבת?</legend>
+        <legend style="font-weight:600;color:var(--navy);margin-bottom:8px">התחייבתי בשבת? סמן את עצמך</legend>
         <div class="kf-choice">
-          <label><input type="radio" name="source" value="shabbat" checked> <b>התחייבתי בשבת</b> <small>בתפילה, בבית הכנסת</small></label>
-          <label><input type="radio" name="source" value="new"> <b>מצטרף עכשיו</b> <small>לא הייתי בהתרמה</small></label>
+          <label><input type="radio" name="source" value="shabbat" checked> <b>התחייבתי בשבת</b> <small>סימון ההתחייבות שנתתי בבית הכנסת</small></label>
+          <label><input type="radio" name="source" value="new"> <b>מצטרף עכשיו</b> <small>רוצה להוסיף את עצמי לתרומה</small></label>
         </div>
       </fieldset>
       <fieldset style="border:0;padding:0;margin:0">
@@ -163,6 +163,6 @@
   </div>
 </footer>
 
-<script src="js/kasefet.js?v=1"></script>
+<script src="js/kasefet.js?v=2"></script>
 </body>
 </html>

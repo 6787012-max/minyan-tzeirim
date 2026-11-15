@@ -85,16 +85,18 @@
     var prev = LAST; LAST = d;
     var grew = prev && partners > (Number(prev.partners) || 0);
 
+    /* הכספת והפס הראשי = שולם בפועל. הפס השני = מה שסומן (התחייבות שנרשמה). */
     var fillPl = root.querySelector('[data-kf="barPledged"]');
     var fillPd = root.querySelector('[data-kf="barPaid"]');
     if (fillPl) fillPl.style.width = pct(pledged, goal) + '%';
     if (fillPd) fillPd.style.width = pct(paid, goal) + '%';
 
-    setTxt(root, 'pledged', shekel(pledged));
     setTxt(root, 'paid', shekel(paid));
+    setTxt(root, 'pledged', shekel(pledged));
     setTxt(root, 'partners', String(partners));
-    setTxt(root, 'left', shekel(Math.max(0, goal - pledged)));
-    setTxt(root, 'pct', pct(pledged, goal) + '%');
+    setTxt(root, 'leftPay', shekel(Math.max(0, goal - paid)));
+    setTxt(root, 'leftMark', shekel(Math.max(0, goal - pledged)));
+    setTxt(root, 'pct', pct(paid, goal) + '%');
     setTxt(root, 'goal', shekel(goal));
 
     var vault = root.querySelector('[data-kf="vault"]');
@@ -104,7 +106,7 @@
     if (list) {
       var people = d.people || [];
       if (!people.length) {
-        list.innerHTML = '<li class="kf-empty" style="grid-column:1/-1;justify-content:center;color:var(--muted)">עדיין אין שותפים רשומים. אתם הראשונים.</li>';
+        list.innerHTML = '<li class="kf-empty" style="grid-column:1/-1;justify-content:center;color:var(--muted)">היו הראשונים לסמן את עצמכם.</li>';
       } else {
         list.innerHTML = people.map(function (p, i) {
           var isNew = grew && i === people.length - 1;
@@ -113,7 +115,7 @@
       }
     }
     if (grew) {
-      ['partners', 'pledged', 'left'].forEach(function (k) {
+      ['partners', 'pledged', 'leftPay', 'paid'].forEach(function (k) {
         var n = root.querySelector('[data-kf="' + k + '"]');
         if (n && n.parentNode) bump(n.parentNode);
       });
