@@ -135,8 +135,22 @@
     var k = (c && c.kasefet) || {};
     var src = typeof k.photo === 'string' ? k.photo.trim() : '';
     if (!/^img\/[A-Za-z0-9_\-\/.]+\.(jpe?g|png|webp)$/i.test(src)) return;
-    var W = Number(k.photoW), H = Number(k.photoH);
-    if (!W || !H) return;
+    var W = Number(k.photoW), H = Number(k.photoH), B = Number(k.photoBytes);
+    if (!W || !H || !B) return;
+    /* גם גודל הקובץ חייב להתאים: מסנן רשת עלול להחליף קובץ בתמונה בעלת אותן מידות */
+    fetch(src, { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error('photo');
+      return r.blob();
+    }).then(function (b) {
+      if (b.size !== B) throw new Error('size');
+      mountImg(src, W, H);
+    }).catch(function () {
+      document.querySelectorAll('[data-kf="photo"]').forEach(function (box) { box.hidden = true; });
+    });
+  }
+
+  function mountImg(src, W, H) {
+    var k = (CFG && CFG.kasefet) || {};
     /* הכרטיס נשאר מוסתר עד שהתמונה נטענה ומידותיה תואמות לערכים מה-config.
        כך תמונה אחרת, תמונת המתנה, או כשל טעינה לא מופיעים לקהל ואין קפיצה בפריסה. */
     document.querySelectorAll('[data-kf="photo"]').forEach(function (box) {
