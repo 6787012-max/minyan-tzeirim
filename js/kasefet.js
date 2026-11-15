@@ -155,7 +155,7 @@
        כך תמונה אחרת, תמונת המתנה, או כשל טעינה לא מופיעים לקהל ואין קפיצה בפריסה. */
     document.querySelectorAll('[data-kf="photo"]').forEach(function (box) {
       var img = document.createElement('img');
-      img.className = 'kf-photo-img'; img.alt = 'כספת לספרי התורה'; img.loading = 'lazy'; img.decoding = 'async';
+      img.className = 'kf-photo-img'; img.alt = 'כספת לספרי התורה'; img.decoding = 'async';
       img.onload = function () {
         if (img.naturalWidth === W && img.naturalHeight === H) {
           box.hidden = false;
