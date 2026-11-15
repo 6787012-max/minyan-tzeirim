@@ -1,149 +1,226 @@
 /* kasefet.css — כספת לארון הקודש: דף ציבורי, דף גבאים וכרטיס בדף הבית.
-   הפלטה והפונטים זהים ל-main.css. איור היכל וכספת ב-SVG בלבד, בלי דמויות אדם. */
+   הפלטה והפונטים זהים ל-main.css. בלי איורים: טבעת זהב ב-SVG, רקע גאומטרי עדין, ותמונה אמיתית כשיש.
+   אנימציות: transform ו-opacity בלבד. kasefet.css נטען גם בדף הבית, לכן כל הכללים כאן מוגבלים למחלקות של הכספת. */
 
-:root{ --kf-ok:#2F6B45; --kf-bad:#8A2D2D; --kf-cream-soft:#E4DCC9; }
+:root{ --kf-ok:#2F6B45; --kf-bad:#8A2D2D; --kf-cream-soft:#E4DCC9; --kf-ease:cubic-bezier(.2,.7,.2,1); }
 
-/* main.css מגדיר section{padding} גלובלי; לאפס לכל מה שהכספת בונה כ-section */
-.kf-panel{padding:0}
-.kf-page{max-width:880px;margin:0 auto;padding:22px 16px 60px}
-.kf-page h1{font-size:clamp(30px,6vw,44px);margin:6px 0 10px}
-.kf-page .kf-lead{font-size:18px;color:var(--muted);margin:0 0 20px}
+/* hidden חייב לנצח בתוך הכספת */
+.kf-page [hidden], .kf-home[hidden], .gb-wrap [hidden]{ display:none !important; }
 
-.kf-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 22px;border-bottom:1px solid var(--line);padding-bottom:10px}
-.kf-tab{background:#FFFDF8;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font:inherit;font-weight:600;color:var(--navy);cursor:pointer;transition:background .2s,color .2s,border-color .2s}
-.kf-tab:hover{border-color:var(--gold)}
-.kf-tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.kf-tab[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
-.kf-panel[hidden]{display:none}
+/* שטח מגע 44px לקישורי הכותרת והתחתית (דף הכספת בלבד) */
+.kf-body .nav a, .kf-body footer a, .kf-body .brand{ min-height:44px; display:inline-flex; align-items:center; }
 
-/* ── היכל: כרטיס כהה עם איור ארון קודש ברקע ───────────────────── */
-.kf-hero{position:relative;overflow:hidden;isolation:isolate;border-radius:24px;margin:0 0 24px;
+/* טקסט לקורא מסך בלבד */
+.kf-sr{ position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
+/* ── מבנה הדף ───────────────────────────────────────────────────── */
+.kf-panel{ padding:0; }
+.kf-page{ max-width:880px; margin:0 auto; padding:22px 16px 60px; }
+.kf-h2{ font-family:'Frank',Georgia,serif; font-weight:500; font-size:clamp(24px,4vw,28px); color:var(--navy); margin:0 0 6px; }
+.kf-page .kf-lead{ font-size:18px; color:var(--muted); margin:0 0 20px; }
+.kf-intro{ font-size:18px; color:var(--navy); margin:0 0 8px; }
+
+.kf-tabs{ position:relative; display:flex; gap:6px; flex-wrap:wrap; margin:18px 0 22px; border-bottom:1px solid var(--line); padding-bottom:10px; }
+.kf-tab{ background:#FFFDF8; border:1px solid var(--line); border-radius:999px; padding:9px 16px; font:inherit; font-weight:600; color:var(--navy); cursor:pointer; min-height:44px; transition:background .25s,color .25s,border-color .25s,transform .15s; }
+.kf-tab:hover{ border-color:var(--gold); }
+.kf-tab:active{ transform:scale(.97); }
+.kf-tab:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.kf-tab[aria-selected="true"]{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.kf-ind{ position:absolute; left:0; bottom:-1px; height:3px; width:0; border-radius:3px; background:linear-gradient(90deg,#B08D3E,#D9BE7C); transition:transform .5s var(--kf-ease),width .5s var(--kf-ease); pointer-events:none; }
+
+/* ── היכל: כרטיס כהה עם דוגמה גאומטרית, תמונה אמיתית כשיש ───────── */
+.kf-hero{ position:relative; overflow:hidden; isolation:isolate; border-radius:24px; margin:0 0 24px; color:#F6F1E5;
   background:radial-gradient(120% 70% at 50% 0%,#2A4A7A 0%,rgba(42,74,122,0) 62%),linear-gradient(180deg,#1B3053 0%,#12233F 68%,#0C1A31 100%);
-  box-shadow:0 18px 50px rgba(18,35,63,.28);border:1px solid rgba(217,190,124,.4);padding:30px 22px 26px}
-.kf-hero::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
-  background:linear-gradient(180deg,rgba(12,26,49,.72) 0%,rgba(12,26,49,.70) 40%,rgba(12,26,49,.92) 100%)}
-.kf-hero .kf-art{opacity:.6}
-.kf-hero-in{position:relative;z-index:1;text-align:center}
-.kf-page .kf-hero .eyebrow{color:var(--gold-lt);font-weight:800;letter-spacing:.08em;font-size:13px}
-.kf-page .kf-hero h1{color:#FBF6E8;font-size:clamp(30px,6vw,42px)}
-.kf-page .kf-hero .kf-lead{color:var(--kf-cream-soft);margin:0 auto;max-width:640px}
-.kf-hero .kf-vault-wrap{max-width:280px;margin:14px auto 0;filter:drop-shadow(0 14px 22px rgba(0,0,0,.4))}
+  box-shadow:0 18px 50px rgba(18,35,63,.28); border:1px solid rgba(217,190,124,.4); padding:30px 22px 26px; }
+.kf-hero::before, .kf-card::before{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.55;
+  background-image:linear-gradient(45deg,rgba(217,190,124,.10) 25%,transparent 25%),linear-gradient(-45deg,rgba(217,190,124,.10) 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,rgba(217,190,124,.10) 75%),linear-gradient(-45deg,transparent 75%,rgba(217,190,124,.10) 75%);
+  background-size:36px 36px; background-position:0 0,0 18px,18px -18px,-18px 0; }
+.kf-hero::after{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(60% 40% at 50% 0%,rgba(246,210,122,.30) 0%,rgba(246,210,122,0) 70%); animation:kfGlow 6s ease-in-out infinite alternate; }
+.kf-hero-in{ position:relative; z-index:1; text-align:center; }
+.kf-eyebrow{ display:inline-block; color:var(--gold-lt); font-weight:800; letter-spacing:.08em; font-size:13px; }
+.kf-page .kf-hero h1{ color:#FBF6E8; font-size:clamp(30px,6vw,42px); margin:8px 0 10px; }
+.kf-hero .kf-lead{ color:#FBF6E8; margin:0 auto 10px; max-width:640px; font-size:18px; }
+.kf-hero .kf-desc{ color:var(--kf-cream-soft); margin:0 auto; max-width:640px; font-size:16px; line-height:1.7; }
+.kf-hero .kf-rise{ animation:kfRise .8s var(--kf-ease) both; animation-delay:calc(var(--d,0) * .12s); }
 
-/* ── איור ה-SVG (היכל, כרטיס בדף הבית) ─────────────────────────── */
-.kf-art{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.kf-art svg{width:100%;height:100%;display:block}
-.kf-art .kf-rays{animation:kfRays 7s ease-in-out infinite alternate}
-.kf-art .kf-flame{transform-box:fill-box;transform-origin:50% 100%;animation:kfFlick 2.6s ease-in-out infinite}
-.kf-art .kf-flame-glow{animation:kfGlowPulse 3.2s ease-in-out infinite}
-.kf-art .kf-dust{fill:#F6E7B8;animation:kfTwinkle 5s ease-in-out infinite}
-@keyframes kfRays{from{opacity:.55}to{opacity:1}}
-@keyframes kfFlick{0%,100%{transform:scale(1,1)}20%{transform:scale(.9,1.07)}45%{transform:scale(1.05,.95)}70%{transform:scale(.95,1.08)}}
-@keyframes kfGlowPulse{0%,100%{opacity:.4}50%{opacity:.85}}
-@keyframes kfTwinkle{0%,100%{opacity:.12}50%{opacity:.8}}
+/* תמונה אמיתית (kasefet.photo): כרטיס עומד עם מסגרת זהב, לצד המד במחשב ומתחתיו בטלפון */
+.kf-visual{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+@media (min-width:641px){ .kf-hero .kf-visual{ flex-direction:row; justify-content:center; gap:30px; } }
+.kf-pic{ margin:0; width:min(210px,58vw); padding:8px; background:#FFFDF8; border:1px solid rgba(217,190,124,.9); border-radius:16px; box-shadow:0 16px 34px rgba(0,0,0,.35); animation:kfRise .9s var(--kf-ease) both .3s; }
+.kf-pic[hidden]{ display:none !important; }
+.kf-pic .kf-photo-img{ display:block; width:100%; height:auto; aspect-ratio:515/845; object-fit:cover; border-radius:10px; opacity:0; transition:opacity .9s ease; }
+.kf-pic .kf-photo-img.in{ opacity:1; }
+.kf-cap{ font-size:13px; color:var(--muted); text-align:center; margin-top:6px; }
+.kf-pic-sm{ width:92px; padding:5px; border-radius:12px; }
+.kf-pic-sm .kf-cap{ font-size:11px; margin-top:4px; }
 
-/* ── כספת מונפשת (SVG): הדלת נפתחת לפי ההתקדמות, ספרי התורה נדלקים ברבעים ── */
-.kf-vault{width:100%;max-width:300px;margin:0 auto;display:block;overflow:visible}
-.kf-vault .kf-door{transform-box:view-box;transform-origin:34px 100px;transition:transform 1.8s cubic-bezier(.2,.7,.2,1)}
-.kf-vault .kf-dial{transform-box:fill-box;transform-origin:center;animation:kfSpin 1.8s cubic-bezier(.2,.7,.2,1) both}
-.kf-vault .kf-s{opacity:.14;transition:opacity 1.2s ease}
-.kf-vault .kf-s.kf-on{opacity:1}
-.kf-vault .kf-glow{transition:opacity 1.8s ease}
-.kf-vault .kf-coin{opacity:0}
-.kf-drop .kf-coin{animation:kfDrop 1.4s ease-in forwards}
-@keyframes kfSpin{from{transform:rotate(-540deg)}to{transform:rotate(0)}}
-@keyframes kfDrop{0%{transform:translateY(-40px);opacity:0}15%{opacity:1}100%{transform:translateY(0);opacity:1}}
+/* ── הטבעת: מד ההתקדמות ─────────────────────────────────────────── */
+.kf-vault-wrap{ max-width:320px; margin:14px auto 0; }
+.kf-ring{ position:relative; width:min(300px,78vw); aspect-ratio:1/1; margin:0 auto; }
+.kf-ring > svg{ width:100%; height:100%; display:block; overflow:visible; }
+.kf-ring-track{ fill:none; stroke:rgba(217,190,124,.18); stroke-width:14; }
+.kf-ring-fill{ fill:none; stroke:url(#kfRingG); stroke-width:14; stroke-linecap:round; transform:rotate(-90deg); transform-origin:100px 100px; transition:stroke-dashoffset 1.8s var(--kf-ease); }
+.kf-ring-in-track{ fill:none; stroke:rgba(246,241,229,.12); stroke-width:1.5; }
+.kf-ring-in{ fill:none; stroke:#FBF6E8; stroke-opacity:.9; stroke-width:2; stroke-linecap:round; transform:rotate(-90deg); transform-origin:100px 100px; transition:stroke-dashoffset 1.8s var(--kf-ease); }
+.kf-ring-spin{ transform-box:view-box; transform-origin:100px 100px; animation:kfOrbit 7s linear infinite; }
+.kf-ring-glint{ fill:#FFF6D6; }
+.kf-ring-glow{ fill:#FFF6D6; opacity:.25; }
+.kf-ring-c{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.kf-ring-pct{ font-family:'Frank',Georgia,serif; font-weight:500; font-size:clamp(40px,11vw,56px); color:#FBF6E8; line-height:1; font-variant-numeric:tabular-nums; }
+.kf-ring-amt{ font-family:'Frank',Georgia,serif; font-size:clamp(20px,5vw,26px); color:var(--gold-lt); margin-top:6px; font-variant-numeric:tabular-nums; }
+.kf-ring-sp{ position:absolute; inset:0; pointer-events:none; }
+.kf-ring-sp i{ position:absolute; width:4px; height:4px; border-radius:50%; background:#F6D27A; opacity:0; animation:kfMote 4.2s ease-in infinite; }
+.kf-ring-sp i:nth-child(1){ left:12%; top:70%; animation-delay:0s; }
+.kf-ring-sp i:nth-child(2){ left:88%; top:60%; animation-delay:.9s; }
+.kf-ring-sp i:nth-child(3){ left:24%; top:14%; animation-delay:1.8s; }
+.kf-ring-sp i:nth-child(4){ left:78%; top:22%; animation-delay:2.6s; }
+.kf-ring-sp i:nth-child(5){ left:50%; top:92%; animation-delay:1.3s; }
+.kf-ring-sp i:nth-child(6){ left:6%; top:44%; animation-delay:3.2s; }
+.kf-left{ text-align:center; color:var(--kf-cream-soft); font-size:17px; margin:12px 0 0; }
+.kf-left bdi{ color:var(--gold-lt); font-family:'Frank',Georgia,serif; font-size:20px; }
 
-.kf-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
-.kf-stat{background:linear-gradient(180deg,#FFFDF8 0%,#FBF6E8 100%);border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center;box-shadow:0 6px 18px rgba(18,35,63,.06)}
-.kf-stat b{display:block;font-family:'Frank',Georgia,serif;font-weight:500;font-size:clamp(22px,4vw,28px);color:var(--navy);line-height:1.2}
-.kf-stat span{font-size:14px;color:var(--muted)}
-.kf-stat.kf-bump{animation:kfBump .7s ease}
-@keyframes kfBump{0%{transform:scale(1)}40%{transform:scale(1.06);border-color:var(--gold)}100%{transform:scale(1)}}
+/* ── מונים, פסים, שלבים ───────────────────────────────────────── */
+.kf-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:18px 0; }
+.kf-stat{ background:linear-gradient(180deg,#FFFDF8 0%,#FBF6E8 100%); border:1px solid var(--line); border-radius:16px; padding:14px 8px; text-align:center; box-shadow:0 6px 18px rgba(18,35,63,.06); }
+.kf-stat b{ display:block; font-family:'Frank',Georgia,serif; font-weight:500; font-size:clamp(20px,4vw,26px); color:var(--navy); line-height:1.2; font-variant-numeric:tabular-nums; }
+.kf-stat span{ font-size:14px; color:var(--muted); }
+.kf-stat.kf-bump{ animation:kfBump .7s ease; }
 
-/* שני פסים מוערמים: מה שסומן מאחורה, מה ששולם מלפנים (מימין, RTL) */
-.kf-bar{position:relative;height:16px;background:#E9E1CF;border-radius:999px;overflow:hidden;margin:6px 0 4px;box-shadow:inset 0 1px 3px rgba(18,35,63,.14)}
-.kf-bar i{position:absolute;top:0;right:0;height:100%;width:0;border-radius:999px;transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
-.kf-bar i:last-child{background:linear-gradient(90deg,#B08D3E,#D9BE7C 55%,#B08D3E);overflow:hidden}
-.kf-bar i:last-child::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);background-size:250% 100%;animation:kfShine 2.8s linear infinite}
-@keyframes kfShine{from{background-position:120% 0}to{background-position:-120% 0}}
-.kf-bar-cap{font-size:15px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.kf-bar{ position:relative; height:16px; background:#E9E1CF; border-radius:999px; overflow:hidden; margin:6px 0 4px; box-shadow:inset 0 1px 3px rgba(18,35,63,.14); }
+.kf-bar i{ position:absolute; top:0; right:0; height:100%; width:0; border-radius:999px; transition:width 1.4s var(--kf-ease); }
+.kf-bar i[data-kf="barPaid"]{ background:linear-gradient(90deg,#B08D3E,#D9BE7C 55%,#B08D3E); overflow:hidden; }
+.kf-bar i[data-kf="barPaid"]::after{ content:""; position:absolute; inset:0; background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%); background-size:250% 100%; animation:kfShine 2.8s linear infinite; }
+@keyframes kfShine{ from{ background-position:120% 0; } to{ background-position:-120% 0; } }
+.kf-bar-cap{ font-size:15px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px; }
+.kf-bar-cap bdi{ font-variant-numeric:tabular-nums; }
 
-.kf-people{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
-.kf-people li{background:#fff;border:1px solid rgba(176,141,62,.3);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px;box-shadow:0 1px 2px rgba(18,35,63,.04)}
-.kf-people li.kf-paid{background:#FFFCF3;border-color:var(--gold)}
-.kf-people li.kf-paid span::before{content:"\2713\00a0";color:var(--gold);font-weight:800}
-.kf-people li.kf-paid::after{content:"שילם";font-size:12px;color:var(--kf-ok);font-weight:700;white-space:nowrap}
-.kf-people li:not(.kf-paid)::after{content:"ממתין";font-size:12px;color:var(--muted);white-space:nowrap}
-.kf-people li.kf-new{animation:kfBump .9s ease}
+.kf-celebrate{ margin:14px 0 0; padding:14px 18px; border-radius:14px; text-align:center; background:linear-gradient(90deg,#D9BE7C,#F2DFA8,#D9BE7C); color:var(--navy); font-family:'Frank',Georgia,serif; font-size:clamp(20px,4vw,24px); box-shadow:0 10px 26px rgba(176,141,62,.35); animation:kfBump 1.2s ease 2; }
+
+.kf-steps{ list-style:none; margin:18px 0 0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.kf-step{ background:#FFFDF8; border:1px solid var(--line); border-radius:16px; padding:16px 14px; box-shadow:var(--shadow); }
+.kf-step .kf-n{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:50%; background:var(--navy); color:var(--gold-lt); font-family:'Frank',Georgia,serif; font-size:18px; }
+.kf-step b{ display:block; font-size:19px; color:var(--navy); margin:8px 0 4px; }
+.kf-step p{ margin:0; font-size:16px; color:var(--muted); }
+
+.kf-people{ list-style:none; margin:18px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
+.kf-people li{ background:#fff; border:1px solid rgba(176,141,62,.3); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:16px; box-shadow:0 1px 2px rgba(18,35,63,.04); animation:kfIn .55s var(--kf-ease) both; animation-delay:calc(var(--i,0) * 70ms); }
+.kf-people li.kf-empty{ grid-column:1/-1; justify-content:center; color:var(--muted); animation:none; }
+.kf-people li.kf-paid{ background:#FFFCF3; border-color:var(--gold); }
+.kf-people li.kf-paid .kf-pname::before{ content:"\2713\00a0"; color:var(--navy); font-weight:800; }
+.kf-people li.kf-new{ animation:kfNew 1.2s ease both; }
+.kf-tag{ font-size:13px; font-weight:700; color:var(--muted); white-space:nowrap; }
+.kf-tag-paid{ color:var(--kf-ok); }
 
 /* ── טפסים ─────────────────────────────────────────────────────── */
-.kf-form{display:grid;gap:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
-.kf-form .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.kf-form label.f{display:grid;gap:6px;font-weight:600;color:var(--navy);font-size:16px}
-.kf-form input[type=text],.kf-form input[type=tel],.kf-form input[type=number],.kf-form input[type=password],.kf-form select{
-  font:inherit;font-size:17px;padding:11px 12px;border:1px solid #CFC5AE;border-radius:10px;background:#FFFDF8;color:var(--ink);width:100%}
-.kf-form .chk{display:flex;gap:10px;align-items:center;font-size:16px}
-.kf-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.kf-choice label{border:1px solid #CFC5AE;border-radius:12px;padding:12px;cursor:pointer;background:#FFFDF8;display:grid;gap:4px}
-.kf-choice input{margin:0 0 4px}
-.kf-choice label:has(input:checked){border-color:var(--gold);background:#FBF6E8;box-shadow:0 0 0 2px rgba(176,141,62,.25)}
-.kf-choice small{color:var(--muted);font-size:14px;font-weight:400}
-.kf-btn{font:inherit;font-weight:800;font-size:17px;padding:13px 22px;border-radius:12px;border:0;background:linear-gradient(180deg,#D9BE7C 0%,#B08D3E 100%);color:var(--navy);cursor:pointer;justify-self:start;box-shadow:0 6px 16px rgba(176,141,62,.35);transition:transform .15s,box-shadow .15s}
-.kf-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(176,141,62,.45)}
-.kf-btn:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
-.kf-btn:disabled{opacity:.55;cursor:default;transform:none}
-.kf-btn.kf-ghost{background:transparent;color:var(--navy);border:1px solid var(--navy);box-shadow:none}
-.kf-msg{font-size:16px;margin:0;min-height:1.4em}
-.kf-msg.err{color:var(--kf-bad)}
-.kf-msg.ok{color:var(--kf-ok)}
+.kf-form{ display:grid; gap:14px; background:#fff; border:1px solid var(--line); border-radius:var(--r); padding:20px; box-shadow:var(--shadow); }
+.kf-field{ display:grid; gap:6px; }
+.kf-field > label, .kf-form label.f{ font-weight:600; color:var(--navy); font-size:16px; }
+.kf-form input[type=text],.kf-form input[type=tel],.kf-form input[type=number]{
+  font:inherit; font-size:17px; padding:11px 12px; min-height:44px; border:1px solid #CFC5AE; border-radius:10px; background:#FFFDF8; color:var(--ink); width:100%; }
+.kf-form input[aria-invalid="true"]{ border-color:var(--kf-bad); }
+.kf-form input:focus-visible,.kf-choice input:focus-visible,.kf-form .chk input:focus-visible{ outline:3px solid var(--gold); outline-offset:1px; }
+.kf-ferr{ font-size:14px; color:var(--kf-bad); margin:0; font-weight:600; }
+.kf-form .chk{ display:flex; gap:10px; align-items:center; font-size:16px; min-height:44px; }
+.kf-form .chk input{ width:20px; height:20px; }
+.kf-fs{ border:0; padding:0; margin:0; min-width:0; }
+.kf-fs legend{ font-weight:600; color:var(--navy); margin-bottom:8px; padding:0; }
+.kf-choice{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.kf-choice label{ border:1px solid #CFC5AE; border-radius:12px; padding:12px; min-height:44px; cursor:pointer; background:#FFFDF8; display:flex; align-items:center; gap:8px; font-size:16px; }
+.kf-choice input{ margin:0; width:20px; height:20px; flex:none; }
+.kf-choice label:has(input:checked){ border-color:var(--gold); background:#FBF6E8; box-shadow:0 0 0 2px rgba(176,141,62,.25); }
+.kf-btn{ font:inherit; font-weight:800; font-size:17px; padding:13px 22px; min-height:44px; border-radius:12px; border:0; background:linear-gradient(180deg,#D9BE7C 0%,#B08D3E 100%); color:var(--navy); cursor:pointer; justify-self:start; display:inline-flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:0 6px 16px rgba(176,141,62,.35); transition:transform .15s,box-shadow .15s; }
+.kf-btn:hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(176,141,62,.45); }
+.kf-btn:active{ transform:scale(.97); }
+.kf-btn:focus-visible{ outline:3px solid var(--navy); outline-offset:2px; }
+.kf-btn:disabled{ opacity:.55; cursor:default; transform:none; }
+.kf-btn.kf-ghost{ background:transparent; color:var(--navy); border:1px solid var(--navy); box-shadow:none; }
+.kf-msg{ font-size:16px; margin:0; min-height:1.4em; }
+.kf-msg.err{ color:var(--kf-bad); }
+.kf-msg.ok{ color:var(--kf-ok); }
 
-.kf-thanks{background:#FBF6E8;border:1px solid var(--gold);border-radius:var(--r);padding:18px;margin-top:14px}
-.kf-thanks code{display:block;direction:ltr;word-break:break-all;background:#fff;border:1px dashed var(--gold);border-radius:8px;padding:8px;margin:8px 0;font-size:14px}
+.kf-thanks{ background:#FBF6E8; border:1px solid var(--gold); border-radius:var(--r); padding:18px; margin-top:14px; }
+.kf-thanks-h{ font-family:'Frank',Georgia,serif; font-size:22px; color:var(--navy); margin:0 0 6px; }
+.kf-thanks p{ margin:0 0 8px; }
+.kf-thanks code{ display:block; direction:ltr; word-break:break-all; background:#fff; border:1px dashed var(--gold); border-radius:8px; padding:8px; margin:8px 0; font-size:14px; }
 
-.kf-note{font-size:15px;color:var(--muted);margin:14px 0 0}
-.kf-pay{display:grid;gap:14px}
-.kf-pay .card{background:#fff;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow)}
-.kf-pay h3{font-size:22px;margin:0 0 6px}
+.kf-note{ font-size:15px; color:var(--muted); margin:14px 0 0; }
+.kf-pay{ display:grid; gap:14px; }
+.kf-pay .card{ background:#fff; border:1px solid var(--line); border-top:3px solid var(--gold); border-radius:var(--r); padding:16px 18px; box-shadow:var(--shadow); }
+.kf-pay h3{ font-size:22px; margin:0 0 6px; }
+.kf-pay p{ margin:0 0 10px; }
 
-/* ── כרטיס בדף הבית: אותה שפה, רקע נייבי עם היכל ───────────────── */
-.kf-home{padding:34px 0 8px}
-.kf-home[hidden]{display:none}
-.kf-card{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:22px;align-items:center;
-  background:linear-gradient(135deg,#1B3053 0%,#12233F 100%);color:#F6F1E5;border:1px solid rgba(217,190,124,.4);border-radius:20px;padding:22px;box-shadow:0 18px 46px rgba(18,35,63,.28)}
-.kf-card > *:not(.kf-art){position:relative;z-index:1}
-.kf-card .kf-art{opacity:.45}
-.kf-card::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,rgba(12,26,49,.55),rgba(12,26,49,.88))}
-.kf-card .kf-k{color:var(--gold-lt);font-weight:800;letter-spacing:.08em;font-size:13px}
-.kf-card h2{color:#FBF6E8;font-size:clamp(24px,4vw,30px);margin:4px 0 8px}
-.kf-card p{margin:0 0 10px;color:var(--kf-cream-soft)}
-.kf-card .kf-nums{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 12px}
-.kf-card .kf-nums b{font-family:'Frank',Georgia,serif;font-weight:500;font-size:24px;color:var(--gold-lt);display:block;line-height:1.2}
-.kf-card .kf-nums span{font-size:13px;color:#CFC6B2}
-.kf-card .kf-bar{background:rgba(255,255,255,.14);box-shadow:none}
-.kf-card .kf-vault{max-width:240px}
-.kf-card .kf-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.kf-card .kf-cta a{display:inline-block;padding:11px 18px;border-radius:12px;font-weight:800;text-decoration:none;font-size:15px;transition:transform .15s}
-.kf-card .kf-cta a:hover{transform:translateY(-1px)}
-.kf-card .kf-cta a:focus-visible{outline:3px solid var(--gold-lt);outline-offset:2px}
-.kf-card .kf-cta .p{background:linear-gradient(180deg,#D9BE7C 0%,#B08D3E 100%);color:var(--navy)}
-.kf-card .kf-cta .s{border:1px solid rgba(246,241,229,.7);color:#F6F1E5}
+/* ── כרטיס בדף הבית: אותה שפה, רקע נייבי ───────────────────────── */
+.kf-home{ padding:34px 0 8px; }
+.kf-card{ position:relative; overflow:hidden; isolation:isolate; display:grid; grid-template-columns:minmax(170px,240px) 1fr; gap:22px; align-items:center;
+  background:linear-gradient(135deg,#1B3053 0%,#12233F 100%); color:#F6F1E5; border:1px solid rgba(217,190,124,.4); border-radius:20px; padding:22px; box-shadow:0 18px 46px rgba(18,35,63,.28); }
+.kf-card > *:not(.kf-bg){ position:relative; z-index:1; }
+.kf-card .kf-visual{ gap:10px; }
+.kf-card .kf-cap{ color:#CFC6B2; }
+.kf-card::after{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:linear-gradient(90deg,rgba(12,26,49,.55),rgba(12,26,49,.9)); }
+.kf-card .kf-k{ color:var(--gold-lt); font-weight:800; letter-spacing:.08em; font-size:13px; }
+.kf-card h2{ font-family:'Frank',Georgia,serif; font-weight:500; color:#FBF6E8; font-size:clamp(24px,4vw,30px); margin:4px 0 6px; }
+.kf-card .kf-sub{ color:var(--gold-lt); font-weight:600; margin:0 0 8px; }
+.kf-card p{ margin:0 0 10px; color:var(--kf-cream-soft); }
+.kf-card .kf-nums{ display:flex; gap:18px; flex-wrap:wrap; margin:8px 0 12px; }
+.kf-card .kf-nums b{ font-family:'Frank',Georgia,serif; font-weight:500; font-size:24px; color:var(--gold-lt); display:block; line-height:1.2; font-variant-numeric:tabular-nums; }
+.kf-card .kf-nums span{ font-size:13px; color:#CFC6B2; }
+.kf-card .kf-bar{ background:rgba(255,255,255,.14); box-shadow:none; }
+.kf-card .kf-ring{ width:min(230px,62vw); }
+.kf-card .kf-cta{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+.kf-card .kf-cta a{ display:inline-flex; align-items:center; min-height:44px; padding:11px 18px; border-radius:12px; font-weight:800; text-decoration:none; font-size:15px; transition:transform .15s; }
+.kf-card .kf-cta a:hover{ transform:translateY(-1px); }
+.kf-card .kf-cta a:focus-visible{ outline:3px solid var(--gold-lt); outline-offset:2px; }
+.kf-card .kf-cta .p{ background:linear-gradient(180deg,#D9BE7C 0%,#B08D3E 100%); color:var(--navy); }
+.kf-card .kf-cta .s{ border:1px solid rgba(246,241,229,.7); color:#F6F1E5; }
+.kf-card .kf-sk{ background:linear-gradient(90deg,rgba(217,190,124,.12),rgba(217,190,124,.4),rgba(217,190,124,.12)); background-size:200% 100%; }
+.kf-home .kf-card.kf-reveal{ transition-duration:.9s; }
 
+/* ── שלד טעינה: מציין מקום במקום 0 ───────────────────────────── */
+.kf-sk{ display:inline-block; width:3.4em; height:.8em; border-radius:6px; vertical-align:middle;
+  background:linear-gradient(90deg,rgba(176,141,62,.14),rgba(217,190,124,.45),rgba(176,141,62,.14)); background-size:200% 100%; animation:kfSk 1.4s linear infinite; }
+@keyframes kfSk{ from{ background-position:120% 0; } to{ background-position:-120% 0; } }
+
+/* הופעה בגלילה: רק כשהסקריפט רץ (kf-js), בלי JS הכול גלוי */
+.kf-js .kf-reveal{ opacity:0; transform:translateY(16px); transition:opacity .7s ease,transform .7s var(--kf-ease); }
+.kf-js .kf-reveal.in{ opacity:1; transform:none; }
+
+/* קונפטי זהוב, קצר */
+.kf-confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:50; }
+.kf-confetti i{ position:absolute; top:-14px; width:8px; height:12px; border-radius:2px; opacity:0; animation:kfFall 2.3s cubic-bezier(.2,.6,.4,1) forwards; }
+
+/* ── תנועה ────────────────────────────────────────────────────── */
+@keyframes kfGlow{ from{ opacity:.55; } to{ opacity:1; } }
+@keyframes kfRise{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+@keyframes kfOrbit{ to{ transform:rotate(360deg); } }
+@keyframes kfMote{ 0%{ transform:translateY(0) scale(.6); opacity:0; } 20%{ opacity:.9; } 100%{ transform:translateY(-70px) scale(1); opacity:0; } }
+@keyframes kfIn{ from{ opacity:0; transform:translateY(8px) scale(.98); } to{ opacity:1; transform:none; } }
+@keyframes kfNew{ 0%{ transform:scale(.96); box-shadow:0 0 0 0 rgba(217,190,124,.9); } 40%{ box-shadow:0 0 0 8px rgba(217,190,124,0); transform:scale(1.02); } 100%{ transform:none; box-shadow:none; } }
+@keyframes kfBump{ 0%{ transform:scale(1); } 40%{ transform:scale(1.06); border-color:var(--gold); } 100%{ transform:scale(1); } }
+@keyframes kfFall{ 0%{ opacity:1; transform:translate3d(0,0,0) rotate(0deg); } 100%{ opacity:0; transform:translate3d(var(--x,0),105vh,0) rotate(540deg); } }
+
+/* ── מותאם מובייל ─────────────────────────────────────────────── */
 @media (max-width:640px){
-  .kf-hero{padding:24px 16px 20px;border-radius:20px}
-  .kf-card{grid-template-columns:1fr;text-align:center;gap:14px;padding:20px 16px}
-  .kf-card .kf-vault{max-width:130px}
-  .kf-card .kf-nums{justify-content:center;gap:14px}
-  .kf-card .kf-bar{margin:6px auto 4px}
-  .kf-card .kf-cta{justify-content:center}
-  .kf-stats{grid-template-columns:repeat(2,1fr)}
-  .kf-form .row2{grid-template-columns:1fr}
-  .kf-choice{grid-template-columns:1fr}
-  .kf-btn{width:100%;justify-self:stretch;text-align:center}
+  .kf-hero{ padding:24px 16px 20px; border-radius:20px; }
+  .kf-card{ grid-template-columns:1fr; text-align:center; gap:14px; padding:20px 16px; }
+  .kf-card .kf-ring{ width:min(190px,60vw); }
+  .kf-card .kf-nums{ justify-content:center; gap:14px; }
+  .kf-card .kf-bar{ margin:6px auto 4px; }
+  .kf-card .kf-cta{ justify-content:center; }
+  .kf-stats{ grid-template-columns:repeat(2,1fr); }
+  .kf-steps{ grid-template-columns:1fr; }
+  .kf-form .row2{ grid-template-columns:1fr; }
+  .kf-choice{ grid-template-columns:1fr; }
+  .kf-btn{ width:100%; justify-self:stretch; }
 }
 
 @media (prefers-reduced-motion:reduce){
-  .kf-vault .kf-door,.kf-vault .kf-s,.kf-vault .kf-glow,.kf-bar i{transition:none}
-  .kf-vault .kf-dial,.kf-art .kf-rays,.kf-art .kf-flame,.kf-art .kf-flame-glow,.kf-art .kf-dust,
-  .kf-bar i:last-child::after,.kf-stat.kf-bump,.kf-people li.kf-new{animation:none}
-  .kf-drop .kf-coin{animation:none;opacity:1}
+  .kf-hero::after,.kf-ring-spin,.kf-ring-sp i,.kf-bar i[data-kf="barPaid"]::after,.kf-stat.kf-bump,.kf-people li,.kf-people li.kf-new,
+  .kf-celebrate,.kf-sk,.kf-hero .kf-rise{ animation:none; }
+  .kf-hero .kf-rise{ opacity:1; }
+  .kf-people li{ opacity:1; }
+  .kf-ring-fill,.kf-ring-in,.kf-bar i,.kf-ind,.kf-tab,.kf-photo-img,.kf-js .kf-reveal{ transition:none; }
+  .kf-js .kf-reveal{ opacity:1; transform:none; }
+  .kf-confetti{ display:none; }
 }

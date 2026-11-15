@@ -6,7 +6,7 @@
   var KEY = 'kf-gabai-code';
   var API = null, ROWS = [], CODE = '';
   var ERR = { locked: 'הכניסה נעולה זמנית (15 דקות) אחרי ניסיונות שגויים',
-              bad_code: 'קוד שגוי', not_found: 'הרשומה לא נמצאה' };
+              bad_code: 'קוד שגוי, נא לנסות שוב', not_found: 'הרשומה לא נמצאה' };
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -48,28 +48,27 @@
     $('gbPledged').textContent = money(pledged);
     $('gbPaid').textContent = money(paid);
     $('gbMissing').textContent = money(Math.max(0, pledged - paid));
-    $('gbCount').textContent = String(ROWS.length);
   }
 
   function draw() {
     summary();
     var tb = $('gbRows');
-    if (!ROWS.length) { tb.innerHTML = '<tr><td colspan="8">אין רשומות עדיין</td></tr>'; return; }
+    if (!ROWS.length) { tb.innerHTML = '<tr><td colspan="7">אין רשומות עדיין</td></tr>'; return; }
     tb.innerHTML = ROWS.map(function (r) {
       var paid = Number(r.paid_amount) || 0;
+      var src = r.source === 'shabbat' ? 'התחייבתי בשבת' : 'מצטרף עכשיו';
       return '<tr data-id="' + r.id + '">' +
-        '<td data-l="שם">' + esc(r.name) + (r.show_name ? '' : ' <small>(מוסתר)</small>') + '</td>' +
+        '<td data-l="שם">' + esc(r.name) + (r.show_name ? '' : ' <small>(מוסתר)</small>') + '<span class="src">' + src + '</span></td>' +
         '<td data-l="טלפון">' + esc(r.phone || '') + '</td>' +
-        '<td data-l="סכום">' + money(r.amount) + '</td>' +
-        '<td data-l="אופן">' + (r.method === 'cash' ? 'מזומן' : 'נדרים') + '</td>' +
-        '<td data-l="מקור">' + (r.source === 'shabbat' ? 'בשבת' : 'חדש') + '</td>' +
+        '<td data-l="התחייבות">' + money(r.amount) + '</td>' +
+        '<td data-l="אופן">' + (r.method === 'cash' ? 'מזומן' : 'נדרים פלוס') + '</td>' +
         '<td data-l="שולם">' +
-          '<input type="number" min="0" max="100000" step="1" value="' + paid + '" class="gb-paid"> ' +
-          (paid > 0 ? '<span class="paid-yes">' + (r.paid_by ? esc(r.paid_by) : '') + '</span>' : '<span class="paid-no">לא</span>') +
+          '<input type="number" min="0" max="100000" step="1" value="' + paid + '" class="gb-paid" aria-label="סכום ששולם">' +
+          (paid > 0 ? '<span class="paid-yes">' + (r.paid_by ? esc(r.paid_by) : 'שולם') + '</span>' : '<span class="paid-no">לא</span>') +
         '</td>' +
-        '<td data-l="הערה"><input type="text" maxlength="300" value="' + esc(r.note || '') + '" class="gb-note"></td>' +
+        '<td data-l="הערה"><input type="text" maxlength="300" value="' + esc(r.note || '') + '" class="gb-note" aria-label="הערה"></td>' +
         '<td data-l="פעולות">' +
-          '<button type="button" class="p" data-a="save">שמירת תשלום</button>' +
+          '<button type="button" class="p" data-a="save">שמירה</button>' +
           '<button type="button" data-a="full">שולם במלואו</button>' +
           '<button type="button" data-a="edit">תיקון</button>' +
           '<button type="button" data-a="del">מחיקה</button>' +
@@ -98,6 +97,7 @@
     f.amount.value = r.amount; f.method.value = r.method; f.source.value = r.source;
     f.show.value = r.show_name ? '1' : '0';
     window.scrollTo(0, 0);
+    f.name.focus();
   }
 
   function paid(id, amount, note) {
@@ -106,7 +106,7 @@
         var e = fail(d); if (e) throw new Error(e);
         msg('נשמר', 'ok');
         return load();
-      });
+      }).catch(function (e) { msg(e.message, 'err'); });
   }
 
   $('gbLoginForm').addEventListener('submit', function (ev) {
@@ -119,7 +119,9 @@
       $('gbCode').value = '';
     }).catch(function (e) {
       CODE = '';
+      $('gbCode').value = '';
       $('gbLoginMsg').textContent = e.message;
+      $('gbCode').focus();
     });
   });
 
@@ -139,7 +141,7 @@
       paid(id, amt, note); return;
     }
     if (a === 'del') {
-      if (!window.confirm('למחוק את ההתחייבות של ' + r.name + '? אי אפשר לשחזר.')) return;
+      if (!window.confirm('למחוק את ההתחייבות של ' + r.name + '?')) return;
       rpc('kasefet_admin_delete', { p_code: CODE, p_id: id }).then(function (d) {
         var e = fail(d); if (e) throw new Error(e);
         msg('נמחק', 'ok'); return load();
@@ -162,6 +164,7 @@
   });
 
   $('gbReset').addEventListener('click', clearForm);
+  $('gbNew').addEventListener('click', function () { clearForm(); window.scrollTo(0, 0); $('gbForm').name.focus(); });
 
   var saved = '';
   try { saved = sessionStorage.getItem(KEY) || ''; } catch (e) { saved = ''; }

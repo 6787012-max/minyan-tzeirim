@@ -4,80 +4,86 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<title>כספת לארון הקודש · גבאים</title>
+<title>עדכון תשלומים · כספת</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co; form-action 'none'; base-uri 'self'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#12233F">
 <link rel="stylesheet" href="css/main.css?v=26">
-<link rel="stylesheet" href="css/kasefet.css?v=1">
+<link rel="stylesheet" href="css/kasefet.css?v=4">
 <style>
   .gb-wrap{max-width:1100px;margin:0 auto;padding:22px 14px 60px}
-  .gb-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+  .gb-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
   .gb-sum div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
-  .gb-sum b{display:block;font-size:20px;color:var(--navy)}
-  .gb-sum span{font-size:13px;color:var(--muted)}
-  .gb-tbl{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
+  .gb-sum b{display:block;font-size:20px;color:var(--navy);font-variant-numeric:tabular-nums}
+  .gb-sum span{font-size:14px;color:var(--muted)}
+  .gb-tbl{width:100%;border-collapse:collapse;background:#fff;font-size:15px}
   .gb-tbl th,.gb-tbl td{border-bottom:1px solid #EEE6D4;padding:7px 6px;text-align:right;vertical-align:middle}
-  .gb-tbl th{background:var(--cream-2);color:var(--navy);font-size:13px}
-  .gb-tbl input[type=number]{width:90px;font:inherit;padding:5px;border:1px solid #CFC5AE;border-radius:8px}
-  .gb-tbl input[type=text]{width:140px;font:inherit;padding:5px;border:1px solid #CFC5AE;border-radius:8px}
-  .gb-tbl button{font:inherit;font-size:13px;padding:5px 9px;border-radius:8px;border:1px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer;margin:2px}
+  .gb-tbl th{background:var(--cream-2);color:var(--navy);font-size:14px}
+  .gb-tbl input[type=number]{width:96px;min-height:44px;font:inherit;padding:5px;border:1px solid #CFC5AE;border-radius:8px}
+  .gb-tbl input[type=text]{width:150px;min-height:44px;font:inherit;padding:5px;border:1px solid #CFC5AE;border-radius:8px}
+  .gb-tbl button{font:inherit;font-size:14px;min-height:44px;padding:5px 10px;border-radius:8px;border:1px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer;margin:2px}
   .gb-tbl button.p{background:var(--navy);color:#fff}
   .gb-tbl .paid-yes{color:var(--kf-ok);font-weight:700}
   .gb-tbl .paid-no{color:var(--muted)}
+  .gb-tbl .src{display:block;font-size:12px;color:var(--muted)}
   .gb-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
-  .gb-form label{display:grid;gap:4px;font-size:14px;font-weight:600;color:var(--navy)}
-  .gb-form input,.gb-form select{font:inherit;font-size:15px;padding:7px;border:1px solid #CFC5AE;border-radius:8px}
+  .gb-form label{display:grid;gap:4px;font-size:15px;font-weight:600;color:var(--navy)}
+  .gb-form input,.gb-form select{font:inherit;font-size:16px;min-height:44px;padding:7px;border:1px solid #CFC5AE;border-radius:8px}
   .gb-form .full{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
-  .gb-btn{font:inherit;font-weight:700;padding:9px 16px;border-radius:10px;border:0;background:var(--navy);color:#fff;cursor:pointer}
+  .gb-btn{font:inherit;font-weight:700;min-height:44px;padding:9px 16px;border-radius:10px;border:0;background:var(--navy);color:#fff;cursor:pointer}
   .gb-btn.g{background:#fff;color:var(--navy);border:1px solid var(--navy)}
   .gb-msg{min-height:1.4em;font-size:15px;margin:8px 0}
   .gb-msg.err{color:var(--kf-bad)} .gb-msg.ok{color:var(--kf-ok)}
+  .gb-login{display:grid;grid-template-columns:1fr auto;gap:10px;max-width:460px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+  .gb-login input{font:inherit;font-size:18px;min-height:44px;padding:7px 10px;border:1px solid #CFC5AE;border-radius:8px;letter-spacing:.15em;text-align:center}
+  .gb-login input:focus-visible,.gb-form input:focus-visible,.gb-form select:focus-visible,.gb-tbl input:focus-visible,.gb-btn:focus-visible,.gb-tbl button:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+  .gb-h2{font-family:'Frank',Georgia,serif;font-weight:500;font-size:22px;color:var(--navy);margin:18px 0 6px}
   @media (max-width:760px){
     .gb-sum{grid-template-columns:repeat(2,1fr)}
     .gb-tbl thead{display:none}
+    .gb-tbl,.gb-tbl tbody{display:block;width:100%}
     .gb-tbl tr{display:block;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:8px;background:#fff}
-    .gb-tbl td{display:flex;justify-content:space-between;border:0;padding:4px 2px;gap:8px}
-    .gb-tbl td::before{content:attr(data-l);color:var(--muted);font-size:12px}
+    .gb-tbl td{display:flex;justify-content:space-between;align-items:center;border:0;padding:4px 2px;gap:8px;flex-wrap:wrap}
+    .gb-tbl td::before{content:attr(data-l);color:var(--muted);font-size:13px}
     .gb-tbl input[type=text]{width:60%}
+    .gb-tbl td[data-l="פעולות"]{justify-content:flex-start}
   }
 </style>
 </head>
-<body>
+<body class="kf-body">
 <header class="top"><div class="wrap">
   <a class="brand" href="index.html"><img src="img/mark@64.png" alt="" width="30" height="30"><b>כספת לארון הקודש<span class="dot"> · </span><span class="pl">גבאים</span></b></a>
 </div></header>
 
 <main class="gb-wrap">
   <div id="gbLogin">
-    <h1 style="font-size:28px">כניסה לגבאים</h1>
+    <h1 class="gb-h2" style="font-size:28px">עדכון תשלומים · כספת</h1>
     <p class="kf-note">הזינו את קוד הגבאי בן 8 הספרות. הקוד נשמר רק בחלון הזה ונמחק בסגירתו.</p>
-    <form class="gb-form" id="gbLoginForm" style="grid-template-columns:1fr auto;max-width:460px">
-      <input type="password" id="gbCode" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" autocomplete="off" required aria-label="קוד גבאי">
+    <form class="gb-login" id="gbLoginForm">
+      <input type="password" id="gbCode" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" autocomplete="off" required aria-label="קוד גבאי" aria-describedby="gbLoginMsg">
       <button class="gb-btn" type="submit">כניסה</button>
     </form>
-    <p class="gb-msg err" id="gbLoginMsg"></p>
+    <p class="gb-msg err" id="gbLoginMsg" role="alert"></p>
   </div>
 
   <div id="gbApp" hidden>
-    <h1 style="font-size:28px">כספת לארון הקודש · תשלומים</h1>
+    <h1 class="gb-h2" style="font-size:28px">עדכון תשלומים · כספת</h1>
     <p class="kf-note" id="gbWho"></p>
     <div class="gb-sum">
-      <div><b id="gbPledged">0</b><span>התחייבויות</span></div>
-      <div><b id="gbPaid">0</b><span>שולם בפועל</span></div>
+      <div><b id="gbPledged">0</b><span>סך ההתחייבויות</span></div>
+      <div><b id="gbPaid">0</b><span>שולם</span></div>
       <div><b id="gbMissing">0</b><span>חסר</span></div>
-      <div><b id="gbCount">0</b><span>רשומות</span></div>
     </div>
     <p class="gb-msg" id="gbMsg" role="status"></p>
 
-    <h2 style="font-size:20px;margin:18px 0 0">הוספה או תיקון</h2>
+    <h2 class="gb-h2">הוספה או תיקון</h2>
     <form class="gb-form" id="gbForm">
       <input type="hidden" name="id">
       <label>שם<input type="text" name="name" required minlength="2" maxlength="80"></label>
       <label>טלפון<input type="text" name="phone" maxlength="20"></label>
-      <label>סכום<input type="number" name="amount" required min="1" max="100000"></label>
+      <label>התחייבות<input type="number" name="amount" required min="1" max="100000"></label>
       <label>אופן<select name="method"><option value="cash">מזומן</option><option value="nedarim">נדרים פלוס</option></select></label>
-      <label>מקור<select name="source"><option value="shabbat">התחייב בשבת</option><option value="new">מצטרף עכשיו</option></select></label>
+      <label>מקור<select name="source"><option value="shabbat">התחייבתי בשבת</option><option value="new">מצטרף עכשיו</option></select></label>
       <label>להציג שם<select name="show"><option value="1">כן</option><option value="0">לא</option></select></label>
       <div class="full">
         <button class="gb-btn" type="submit">שמירה</button>
@@ -85,14 +91,17 @@
       </div>
     </form>
 
-    <h2 style="font-size:20px;margin:18px 0 6px">רשימה</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px">
+      <h2 class="gb-h2" style="margin:0">רשימה</h2>
+      <button class="gb-btn g" type="button" id="gbNew">הוספת התחייבות</button>
+    </div>
     <table class="gb-tbl">
-      <thead><tr><th>שם</th><th>טלפון</th><th>סכום</th><th>אופן</th><th>מקור</th><th>שולם</th><th>הערה</th><th>פעולות</th></tr></thead>
+      <thead><tr><th>שם</th><th>טלפון</th><th>התחייבות</th><th>אופן</th><th>שולם</th><th>הערה</th><th>פעולות</th></tr></thead>
       <tbody id="gbRows"></tbody>
     </table>
   </div>
 </main>
 
-<script src="js/kasefet-gabai.js?v=1"></script>
+<script src="js/kasefet-gabai.js?v=2"></script>
 </body>
 </html>

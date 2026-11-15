@@ -1,14 +1,16 @@
 /* kasefet.js — כספת לארון הקודש. שני מצבים לפי מה שקיים בדף:
    #kfHome  = כרטיס קומפקטי בדף הבית (נשלט מ-config.kasefet.show).
-   #kfPage  = דף המלא kasefet.html (לשוניות: מצב, הצטרפות, תשלום, עדכון אישי).
+   #kfPage  = הדף המלא kasefet.html (לשוניות: מצב, הצטרפות, תשלום, עדכון אישי).
    כל הנתונים מגיעים מ-RPC ציבורי בלבד (kasefet_public / kasefet_pledge / kasefet_get / kasefet_update).
    אין כאן טלפונים, טוקנים או סכומים אישיים של אחרים. */
 (function () {
   'use strict';
 
   var $ = function (id) { return document.getElementById(id); };
-  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var C1 = 2 * Math.PI * 86, C2 = 2 * Math.PI * 70; /* היקפי הטבעות ב-viewBox 200 */
   var API = null, CFG = null, TIMER = null, LAST = null;
+  var TOKEN_KEY = 'kf-token';
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -16,7 +18,9 @@
     });
   }
   function shekel(n) { return '₪' + Math.round(Number(n) || 0).toLocaleString('he-IL'); }
-  function pct(part, whole) { return whole > 0 ? Math.min(100, Math.round(part / whole * 100)) : 0; }
+  function intFmt(n) { return String(Math.round(Number(n) || 0)); }
+  function pctFmt(n) { return Math.round(Number(n) || 0) + '%'; }
+  function fld(f, name) { return f.querySelector('[name="' + name + '"]'); }
 
   function loadApi() {
     if (API) return Promise.resolve(API);
@@ -38,256 +42,16 @@
       }).then(function (r) {
         return r.text().then(function (t) {
           var data = null; try { data = t ? JSON.parse(t) : null; } catch (e) { data = t; }
-          if (!r.ok) {
-            var msg = (data && data.message) || 'אירעה שגיאה, נסו שוב';
-            throw new Error(msg);
-          }
+          if (!r.ok) throw new Error((data && data.message) || 'שגיאה בשרת');
           return data;
         });
       });
     });
   }
 
-  /* איור היכל (ארון קודש) לרקע הדף והכרטיס: קשת, עמודים, פרוכת עם רקמה, כתר, לוחות הברית,
-     נר תמיד שמהבהב ואור זהוב. חפצים ואדריכלות בלבד, בלי דמויות אדם. */
-  function artSVG() {
-    var dust = [[60,70],[118,150],[205,52],[262,206],[336,118],[424,64],[486,186],[88,300],
-                [512,326],[160,382],[300,28],[444,292],[380,36],[226,340],[540,126],[30,200]];
-    var dustSVG = dust.map(function (p, i) {
-      return '<circle class="kf-dust" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (1 + (i % 3) * 0.6) +
-             '" style="animation-delay:' + (i * 0.45) + 's"/>';
-    }).join('');
-    var folds = [186, 222, 258, 342, 378, 414].map(function (x) {
-      return '<path d="M' + x + ' 150 V420" stroke="#06101F" stroke-opacity=".55" stroke-width="2"/>' +
-             '<path d="M' + (x + 4) + ' 150 V420" stroke="#3A62A0" stroke-opacity=".35" stroke-width="1.5"/>';
-    }).join('');
-    var tablets = '';
-    [[222, 292, 257], [308, 378, 343]].forEach(function (t) {
-      tablets += '<path d="M' + t[0] + ' 300 V205 A35 35 0 0 1 ' + t[1] + ' 205 V300 Z" fill="#EBDCB6" stroke="#8A6D2A" stroke-width="3"/>';
-      [232, 250, 268, 286].forEach(function (y) {
-        tablets += '<path d="M' + (t[2] - 16) + ' ' + y + ' H' + (t[2] + 16) + '" stroke="#8A6D2A" stroke-width="2.5" stroke-opacity=".6"/>';
-      });
-    });
-    function lamp(x) {
-      return '<path d="M' + x + ' 96 V146" stroke="#B08D3E" stroke-width="2"/>' +
-             '<circle class="kf-flame-glow" cx="' + x + '" cy="158" r="24" fill="#F6D27A" opacity=".5"/>' +
-             '<path d="M' + (x - 9) + ' 146 H' + (x + 9) + ' L' + (x + 6) + ' 166 Q' + x + ' 172 ' + (x - 6) + ' 166 Z" fill="url(#kfGoldG)"/>' +
-             '<ellipse class="kf-flame" cx="' + x + '" cy="156" rx="4.5" ry="8" fill="#FFF1C0"/>';
-    }
-    return '<svg viewBox="0 0 600 440" preserveAspectRatio="xMidYMid slice" focusable="false" aria-hidden="true">' +
-      '<defs>' +
-        '<radialGradient id="kfGlowG" cx="50%" cy="34%" r="58%"><stop offset="0" stop-color="#F6D27A" stop-opacity=".5"/><stop offset="1" stop-color="#F6D27A" stop-opacity="0"/></radialGradient>' +
-        '<linearGradient id="kfGoldG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2DFA8"/><stop offset=".5" stop-color="#B08D3E"/><stop offset="1" stop-color="#7A5F22"/></linearGradient>' +
-        '<linearGradient id="kfCurtainG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0B2452"/><stop offset=".5" stop-color="#1E4A8C"/><stop offset="1" stop-color="#0B2452"/></linearGradient>' +
-        '<linearGradient id="kfArchG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050C18"/><stop offset="1" stop-color="#0E1D38"/></linearGradient>' +
-        '<pattern id="kfEmb" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M13 3 L23 13 L13 23 L3 13 Z" fill="none" stroke="#D9BE7C" stroke-width="1" stroke-opacity=".5"/><circle cx="13" cy="13" r="1.6" fill="#D9BE7C" fill-opacity=".7"/></pattern>' +
-      '</defs>' +
-      '<ellipse cx="300" cy="200" rx="330" ry="260" fill="url(#kfGlowG)"/>' +
-      '<g class="kf-rays" fill="#F2DFA8">' +
-        '<path d="M300 40 L118 420 L206 420 Z" opacity=".10"/>' +
-        '<path d="M300 40 L394 420 L482 420 Z" opacity=".10"/>' +
-        '<path d="M300 40 L30 330 L30 262 Z" opacity=".06"/>' +
-        '<path d="M300 40 L570 330 L570 262 Z" opacity=".06"/>' +
-      '</g>' +
-      dustSVG +
-      '<path d="M112 420 V200 Q112 58 300 58 Q488 58 488 200 V420 Z" fill="url(#kfArchG)" stroke="url(#kfGoldG)" stroke-width="6"/>' +
-      '<path d="M128 420 V204 Q128 74 300 74 Q472 74 472 204 V420" fill="none" stroke="#B08D3E" stroke-opacity=".45" stroke-width="2"/>' +
-      '<rect x="84" y="190" width="28" height="230" fill="url(#kfGoldG)" opacity=".85"/>' +
-      '<rect x="488" y="190" width="28" height="230" fill="url(#kfGoldG)" opacity=".85"/>' +
-      '<rect x="78" y="180" width="40" height="12" rx="2" fill="url(#kfGoldG)"/>' +
-      '<rect x="482" y="180" width="40" height="12" rx="2" fill="url(#kfGoldG)"/>' +
-      '<rect x="78" y="410" width="40" height="10" rx="2" fill="url(#kfGoldG)"/>' +
-      '<rect x="482" y="410" width="40" height="10" rx="2" fill="url(#kfGoldG)"/>' +
-      '<path d="M150 420 V190 Q150 104 300 104 Q450 104 450 190 V420 Z" fill="url(#kfCurtainG)"/>' +
-      '<path d="M150 420 V190 Q150 104 300 104 Q450 104 450 190 V420 Z" fill="url(#kfEmb)" opacity=".9"/>' +
-      folds +
-      '<path d="M150 420 V190 Q150 104 300 104 Q450 104 450 190 V420" fill="none" stroke="url(#kfGoldG)" stroke-width="5"/>' +
-      '<path d="M166 420 V196 Q166 122 300 122 Q434 122 434 196 V420" fill="none" stroke="#D9BE7C" stroke-opacity=".5" stroke-width="1.5"/>' +
-      '<path d="M262 98 V70 L282 84 L300 56 L318 84 L338 70 V98 Z" fill="url(#kfGoldG)" stroke="#7A5F22" stroke-width="1.5"/>' +
-      '<circle cx="262" cy="70" r="4" fill="#F2DFA8"/><circle cx="300" cy="56" r="4.5" fill="#F2DFA8"/><circle cx="338" cy="70" r="4" fill="#F2DFA8"/>' +
-      tablets +
-      lamp(172) + lamp(428) +
-      '<rect x="40" y="420" width="520" height="12" rx="3" fill="#0A1424" stroke="url(#kfGoldG)" stroke-width="2"/>' +
-      '<rect x="66" y="432" width="468" height="6" rx="2" fill="#08101E"/>' +
-      '</svg>';
-  }
-
-  /* כספת SVG: היכל סגור שנפתח לפי היחס. ארבעה ספרי תורה נדלקים בכל רבע מהיעד, ומטבעות נופלים. בלי דמויות. */
-  function vaultSVG() {
-    var colors = ['#7A1F2B', '#1F3A6B', '#7A1F2B', '#1F3A6B'];
-    var xs = [60, 83, 117, 140];
-    var scrolls = xs.map(function (x, i) {
-      return '<g class="kf-s" data-n="' + (i + 1) + '">' +
-        '<rect x="' + (x - 7) + '" y="66" width="14" height="78" rx="3" fill="' + colors[i] + '"/>' +
-        '<rect x="' + (x - 7) + '" y="100" width="14" height="4" fill="#D9BE7C"/>' +
-        '<rect x="' + (x - 9) + '" y="60" width="18" height="6" rx="3" fill="#D9BE7C"/>' +
-        '<rect x="' + (x - 9) + '" y="144" width="18" height="6" rx="3" fill="#D9BE7C"/>' +
-        '<path d="M' + (x - 5) + ' 56 L' + (x - 5) + ' 48 L' + (x - 2) + ' 52 L' + x + ' 45 L' + (x + 2) + ' 52 L' + (x + 5) + ' 48 L' + (x + 5) + ' 56 Z" fill="#F2DFA8"/>' +
-        '</g>';
-    }).join('');
-    var ticks = '';
-    for (var k = 0; k < 12; k++) {
-      var a = k * Math.PI / 6;
-      ticks += '<line x1="' + (96 + 13 * Math.cos(a)).toFixed(1) + '" y1="' + (100 + 13 * Math.sin(a)).toFixed(1) +
-               '" x2="' + (96 + 16 * Math.cos(a)).toFixed(1) + '" y2="' + (100 + 16 * Math.sin(a)).toFixed(1) +
-               '" stroke="#D9BE7C" stroke-width="1.5"/>';
-    }
-    var corners = [[24, 28], [168, 28], [24, 160], [168, 160]].map(function (p) {
-      return '<rect x="' + p[0] + '" y="' + p[1] + '" width="8" height="8" rx="2" fill="#D9BE7C"/>';
-    }).join('');
-    var rivets = [[44, 50], [156, 50], [44, 150], [156, 150]].map(function (p) {
-      return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.5" fill="#D9BE7C"/>';
-    }).join('');
-    return '<svg class="kf-vault" viewBox="0 0 200 200" role="img" aria-label="כספת לארון הקודש, נפתחת לפי ההתקדמות">' +
-      '<defs>' +
-        '<linearGradient id="kfSteelG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E4D7E"/><stop offset=".55" stop-color="#16294A"/><stop offset="1" stop-color="#0D1A30"/></linearGradient>' +
-        '<linearGradient id="kfDoorG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#26426F"/><stop offset="1" stop-color="#132643"/></linearGradient>' +
-        '<linearGradient id="kfVGoldG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2DFA8"/><stop offset=".5" stop-color="#B08D3E"/><stop offset="1" stop-color="#7A5F22"/></linearGradient>' +
-        '<radialGradient id="kfInG" cx="50%" cy="60%" r="70%"><stop offset="0" stop-color="#F6D27A" stop-opacity=".95"/><stop offset=".6" stop-color="#B08D3E" stop-opacity=".35"/><stop offset="1" stop-color="#B08D3E" stop-opacity="0"/></radialGradient>' +
-      '</defs>' +
-      '<rect x="18" y="22" width="164" height="160" rx="14" fill="url(#kfSteelG)" stroke="url(#kfVGoldG)" stroke-width="5"/>' +
-      '<rect x="26" y="30" width="148" height="144" rx="10" fill="none" stroke="#B08D3E" stroke-opacity=".35" stroke-width="1.5"/>' +
-      corners +
-      '<rect x="12" y="56" width="10" height="18" rx="3" fill="#7A5F22"/>' +
-      '<rect x="12" y="118" width="10" height="18" rx="3" fill="#7A5F22"/>' +
-      '<rect x="34" y="40" width="132" height="124" rx="8" fill="#050B16"/>' +
-      scrolls +
-      '<rect class="kf-glow" x="34" y="40" width="132" height="124" rx="8" fill="url(#kfInG)" opacity="0"/>' +
-      '<g class="kf-door">' +
-        '<rect x="34" y="40" width="132" height="124" rx="8" fill="url(#kfDoorG)" stroke="url(#kfVGoldG)" stroke-width="3"/>' +
-        '<rect x="42" y="48" width="116" height="108" rx="5" fill="none" stroke="#B08D3E" stroke-opacity=".45" stroke-width="1.5"/>' +
-        '<g class="kf-dial"><circle cx="96" cy="100" r="18" fill="#0C1828" stroke="url(#kfVGoldG)" stroke-width="3"/>' + ticks +
-          '<circle cx="96" cy="100" r="3" fill="#F2DFA8"/></g>' +
-        '<circle cx="146" cy="100" r="13" fill="none" stroke="url(#kfVGoldG)" stroke-width="4"/>' +
-        '<path d="M146 87 V113 M133 100 H159 M136 90 L156 110 M156 90 L136 110" stroke="#D9BE7C" stroke-width="2.5"/>' +
-        '<circle cx="146" cy="100" r="3.5" fill="#F2DFA8"/>' +
-        rivets +
-      '</g>' +
-      '<circle class="kf-coin" cx="80" cy="176" r="7" fill="#EBDCB6" stroke="#8A6D2A" style="animation-delay:.1s"/>' +
-      '<circle class="kf-coin" cx="100" cy="172" r="7" fill="#EBDCB6" stroke="#8A6D2A" style="animation-delay:.35s"/>' +
-      '<circle class="kf-coin" cx="120" cy="176" r="7" fill="#EBDCB6" stroke="#8A6D2A" style="animation-delay:.6s"/>' +
-      '<rect x="30" y="184" width="140" height="8" rx="4" fill="#B08D3E" opacity=".6"/>' +
-      '</svg>';
-  }
-
-  function setVault(el, paid, goal, animate) {
-    if (!el) return;
-    var door = el.querySelector('.kf-door');
-    if (!door) { el.innerHTML = vaultSVG(); door = el.querySelector('.kf-door'); }
-    var ratio = Math.max(0, Math.min(1, goal ? paid / goal : 0));
-    /* הדלת נפתחת מהציר שלה (שמאל) לפי היחס: סגורה ב-0, פתוחה לגמרי ב-100 */
-    door.style.transform = 'scaleX(' + (1 - 0.9 * ratio).toFixed(3) + ')';
-    var glow = el.querySelector('.kf-glow');
-    if (glow) glow.style.opacity = ratio.toFixed(3);
-    /* כל רבע מהיעד מדליק ספר תורה נוסף */
-    var lit = Math.min(4, Math.floor(ratio * 4 + 1e-9));
-    el.querySelectorAll('.kf-s').forEach(function (g) {
-      g.classList.toggle('kf-on', Number(g.getAttribute('data-n')) <= lit);
-    });
-    if (animate && !REDUCED) {
-      el.classList.remove('kf-drop'); void el.offsetWidth; el.classList.add('kf-drop');
-    }
-  }
-
-  function bump(n) {
-    if (!n || REDUCED) return;
-    n.classList.remove('kf-bump'); void n.offsetWidth; n.classList.add('kf-bump');
-  }
-
-  /* ── מצב המגבית ──────────────────────────────────────────────── */
-  function render(d, root) {
-    var goal = Number(d.goal) || 10000, pledged = Number(d.pledged) || 0, paid = Number(d.paid) || 0;
-    var partners = Number(d.partners) || 0;
-    var prev = LAST; LAST = d;
-    var grew = prev && partners > (Number(prev.partners) || 0);
-
-    /* הכספת והפס הראשי = שולם בפועל. הפס השני = מה שסומן (התחייבות שנרשמה). */
-    var fillPl = root.querySelector('[data-kf="barPledged"]');
-    var fillPd = root.querySelector('[data-kf="barPaid"]');
-    if (fillPl) fillPl.style.width = pct(pledged, goal) + '%';
-    if (fillPd) fillPd.style.width = pct(paid, goal) + '%';
-
-    setTxt(root, 'paid', shekel(paid));
-    setTxt(root, 'pledged', shekel(pledged));
-    setTxt(root, 'partners', String(partners));
-    setTxt(root, 'leftPay', shekel(Math.max(0, goal - paid)));
-    setTxt(root, 'leftMark', shekel(Math.max(0, goal - pledged)));
-    setTxt(root, 'pct', pct(paid, goal) + '%');
-    setTxt(root, 'goal', shekel(goal));
-
-    var vault = root.querySelector('[data-kf="vault"]');
-    setVault(vault, paid, goal, grew);
-
-    var list = root.querySelector('[data-kf="people"]');
-    if (list) {
-      var people = d.people || [];
-      if (!people.length) {
-        list.innerHTML = '<li class="kf-empty" style="grid-column:1/-1;justify-content:center;color:var(--muted)">היו הראשונים לסמן את עצמכם.</li>';
-      } else {
-        list.innerHTML = people.map(function (p, i) {
-          var isNew = grew && i === people.length - 1;
-          return '<li class="' + (p.paid ? 'kf-paid' : '') + (isNew ? ' kf-new' : '') + '"><span>' + esc(p.name) + '</span></li>';
-        }).join('');
-      }
-    }
-    if (grew) {
-      ['partners', 'pledged', 'leftPay', 'paid'].forEach(function (k) {
-        var n = root.querySelector('[data-kf="' + k + '"]');
-        if (n && n.parentNode) bump(n.parentNode);
-      });
-    }
-  }
-
-  function setTxt(root, key, val) {
-    var n = root.querySelector('[data-kf="' + key + '"]');
-    if (n) n.textContent = val;
-  }
-
-  function loadStatus(root) {
-    return rpc('kasefet_public').then(function (d) { render(d, root); return d; })
-      .catch(function () {
-        var note = root.querySelector('[data-kf="err"]');
-        if (note) { note.textContent = 'לא הצלחנו לטעון את המצב כרגע. ננסה שוב בעוד רגע.'; note.hidden = false; }
-      });
-  }
-
-  /* ── דף הבית ─────────────────────────────────────────────────── */
-  function initHome() {
-    var home = $('kfHome');
-    loadCfg().then(function (c) {
-      var k = c.kasefet || {};
-      if (k.show === false) return;
-      home.hidden = false;
-      var vault = home.querySelector('[data-kf="vault"]');
-      if (vault) vault.innerHTML = vaultSVG();
-      loadStatus(home);
-      TIMER = setInterval(function () { loadStatus(home); }, 20000);
-    }).catch(function () { /* לא מציגים כלום אם הקונפיגורציה לא נטענה */ });
-  }
-
-  /* ── דף מלא ──────────────────────────────────────────────────── */
-  var TOKEN_KEY = 'kf-token';
-
   function readTok() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
   function saveTok(t) { try { localStorage.setItem(TOKEN_KEY, t); } catch (e) { /* פרטי גלישה */ } }
-
-  function selectTab(id) {
-    document.querySelectorAll('.kf-tab').forEach(function (b) {
-      b.setAttribute('aria-selected', b.getAttribute('data-tab') === id ? 'true' : 'false');
-    });
-    document.querySelectorAll('.kf-panel').forEach(function (p) {
-      p.hidden = p.id !== 'panel-' + id;
-    });
-    if (history.replaceState) history.replaceState(null, '', location.pathname + (id === 'edit' ? location.search : '') + '#' + id);
-  }
-
-  function formValues(f) {
-    return {
-      name: f.name.value, phone: f.phone.value, amount: parseInt(f.amount.value, 10),
-      method: f.querySelector('input[name=method]:checked').value,
-      show: f.querySelector('input[name=show]').checked
-    };
-  }
+  function forgetTok() { try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* פרטי גלישה */ } }
 
   function nedarimUrl(amount) {
     var base = 'https://www.matara.pro/nedarimplus/online/?mosad=' + encodeURIComponent(CFG.nedarim.mosad);
@@ -296,95 +60,374 @@
     return base;
   }
 
+  /* ── טבעת ההתקדמות (SVG בלבד, בלי איורים) ───────────────────────── */
+  function ringHTML() {
+    return '<div class="kf-ring">' +
+      '<svg viewBox="0 0 200 200" focusable="false" aria-hidden="true">' +
+        '<defs><linearGradient id="kfRingG" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0" stop-color="#F2DFA8"/><stop offset=".5" stop-color="#B08D3E"/><stop offset="1" stop-color="#7A5F22"/>' +
+        '</linearGradient></defs>' +
+        '<circle class="kf-ring-track" cx="100" cy="100" r="86"/>' +
+        '<circle class="kf-ring-fill" data-kf="ringFill" cx="100" cy="100" r="86" stroke="url(#kfRingG)" ' +
+          'stroke-dasharray="' + C1.toFixed(2) + '" stroke-dashoffset="' + C1.toFixed(2) + '"/>' +
+        '<circle class="kf-ring-in-track" cx="100" cy="100" r="70"/>' +
+        '<circle class="kf-ring-in" data-kf="ringIn" cx="100" cy="100" r="70" ' +
+          'stroke-dasharray="' + C2.toFixed(2) + '" stroke-dashoffset="' + C2.toFixed(2) + '"/>' +
+        '<g class="kf-ring-spin"><circle class="kf-ring-glow" cx="100" cy="14" r="9"/><circle class="kf-ring-glint" cx="100" cy="14" r="4"/></g>' +
+      '</svg>' +
+      '<div class="kf-ring-c">' +
+        '<b class="kf-ring-pct" data-kf="pct"><i class="kf-sk"></i></b>' +
+        '<span class="kf-ring-amt"><bdi data-kf="ringAmt"><i class="kf-sk"></i></bdi></span>' +
+      '</div>' +
+      '<div class="kf-ring-sp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>' +
+    '</div>';
+  }
+
+  /* ── מספרים שרצים למעלה ────────────────────────────────────────── */
+  function tween(root, key, to, fmt) {
+    var el = root.querySelector('[data-kf="' + key + '"]');
+    if (!el) return;
+    var from = parseFloat(el.getAttribute('data-v'));
+    if (isNaN(from)) from = 0;
+    el.setAttribute('data-v', String(to));
+    var id = (el._tw = (el._tw || 0) + 1);
+    if (REDUCED || from === to) { el.textContent = fmt(to); return; }
+    var t0 = 0;
+    function step(ts) {
+      if (el._tw !== id) return;
+      if (!t0) t0 = ts;
+      var k = Math.min(1, (ts - t0) / 900), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function bump(n) {
+    if (!n || REDUCED) return;
+    n.classList.remove('kf-bump'); void n.offsetWidth; n.classList.add('kf-bump');
+  }
+
+  /* קונפטי זהוב קצר. בלי תנועה מופחתת לא מוצג */
+  function confetti() {
+    if (REDUCED) return;
+    var box = document.createElement('div');
+    box.className = 'kf-confetti'; box.setAttribute('aria-hidden', 'true');
+    var cols = ['#F2DFA8', '#D9BE7C', '#B08D3E', '#FBF6E8', '#12233F'];
+    for (var i = 0; i < 36; i++) {
+      var s = document.createElement('i');
+      s.style.left = (Math.random() * 100).toFixed(1) + '%';
+      s.style.background = cols[i % cols.length];
+      s.style.animationDelay = (Math.random() * 0.35).toFixed(2) + 's';
+      s.style.setProperty('--x', ((Math.random() - 0.5) * 160).toFixed(0) + 'px');
+      box.appendChild(s);
+    }
+    document.body.appendChild(box);
+    setTimeout(function () { if (box.parentNode) box.parentNode.removeChild(box); }, 2600);
+  }
+
+  /* תמונה אמיתית: רק אם config.kasefet.photo מוגדר (נתיב יחסי תחת img/) */
+  function mountPhotos(c) {
+    var k = (c && c.kasefet) || {};
+    var src = typeof k.photo === 'string' ? k.photo.trim() : '';
+    if (!/^img\/[A-Za-z0-9_\-\/.]+\.(jpe?g|png|webp)$/i.test(src)) return;
+    document.querySelectorAll('[data-kf="photo"]').forEach(function (box) {
+      var img = document.createElement('img');
+      img.className = 'kf-photo-img'; img.alt = 'כספת לספרי התורה'; img.loading = 'lazy'; img.decoding = 'async';
+      img.width = 515; img.height = 845;
+      img.onload = function () { img.classList.add('in'); };
+      img.src = src;
+      box.appendChild(img);
+      if (k.photoCredit) {
+        var cap = document.createElement('figcaption');
+        cap.className = 'kf-cap';
+        cap.textContent = String(k.photoCredit);
+        box.appendChild(cap);
+      }
+      box.hidden = false;
+    });
+  }
+
+  /* ── מצב המגבית ──────────────────────────────────────────────── */
+  function render(d, root) {
+    var goal = Number(d.goal) || 10000, pledged = Number(d.pledged) || 0, paid = Number(d.paid) || 0;
+    var partners = Number(d.partners) || 0;
+    var prev = LAST; LAST = d;
+    var grew = !!prev && partners > (Number(prev.partners) || 0);
+    var rPaid = Math.max(0, Math.min(1, paid / goal)), rPl = Math.max(0, Math.min(1, pledged / goal));
+
+    /* הפס הראשי והטבעת = שולם בפועל. הפס השני והטבעת הפנימית = מה שסומן */
+    var fillPl = root.querySelector('[data-kf="barPledged"]'), fillPd = root.querySelector('[data-kf="barPaid"]');
+    if (fillPl) fillPl.style.width = (rPl * 100).toFixed(2) + '%';
+    if (fillPd) fillPd.style.width = (rPaid * 100).toFixed(2) + '%';
+    var rf = root.querySelector('[data-kf="ringFill"]'), ri = root.querySelector('[data-kf="ringIn"]');
+    if (rf) rf.style.strokeDashoffset = (C1 * (1 - rPaid)).toFixed(2);
+    if (ri) ri.style.strokeDashoffset = (C2 * (1 - rPl)).toFixed(2);
+
+    tween(root, 'paid', paid, shekel);
+    tween(root, 'pledged', pledged, shekel);
+    tween(root, 'partners', partners, intFmt);
+    tween(root, 'leftPay', Math.max(0, goal - paid), shekel);
+    tween(root, 'leftMark', Math.max(0, goal - pledged), shekel);
+    tween(root, 'ringAmt', paid, shekel);
+    tween(root, 'pct', rPaid * 100, pctFmt);
+    var gl = root.querySelector('[data-kf="goal"]');
+    if (gl) gl.textContent = shekel(goal);
+
+    var sr = root.querySelector('[data-kf="sr"]');
+    if (sr) sr.textContent = 'שולם ' + shekel(paid) + ' מתוך ' + shekel(goal) + '. סומנו ' + shekel(pledged) + ', ' + partners + ' שותפים.';
+
+    /* 100%: הודעה מיוחדת, וקונפטי רק במעבר מ"לא שולם" ל"שולם במלואו" */
+    var done = goal > 0 && paid >= goal;
+    var cel = root.querySelector('[data-kf="celebrate"]');
+    if (cel) cel.hidden = !done;
+    if (done && prev && !(Number(prev.paid) >= (Number(prev.goal) || goal))) confetti();
+
+    /* הרשימה נבנית מחדש רק כשהתוכן השתנה, כדי שכל רענון לא יפעיל את האנימציה שוב */
+    var list = root.querySelector('[data-kf="people"]');
+    if (list) {
+      var people = d.people || [];
+      var sig = people.map(function (p) { return (p.name || '') + (p.paid ? '1' : '0'); }).join('|');
+      if (list.getAttribute('data-sig') !== sig) {
+        list.setAttribute('data-sig', sig);
+        list.innerHTML = people.length ? people.map(function (p, i) {
+          var isNew = grew && i === people.length - 1;
+          return '<li class="' + (p.paid ? 'kf-paid' : '') + (isNew ? ' kf-new' : '') + '" style="--i:' + i + '">' +
+            '<span class="kf-pname">' + esc(p.name || 'שותף בעילום שם') + '</span>' +
+            (p.paid ? '<span class="kf-tag kf-tag-paid">שילם</span>' : '<span class="kf-tag">ממתין</span>') +
+          '</li>';
+        }).join('') : '<li class="kf-empty">היו הראשונים לסמן את עצמכם.</li>';
+      }
+    }
+
+    if (grew) {
+      ['partners', 'pledged', 'leftPay', 'paid'].forEach(function (k) {
+        var n = root.querySelector('[data-kf="' + k + '"]');
+        if (n) bump(n.closest('.kf-stat, .kf-nums > div'));
+      });
+    }
+  }
+
+  function loadStatus(root) {
+    return rpc('kasefet_public').then(function (d) {
+      var note = root.querySelector('[data-kf="err"]');
+      if (note) note.hidden = true;
+      render(d, root);
+      return d;
+    }).catch(function () {
+      /* בכשל משאירים את הערך האחרון, לא מאפסים */
+      var note = root.querySelector('[data-kf="err"]');
+      if (note) { note.textContent = 'לא הצלחנו לטעון את המצב כרגע. ננסה שוב בעוד רגע.'; note.hidden = false; }
+    });
+  }
+
+  /* ── הופעה בגלילה ────────────────────────────────────────────── */
+  function initReveal() {
+    var els = document.querySelectorAll('.kf-reveal');
+    if (!els.length) return;
+    if (REDUCED || !('IntersectionObserver' in window)) {
+      els.forEach(function (e) { e.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (ents) {
+      ents.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12 });
+    els.forEach(function (e) { io.observe(e); });
+  }
+
+  /* ── דף הבית ─────────────────────────────────────────────────── */
+  function initHome() {
+    var home = $('kfHome');
+    loadStatus(home);
+    TIMER = setInterval(function () { loadStatus(home); }, 20000);
+    loadCfg().then(function (c) {
+      mountPhotos(c);
+      if (((c && c.kasefet) || {}).show === false) return;
+      home.hidden = false;
+    }).catch(function () { /* לא מציגים כלום אם הקונפיגורציה לא נטענה */ });
+  }
+
+  /* ── שדות וטפסים ─────────────────────────────────────────────── */
+  function fieldErr(input, text) {
+    var box = input.closest('.kf-field');
+    var p = box && box.querySelector('.kf-ferr');
+    if (p) { p.textContent = text; p.hidden = false; }
+    input.setAttribute('aria-invalid', 'true');
+  }
+  function clearErrs(f) {
+    f.querySelectorAll('.kf-ferr').forEach(function (p) { p.hidden = true; p.textContent = ''; });
+    f.querySelectorAll('[aria-invalid]').forEach(function (i) { i.removeAttribute('aria-invalid'); });
+  }
+  function wireErrClear(f) {
+    f.addEventListener('input', function (ev) {
+      var t = ev.target, box = t.closest && t.closest('.kf-field');
+      if (!box) return;
+      var p = box.querySelector('.kf-ferr');
+      if (p) p.hidden = true;
+      t.removeAttribute('aria-invalid');
+    });
+  }
+  function validate(f) {
+    clearErrs(f);
+    var bad = [];
+    var nameEl = fld(f, 'name'), amtEl = fld(f, 'amount');
+    if (nameEl.value.trim().length < 2) bad.push([nameEl, 'נא למלא שם מלא']);
+    var a = amtEl.value.trim(), n = Number(a);
+    if (a === '') bad.push([amtEl, 'נא למלא סכום']);
+    else if (isNaN(n) || n < 1) bad.push([amtEl, 'הסכום צריך להיות לפחות 1 ש"ח']);
+    else if (n > 100000) bad.push([amtEl, 'הסכום גבוה מדי, נא לבדוק']);
+    bad.forEach(function (b) { fieldErr(b[0], b[1]); });
+    if (bad.length) bad[0][0].focus();
+    return !bad.length;
+  }
+  function formValues(f) {
+    return {
+      name: fld(f, 'name').value.trim(), phone: fld(f, 'phone').value.trim(),
+      amount: Math.floor(Number(fld(f, 'amount').value)),
+      method: f.querySelector('input[name=method]:checked').value,
+      show: fld(f, 'show').checked
+    };
+  }
+
+  /* ── דף מלא ──────────────────────────────────────────────────── */
+  function moveInd(btn) {
+    var ind = document.querySelector('.kf-ind');
+    if (!ind || !btn || btn.hidden) return;
+    ind.style.width = btn.offsetWidth + 'px';
+    ind.style.transform = 'translateX(' + btn.offsetLeft + 'px)';
+  }
+
   function initPage() {
     var page = $('kfPage');
     var params = new URLSearchParams(location.search);
-    var token = params.get('t') || '';
+    var urlTok = params.get('t') || '';
+    var fromUrl = !!urlTok;
+    var token = urlTok || readTok();          /* קישור אישי מהכתובת, או טוקן שנשמר במכשיר */
+    var joinF = $('kfJoin'), editF = $('kfEdit');
+    var NED_AMOUNT = 0;
 
-    var pageRoot = page;
-    loadStatus(pageRoot);
-    TIMER = setInterval(function () { loadStatus(pageRoot); }, 20000);
-    loadCfg().then(function () {
+    function setNedarim(amount) {
+      NED_AMOUNT = Number(amount) || 0;
       var np = $('kfNedarim');
-      if (np) np.href = nedarimUrl(0);
-      if (token) loadEdit();
-    });
+      if (np && CFG) np.href = nedarimUrl(NED_AMOUNT);
+    }
+    function showEditTab() { var t = document.querySelector('.kf-tab[data-tab="edit"]'); if (t) t.hidden = false; }
+    function hideEditTab() { var t = document.querySelector('.kf-tab[data-tab="edit"]'); if (t) t.hidden = true; }
+
+    function selectTab(id) {
+      var active = null;
+      document.querySelectorAll('.kf-tab').forEach(function (b) {
+        var on = b.getAttribute('data-tab') === id;
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        b.setAttribute('tabindex', on ? '0' : '-1');
+        if (on) active = b;
+      });
+      document.querySelectorAll('.kf-panel').forEach(function (p) { p.hidden = p.id !== 'panel-' + id; });
+      moveInd(active);
+      if (history.replaceState) history.replaceState(null, '', location.pathname + (id === 'edit' ? location.search : '') + '#' + id);
+    }
 
     document.querySelectorAll('.kf-tab').forEach(function (b) {
       b.addEventListener('click', function () { selectTab(b.getAttribute('data-tab')); });
     });
+    window.addEventListener('resize', function () { moveInd(document.querySelector('.kf-tab[aria-selected="true"]')); });
+    window.addEventListener('load', function () { moveInd(document.querySelector('.kf-tab[aria-selected="true"]')); });
 
-    var joinF = $('kfJoin');
-    var mine = readTok();
-    if (token) {
-      var editTab = document.querySelector('.kf-tab[data-tab="edit"]');
-      if (editTab) editTab.hidden = false;
+    function badToken() {
+      if (fromUrl) {
+        var m = $('kfEditErr'); m.textContent = 'הקישור לא נמצא, ייתכן שהוא ישן'; m.hidden = false;
+        return;
+      }
+      /* טוקן ששמור במכשיר ולא תקף עוד: מסירים בשקט */
+      forgetTok(); token = ''; hideEditTab();
+      if (document.querySelector('.kf-tab[data-tab="edit"][aria-selected="true"]')) selectTab('join');
     }
-    if (mine && !token) {
-      $('kfMineBox').hidden = false;
-      $('kfMineBtn').addEventListener('click', function () {
-        location.href = 'kasefet.html?t=' + encodeURIComponent(mine) + '#edit';
+
+    function fillEdit(r) {
+      fld(editF, 'name').value = r.name || '';
+      fld(editF, 'phone').value = r.phone || '';
+      fld(editF, 'amount').value = r.amount || '';
+      editF.querySelectorAll('input[name=method]').forEach(function (x) { x.checked = x.value === r.method; });
+      fld(editF, 'show').checked = !!r.show_name;
+      $('kfEditIntro').textContent = 'שלום ' + (r.name || '') + ', כאן אפשר לעדכן את ההתחייבות שלך.';
+      $('kfPaidInfo').textContent = Number(r.paid_amount) > 0
+        ? 'נרשם אצלנו ששולמו ' + shekel(r.paid_amount) + '. תודה רבה!'
+        : 'עדיין לא נרשם תשלום. אפשר לשלם במזומן לגבאי או דרך נדרים פלוס.';
+      setNedarim(r.amount);
+    }
+
+    function loadEdit() {
+      var t = token;
+      rpc('kasefet_get', { p_token: t }).then(function (r) {
+        if (t !== token) return;
+        if (!r || r.ok === false) { badToken(); return; }
+        fillEdit(r);
+        if (fromUrl) saveTok(t);              /* קישור תקף נשמר במכשיר, והלשונית תישאר גם בלי הכתובת */
+        showEditTab();
+        $('kfEditErr').hidden = true;
+        $('kfEditBox').hidden = false;
+      }).catch(function () {
+        var m = $('kfEditErr');
+        m.textContent = 'לא הצלחנו לטעון את ההתחייבות כרגע. נא לנסות שוב בעוד רגע.';
+        m.hidden = false;
       });
     }
 
+    loadStatus(page);
+    TIMER = setInterval(function () { loadStatus(page); }, 20000);
+    loadCfg().then(function (c) {
+      mountPhotos(c);
+      setNedarim(NED_AMOUNT);
+    }).catch(function () { /* בלי קונפיגורציה הקישורים נשארים ריקים */ });
+
+    if (token) { showEditTab(); loadEdit(); }
+
+    wireErrClear(joinF);
+    wireErrClear(editF);
+
     joinF.addEventListener('submit', function (ev) {
       ev.preventDefault();
-      var v = formValues(joinF), msg = $('kfJoinMsg'), btn = joinF.querySelector('button[type=submit]');
-      var src = joinF.querySelector('input[name=source]:checked').value;
+      var msg = $('kfJoinMsg'), btn = joinF.querySelector('button[type=submit]');
       msg.className = 'kf-msg'; msg.textContent = '';
-      if (!v.amount) { msg.className = 'kf-msg err'; msg.textContent = 'נא להזין סכום'; return; }
+      if (!validate(joinF)) return;
+      var v = formValues(joinF);
+      var src = joinF.querySelector('input[name=source]:checked').value;
       btn.disabled = true;
       rpc('kasefet_pledge', {
         p_name: v.name, p_phone: v.phone, p_amount: v.amount, p_method: v.method,
         p_show_name: v.show, p_source: src
       }).then(function (tok) {
-        saveTok(tok);
-        var link = location.origin + location.pathname.replace(/[^/]*$/, '') + 'kasefet.html?t=' + tok + '#edit';
+        if (typeof tok !== 'string' || !tok) throw new Error('empty');
+        token = tok; saveTok(tok);
+        var link = location.origin + location.pathname.replace(/[^/]*$/, '') + 'kasefet.html?t=' + encodeURIComponent(tok) + '#edit';
         $('kfThanksLink').textContent = link;
         $('kfThanks').hidden = false;
-        joinF.reset(); joinF.amount.value = '';
-        loadStatus(pageRoot);
-        btn.disabled = false;
+        joinF.reset(); clearErrs(joinF);
+        showEditTab(); loadEdit();
+        loadStatus(page);
+        confetti();
         $('kfThanks').scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
-      }).catch(function (e) {
-        msg.className = 'kf-msg err'; msg.textContent = e.message; btn.disabled = false;
-      });
+      }).catch(function () {
+        msg.className = 'kf-msg err'; msg.textContent = 'לא הצלחנו לשמור. נא לנסות שוב בעוד רגע.';
+      }).then(function () { btn.disabled = false; });
     });
 
     var copy = $('kfCopy');
     if (copy) copy.addEventListener('click', function () {
       var txt = $('kfThanksLink').textContent;
-      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { copy.textContent = 'הועתק'; }, function () {});
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function () { copy.textContent = 'הועתק'; }, function () {});
+      }
     });
-
-    var editF = $('kfEdit');
-    if (token) selectTab('edit');
-    else {
-      var hash = (location.hash || '').replace('#', '');
-      if (hash === 'join' || hash === 'pay' || hash === 'status') selectTab(hash);
-    }
-
-    function loadEdit() {
-      rpc('kasefet_get', { p_token: token }).then(function (r) {
-        if (!r) throw new Error('הקישור לא נמצא, ייתכן שהוא ישן');
-        editF.name.value = r.name || ''; editF.phone.value = r.phone || '';
-        editF.amount.value = r.amount; editF.show.checked = !!r.show_name;
-        editF.querySelectorAll('input[name=method]').forEach(function (x) { x.checked = x.value === r.method; });
-        $('kfPaidInfo').textContent = r.paid_amount > 0
-          ? 'נרשם אצלנו ששולמו ' + shekel(r.paid_amount) + '. תודה רבה!'
-          : 'עדיין לא נרשם תשלום. אפשר לשלם במזומן לגבאי או דרך נדרים פלוס.';
-        $('kfNedarim').href = nedarimUrl(r.amount);
-        $('kfEditBox').hidden = false;
-        $('kfEditIntro').textContent = 'שלום ' + (r.name || '') + ', כאן אפשר לעדכן את ההתחייבות שלך.';
-      }).catch(function (e) {
-        var m = $('kfEditMsg'); m.className = 'kf-msg err'; m.textContent = e.message;
-      });
-    }
 
     editF.addEventListener('submit', function (ev) {
       ev.preventDefault();
-      var v = formValues(editF), msg = $('kfEditMsg'), btn = editF.querySelector('button[type=submit]');
+      var msg = $('kfEditMsg'), btn = editF.querySelector('button[type=submit]');
       msg.className = 'kf-msg'; msg.textContent = '';
+      if (!token || !validate(editF)) return;
+      var v = formValues(editF);
       btn.disabled = true;
       rpc('kasefet_update', {
         p_token: token, p_name: v.name, p_phone: v.phone, p_amount: v.amount,
@@ -392,16 +435,25 @@
       }).then(function () {
         msg.className = 'kf-msg ok'; msg.textContent = 'נשמר. תודה!';
         saveTok(token);
-        btn.disabled = false;
-        loadStatus(pageRoot);
-      }).catch(function (e) {
-        msg.className = 'kf-msg err'; msg.textContent = e.message; btn.disabled = false;
-      });
+        setNedarim(v.amount);              /* הקישור לנדרים פלוס מתעדכן מיד לסכום החדש */
+        loadStatus(page);
+      }).catch(function () {
+        msg.className = 'kf-msg err'; msg.textContent = 'לא הצלחנו לשמור. נא לנסות שוב בעוד רגע.';
+      }).then(function () { btn.disabled = false; });
     });
+
+    if (token && (fromUrl || location.hash === '#edit')) selectTab('edit');
+    else {
+      var hash = (location.hash || '').replace('#', '');
+      if (hash === 'join' || hash === 'pay' || hash === 'status') selectTab(hash);
+      else moveInd(document.querySelector('.kf-tab[aria-selected="true"]'));
+    }
   }
 
   function start() {
-    document.querySelectorAll('[data-kf="art"]').forEach(function (n) { n.innerHTML = artSVG(); });
+    document.body.classList.add('kf-js');
+    document.querySelectorAll('[data-kf="vault"]').forEach(function (v) { v.innerHTML = ringHTML(); });
+    initReveal();
     if ($('kfHome')) initHome();
     if ($('kfPage')) initPage();
   }

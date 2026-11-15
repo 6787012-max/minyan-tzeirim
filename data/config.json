@@ -49,6 +49,8 @@
   "kasefet": {
     "show": true,
     "goal": 10000,
+    "photo": "img/kasefet-aron.jpg",
+    "photoCredit": "תמונה להמחשה",
     "note": "התרמה לכספת לארון הקודש. היעד נקבע ב-SQL (kasefet_public); השדה כאן לתצוגה בלבד."
   },
   "shiurim": [

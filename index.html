@@ -20,7 +20,7 @@
 <link rel="preload" href="fonts/frank-medium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/assistant-regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/main.css?v=26">
-<link rel="stylesheet" href="css/kasefet.css?v=3">
+<link rel="stylesheet" href="css/kasefet.css?v=4">
 <style>
   /* פופ-אפ סעודת שמחת תורה — מעולה עד 04/10/2026, אחרי זה JS לא יציג */
   .sp-backdrop { position: fixed; inset: 0; background: rgba(18,35,63,.55);
@@ -117,25 +117,29 @@
   <!-- כספת לארון הקודש — כרטיס קומפקטי. נשלט מ-config.json (kasefet.show). js/kasefet.js ממלא. -->
   <section class="kf-home" id="kfHome" hidden aria-labelledby="kfHomeTitle">
     <div class="wrap">
-      <div class="kf-card">
-        <div class="kf-art" data-kf="art" aria-hidden="true"></div>
-        <div data-kf="vault"></div>
+      <div class="kf-card kf-reveal">
+        <div class="kf-visual">
+          <div data-kf="vault"></div>
+          <figure class="kf-pic kf-pic-sm" data-kf="photo" hidden></figure>
+        </div>
         <div>
           <span class="kf-k">כספת לארון הקודש</span>
-          <h2 id="kfHomeTitle">ברוך ה', כל הסכום התחייב בשבת</h2>
-          <p>היעד 10,000 ש"ח לכספת ל-4 ספרי התורה. עכשיו כל מי שהתחייב מסמן את עצמו ומשלם, עדיף במזומן.</p>
+          <h2 id="kfHomeTitle">כספת לספרי התורה שלנו</h2>
+          <p class="kf-sub">ברוך ה', בשבת התחייב הציבור על כל הסכום</p>
+          <p>נשאר רק לסמן ולשלם, עדיף במזומן.</p>
           <div class="kf-bar" aria-hidden="true">
             <i data-kf="barPledged" style="background:#EBDCB6"></i>
             <i data-kf="barPaid"></i>
           </div>
           <div class="kf-nums">
-            <div><b data-kf="paid">0</b><span>שולם בפועל</span></div>
-            <div><b data-kf="pledged">0</b><span>סימנו את עצמם</span></div>
-            <div><b data-kf="leftPay">10,000 ₪</b><span>נשאר לשלם</span></div>
+            <div><b data-kf="paid"><i class="kf-sk"></i></b><span>שולם עד עכשיו</span></div>
+            <div><b data-kf="pledged"><i class="kf-sk"></i></b><span>סימנו את עצמם</span></div>
+            <div><b data-kf="partners"><i class="kf-sk"></i></b><span>שותפים</span></div>
+            <div><b data-kf="leftPay"><i class="kf-sk"></i></b><span>נשאר לשלם</span></div>
           </div>
           <div class="kf-cta">
-            <a class="p" href="kasefet.html#join">סמן את עצמי</a>
-            <a class="s" href="kasefet.html">לצפייה במצב המלא</a>
+            <a class="p" href="kasefet.html#join">לסמן את עצמי</a>
+            <a class="s" href="kasefet.html">למצב המלא</a>
           </div>
         </div>
       </div>
@@ -388,7 +392,7 @@
 <script src="js/luach.js?v=20"></script>
 <script src="js/motion.js?v=20"></script>
 <script src="js/app.js?v=26"></script>
-<script src="js/kasefet.js?v=3"></script>
+<script src="js/kasefet.js?v=4"></script>
 <script src="js/simchat-popup.js?v=21"></script>
 </body>
 </html>
