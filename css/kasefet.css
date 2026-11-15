@@ -1,47 +1,83 @@
 /* kasefet.css — כספת לארון הקודש: דף ציבורי, דף גבאים וכרטיס בדף הבית.
-   הפלטה והפונטים זהים ל-main.css. בלי דמויות אדם: רק כספת, מטבעות ופס. */
+   הפלטה והפונטים זהים ל-main.css. איור היכל וכספת ב-SVG בלבד, בלי דמויות אדם. */
 
-:root{ --kf-ok:#2F6B45; --kf-bad:#8A2D2D; }
+:root{ --kf-ok:#2F6B45; --kf-bad:#8A2D2D; --kf-cream-soft:#E4DCC9; }
 
 /* main.css מגדיר section{padding} גלובלי; לאפס לכל מה שהכספת בונה כ-section */
 .kf-panel{padding:0}
-.kf-page{max-width:880px;margin:0 auto;padding:28px 18px 60px}
+.kf-page{max-width:880px;margin:0 auto;padding:22px 16px 60px}
 .kf-page h1{font-size:clamp(30px,6vw,44px);margin:6px 0 10px}
 .kf-page .kf-lead{font-size:18px;color:var(--muted);margin:0 0 20px}
 
 .kf-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 22px;border-bottom:1px solid var(--line);padding-bottom:10px}
-.kf-tab{background:transparent;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font:inherit;font-weight:600;color:var(--navy);cursor:pointer}
+.kf-tab{background:#FFFDF8;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font:inherit;font-weight:600;color:var(--navy);cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.kf-tab:hover{border-color:var(--gold)}
+.kf-tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .kf-tab[aria-selected="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
 .kf-panel[hidden]{display:none}
 
-/* ── כספת מונפשת (SVG) ─────────────────────────────────────────── */
-.kf-vault{width:100%;max-width:300px;margin:0 auto;display:block}
-.kf-vault .kf-fill{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);transition:transform 1.6s cubic-bezier(.2,.7,.2,1)}
+/* ── היכל: כרטיס כהה עם איור ארון קודש ברקע ───────────────────── */
+.kf-hero{position:relative;overflow:hidden;isolation:isolate;border-radius:24px;margin:0 0 24px;
+  background:radial-gradient(120% 70% at 50% 0%,#2A4A7A 0%,rgba(42,74,122,0) 62%),linear-gradient(180deg,#1B3053 0%,#12233F 68%,#0C1A31 100%);
+  box-shadow:0 18px 50px rgba(18,35,63,.28);border:1px solid rgba(217,190,124,.4);padding:30px 22px 26px}
+.kf-hero::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(12,26,49,.72) 0%,rgba(12,26,49,.70) 40%,rgba(12,26,49,.92) 100%)}
+.kf-hero .kf-art{opacity:.6}
+.kf-hero-in{position:relative;z-index:1;text-align:center}
+.kf-page .kf-hero .eyebrow{color:var(--gold-lt);font-weight:800;letter-spacing:.08em;font-size:13px}
+.kf-page .kf-hero h1{color:#FBF6E8;font-size:clamp(30px,6vw,42px)}
+.kf-page .kf-hero .kf-lead{color:var(--kf-cream-soft);margin:0 auto;max-width:640px}
+.kf-hero .kf-vault-wrap{max-width:280px;margin:14px auto 0;filter:drop-shadow(0 14px 22px rgba(0,0,0,.4))}
+
+/* ── איור ה-SVG (היכל, כרטיס בדף הבית) ─────────────────────────── */
+.kf-art{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.kf-art svg{width:100%;height:100%;display:block}
+.kf-art .kf-rays{animation:kfRays 7s ease-in-out infinite alternate}
+.kf-art .kf-flame{transform-box:fill-box;transform-origin:50% 100%;animation:kfFlick 2.6s ease-in-out infinite}
+.kf-art .kf-flame-glow{animation:kfGlowPulse 3.2s ease-in-out infinite}
+.kf-art .kf-dust{fill:#F6E7B8;animation:kfTwinkle 5s ease-in-out infinite}
+@keyframes kfRays{from{opacity:.55}to{opacity:1}}
+@keyframes kfFlick{0%,100%{transform:scale(1,1)}20%{transform:scale(.9,1.07)}45%{transform:scale(1.05,.95)}70%{transform:scale(.95,1.08)}}
+@keyframes kfGlowPulse{0%,100%{opacity:.4}50%{opacity:.85}}
+@keyframes kfTwinkle{0%,100%{opacity:.12}50%{opacity:.8}}
+
+/* ── כספת מונפשת (SVG): הדלת נפתחת לפי ההתקדמות, ספרי התורה נדלקים ברבעים ── */
+.kf-vault{width:100%;max-width:300px;margin:0 auto;display:block;overflow:visible}
+.kf-vault .kf-door{transform-box:view-box;transform-origin:34px 100px;transition:transform 1.8s cubic-bezier(.2,.7,.2,1)}
+.kf-vault .kf-dial{transform-box:fill-box;transform-origin:center;animation:kfSpin 1.8s cubic-bezier(.2,.7,.2,1) both}
+.kf-vault .kf-s{opacity:.14;transition:opacity 1.2s ease}
+.kf-vault .kf-s.kf-on{opacity:1}
+.kf-vault .kf-glow{transition:opacity 1.8s ease}
 .kf-vault .kf-coin{opacity:0}
-.kf-vault.kf-drop .kf-coin{animation:kfDrop 1.4s ease-in forwards}
+.kf-drop .kf-coin{animation:kfDrop 1.4s ease-in forwards}
+@keyframes kfSpin{from{transform:rotate(-540deg)}to{transform:rotate(0)}}
 @keyframes kfDrop{0%{transform:translateY(-40px);opacity:0}15%{opacity:1}100%{transform:translateY(0);opacity:1}}
-.kf-vault .kf-door{transform-box:fill-box;transform-origin:left center;transition:transform .6s}
-.kf-vault.kf-open .kf-door{transform:rotate(-14deg)}
 
 .kf-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
-.kf-stat{background:var(--cream-2);border:1px solid var(--line);border-radius:var(--r);padding:12px 8px;text-align:center}
-.kf-stat b{display:block;font-size:24px;color:var(--navy)}
-.kf-stat span{font-size:13px;color:var(--muted)}
+.kf-stat{background:linear-gradient(180deg,#FFFDF8 0%,#FBF6E8 100%);border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center;box-shadow:0 6px 18px rgba(18,35,63,.06)}
+.kf-stat b{display:block;font-family:'Frank',Georgia,serif;font-weight:500;font-size:clamp(22px,4vw,28px);color:var(--navy);line-height:1.2}
+.kf-stat span{font-size:14px;color:var(--muted)}
 .kf-stat.kf-bump{animation:kfBump .7s ease}
 @keyframes kfBump{0%{transform:scale(1)}40%{transform:scale(1.06);border-color:var(--gold)}100%{transform:scale(1)}}
 
-.kf-bar{height:14px;background:#E9E1CF;border-radius:999px;overflow:hidden;margin:6px 0 4px}
-.kf-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-lt));border-radius:999px;transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
-.kf-bar-cap{font-size:14px;color:var(--muted);display:flex;justify-content:space-between}
+/* שני פסים מוערמים: מה שסומן מאחורה, מה ששולם מלפנים (מימין, RTL) */
+.kf-bar{position:relative;height:16px;background:#E9E1CF;border-radius:999px;overflow:hidden;margin:6px 0 4px;box-shadow:inset 0 1px 3px rgba(18,35,63,.14)}
+.kf-bar i{position:absolute;top:0;right:0;height:100%;width:0;border-radius:999px;transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+.kf-bar i:last-child{background:linear-gradient(90deg,#B08D3E,#D9BE7C 55%,#B08D3E);overflow:hidden}
+.kf-bar i:last-child::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);background-size:250% 100%;animation:kfShine 2.8s linear infinite}
+@keyframes kfShine{from{background-position:120% 0}to{background-position:-120% 0}}
+.kf-bar-cap{font-size:15px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 
-.kf-people{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
-.kf-people li{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;gap:8px;font-size:16px}
+.kf-people{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.kf-people li{background:#fff;border:1px solid rgba(176,141,62,.3);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px;box-shadow:0 1px 2px rgba(18,35,63,.04)}
+.kf-people li.kf-paid{background:#FFFCF3;border-color:var(--gold)}
+.kf-people li.kf-paid span::before{content:"\2713\00a0";color:var(--gold);font-weight:800}
 .kf-people li.kf-paid::after{content:"שילם";font-size:12px;color:var(--kf-ok);font-weight:700;white-space:nowrap}
 .kf-people li:not(.kf-paid)::after{content:"ממתין";font-size:12px;color:var(--muted);white-space:nowrap}
 .kf-people li.kf-new{animation:kfBump .9s ease}
 
 /* ── טפסים ─────────────────────────────────────────────────────── */
-.kf-form{display:grid;gap:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.kf-form{display:grid;gap:14px;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
 .kf-form .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .kf-form label.f{display:grid;gap:6px;font-weight:600;color:var(--navy);font-size:16px}
 .kf-form input[type=text],.kf-form input[type=tel],.kf-form input[type=number],.kf-form input[type=password],.kf-form select{
@@ -52,9 +88,11 @@
 .kf-choice input{margin:0 0 4px}
 .kf-choice label:has(input:checked){border-color:var(--gold);background:#FBF6E8;box-shadow:0 0 0 2px rgba(176,141,62,.25)}
 .kf-choice small{color:var(--muted);font-size:14px;font-weight:400}
-.kf-btn{font:inherit;font-weight:800;font-size:17px;padding:13px 20px;border-radius:12px;border:0;background:var(--navy);color:#fff;cursor:pointer;justify-self:start}
-.kf-btn:disabled{opacity:.55;cursor:default}
-.kf-btn.kf-ghost{background:transparent;color:var(--navy);border:1px solid var(--navy)}
+.kf-btn{font:inherit;font-weight:800;font-size:17px;padding:13px 22px;border-radius:12px;border:0;background:linear-gradient(180deg,#D9BE7C 0%,#B08D3E 100%);color:var(--navy);cursor:pointer;justify-self:start;box-shadow:0 6px 16px rgba(176,141,62,.35);transition:transform .15s,box-shadow .15s}
+.kf-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(176,141,62,.45)}
+.kf-btn:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+.kf-btn:disabled{opacity:.55;cursor:default;transform:none}
+.kf-btn.kf-ghost{background:transparent;color:var(--navy);border:1px solid var(--navy);box-shadow:none}
 .kf-msg{font-size:16px;margin:0;min-height:1.4em}
 .kf-msg.err{color:var(--kf-bad)}
 .kf-msg.ok{color:var(--kf-ok)}
@@ -64,37 +102,48 @@
 
 .kf-note{font-size:15px;color:var(--muted);margin:14px 0 0}
 .kf-pay{display:grid;gap:14px}
-.kf-pay .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.kf-pay .card{background:#fff;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow)}
 .kf-pay h3{font-size:22px;margin:0 0 6px}
 
-/* ── כרטיס בדף הבית ─────────────────────────────────────────────── */
+/* ── כרטיס בדף הבית: אותה שפה, רקע נייבי עם היכל ───────────────── */
 .kf-home{padding:34px 0 8px}
 .kf-home[hidden]{display:none}
-.kf-card{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:22px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
-.kf-card .kf-k{color:var(--gold);font-weight:800;letter-spacing:.06em;font-size:13px}
-.kf-card h2{font-size:clamp(24px,4vw,30px);margin:4px 0 8px}
-.kf-card p{margin:0 0 10px;color:var(--muted)}
+.kf-card{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:22px;align-items:center;
+  background:linear-gradient(135deg,#1B3053 0%,#12233F 100%);color:#F6F1E5;border:1px solid rgba(217,190,124,.4);border-radius:20px;padding:22px;box-shadow:0 18px 46px rgba(18,35,63,.28)}
+.kf-card > *:not(.kf-art){position:relative;z-index:1}
+.kf-card .kf-art{opacity:.45}
+.kf-card::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(90deg,rgba(12,26,49,.55),rgba(12,26,49,.88))}
+.kf-card .kf-k{color:var(--gold-lt);font-weight:800;letter-spacing:.08em;font-size:13px}
+.kf-card h2{color:#FBF6E8;font-size:clamp(24px,4vw,30px);margin:4px 0 8px}
+.kf-card p{margin:0 0 10px;color:var(--kf-cream-soft)}
 .kf-card .kf-nums{display:flex;gap:18px;flex-wrap:wrap;margin:8px 0 12px}
-.kf-card .kf-nums b{font-size:22px;color:var(--navy);display:block}
-.kf-card .kf-nums span{font-size:13px;color:var(--muted)}
-.kf-card .kf-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.kf-card .kf-cta a{display:inline-block;padding:11px 18px;border-radius:12px;font-weight:800;text-decoration:none;font-size:15px}
-.kf-card .kf-cta .p{background:var(--navy);color:#fff}
-.kf-card .kf-cta .s{border:1px solid var(--navy);color:var(--navy)}
+.kf-card .kf-nums b{font-family:'Frank',Georgia,serif;font-weight:500;font-size:24px;color:var(--gold-lt);display:block;line-height:1.2}
+.kf-card .kf-nums span{font-size:13px;color:#CFC6B2}
+.kf-card .kf-bar{background:rgba(255,255,255,.14);box-shadow:none}
 .kf-card .kf-vault{max-width:240px}
+.kf-card .kf-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.kf-card .kf-cta a{display:inline-block;padding:11px 18px;border-radius:12px;font-weight:800;text-decoration:none;font-size:15px;transition:transform .15s}
+.kf-card .kf-cta a:hover{transform:translateY(-1px)}
+.kf-card .kf-cta a:focus-visible{outline:3px solid var(--gold-lt);outline-offset:2px}
+.kf-card .kf-cta .p{background:linear-gradient(180deg,#D9BE7C 0%,#B08D3E 100%);color:var(--navy)}
+.kf-card .kf-cta .s{border:1px solid rgba(246,241,229,.7);color:#F6F1E5}
 
 @media (max-width:640px){
-  .kf-card{grid-template-columns:1fr;text-align:center}
+  .kf-hero{padding:24px 16px 20px;border-radius:20px}
+  .kf-card{grid-template-columns:1fr;text-align:center;gap:14px;padding:20px 16px}
+  .kf-card .kf-vault{max-width:130px}
+  .kf-card .kf-nums{justify-content:center;gap:14px}
+  .kf-card .kf-bar{margin:6px auto 4px}
   .kf-card .kf-cta{justify-content:center}
-  .kf-card .kf-vault{max-width:180px}
   .kf-stats{grid-template-columns:repeat(2,1fr)}
   .kf-form .row2{grid-template-columns:1fr}
   .kf-choice{grid-template-columns:1fr}
-  .kf-btn{width:100%}
+  .kf-btn{width:100%;justify-self:stretch;text-align:center}
 }
 
 @media (prefers-reduced-motion:reduce){
-  .kf-vault .kf-fill,.kf-bar i,.kf-vault .kf-door{transition:none}
-  .kf-vault.kf-drop .kf-coin{animation:none;opacity:1}
-  .kf-stat.kf-bump,.kf-people li.kf-new{animation:none}
+  .kf-vault .kf-door,.kf-vault .kf-s,.kf-vault .kf-glow,.kf-bar i{transition:none}
+  .kf-vault .kf-dial,.kf-art .kf-rays,.kf-art .kf-flame,.kf-art .kf-flame-glow,.kf-art .kf-dust,
+  .kf-bar i:last-child::after,.kf-stat.kf-bump,.kf-people li.kf-new{animation:none}
+  .kf-drop .kf-coin{animation:none;opacity:1}
 }
