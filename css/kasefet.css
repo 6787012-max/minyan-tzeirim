@@ -20,8 +20,9 @@
 .kf-page .kf-lead{ font-size:18px; color:var(--muted); margin:0 0 20px; }
 .kf-intro{ font-size:18px; color:var(--navy); margin:0 0 8px; }
 
-.kf-tabs{ position:relative; display:flex; gap:6px; flex-wrap:wrap; margin:18px 0 22px; border-bottom:1px solid var(--line); padding-bottom:10px; }
-.kf-tab{ background:#FFFDF8; border:1px solid var(--line); border-radius:999px; padding:9px 16px; font:inherit; font-weight:600; color:var(--navy); cursor:pointer; min-height:44px; transition:background .25s,color .25s,border-color .25s,transform .15s; }
+.kf-tabs{ position:relative; display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin:18px 0 22px; border-bottom:1px solid var(--line); padding:0 0 10px; }
+.kf-tabs::-webkit-scrollbar{ display:none; }
+.kf-tab{ flex:0 0 auto; scroll-snap-align:start; white-space:nowrap; background:#FFFDF8; border:1px solid var(--line); border-radius:999px; padding:9px 16px; font:inherit; font-weight:600; color:var(--navy); cursor:pointer; min-height:44px; transition:background .25s,color .25s,border-color .25s,transform .15s; }
 .kf-tab:hover{ border-color:var(--gold); }
 .kf-tab:active{ transform:scale(.97); }
 .kf-tab:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
@@ -43,15 +44,20 @@
 .kf-page .kf-hero h1{ color:#FBF6E8; font-size:clamp(30px,6vw,42px); margin:8px 0 10px; }
 .kf-hero .kf-lead{ color:#FBF6E8; margin:0 auto 10px; max-width:640px; font-size:18px; }
 .kf-hero .kf-desc{ color:var(--kf-cream-soft); margin:0 auto; max-width:640px; font-size:16px; line-height:1.7; }
-.kf-hero .kf-rise{ animation:kfRise .8s var(--kf-ease) both; animation-delay:calc(var(--d,0) * .12s); }
+/* אנימציות כניסה: בלי fill-mode, כך שהתוכן גלוי תמיד ולא נתקע ב-opacity:0 בלשונית ברקע */
+.kf-hero .kf-rise{ animation:kfRise .8s var(--kf-ease); animation-delay:calc(var(--d,0) * .12s); }
 
 /* תמונה אמיתית (kasefet.photo): כרטיס עומד עם מסגרת זהב, לצד המד במחשב ומתחתיו בטלפון */
 .kf-visual{ display:flex; flex-direction:column; align-items:center; gap:14px; }
 @media (min-width:641px){ .kf-hero .kf-visual{ flex-direction:row; justify-content:center; gap:30px; } }
-.kf-pic{ margin:0; width:min(210px,58vw); padding:8px; background:#FFFDF8; border:1px solid rgba(217,190,124,.9); border-radius:16px; box-shadow:0 16px 34px rgba(0,0,0,.35); animation:kfRise .9s var(--kf-ease) both .3s; }
+.kf-pic{ margin:0; width:min(210px,58vw); padding:8px; background:#FFFDF8; border:1px solid rgba(217,190,124,.9); border-radius:16px; box-shadow:0 16px 34px rgba(0,0,0,.35); animation:kfRise .9s var(--kf-ease) .3s; }
 .kf-pic[hidden]{ display:none !important; }
-.kf-pic .kf-photo-img{ display:block; width:100%; height:auto; aspect-ratio:515/845; object-fit:cover; border-radius:10px; opacity:0; transition:opacity .9s ease; }
-.kf-pic .kf-photo-img.in{ opacity:1; }
+.kf-pic .kf-photo-img{ display:block; width:100%; height:auto; aspect-ratio:515/845; object-fit:cover; border-radius:10px; }
+/* במחשב התמונה צמודה לימין המד, והמד נשאר ממורכז גם כשהתמונה מופיעה */
+@media (min-width:900px){
+  .kf-hero .kf-visual{ position:relative; }
+  .kf-hero .kf-pic{ position:absolute; top:0; bottom:0; margin:auto 0; height:max-content; left:calc(50% + 170px); }
+}
 .kf-cap{ font-size:13px; color:var(--muted); text-align:center; margin-top:6px; }
 .kf-pic-sm{ width:92px; padding:5px; border-radius:12px; }
 .kf-pic-sm .kf-cap{ font-size:11px; margin-top:4px; }
@@ -105,7 +111,7 @@
 .kf-step p{ margin:0; font-size:16px; color:var(--muted); }
 
 .kf-people{ list-style:none; margin:18px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
-.kf-people li{ background:#fff; border:1px solid rgba(176,141,62,.3); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:16px; box-shadow:0 1px 2px rgba(18,35,63,.04); animation:kfIn .55s var(--kf-ease) both; animation-delay:calc(var(--i,0) * 70ms); }
+.kf-people li{ background:#fff; border:1px solid rgba(176,141,62,.3); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:16px; box-shadow:0 1px 2px rgba(18,35,63,.04); animation:kfIn .55s var(--kf-ease); animation-delay:min(calc(var(--i,0) * 70ms), .6s); }
 .kf-people li.kf-empty{ grid-column:1/-1; justify-content:center; color:var(--muted); animation:none; }
 .kf-people li.kf-paid{ background:#FFFCF3; border-color:var(--gold); }
 .kf-people li.kf-paid .kf-pname::before{ content:"\2713\00a0"; color:var(--navy); font-weight:800; }
@@ -202,7 +208,19 @@
 
 /* ── מותאם מובייל ─────────────────────────────────────────────── */
 @media (max-width:640px){
-  .kf-hero{ padding:24px 16px 20px; border-radius:20px; }
+  .kf-page{ padding:14px 14px 48px; }
+  .kf-tab{ padding:8px 12px; font-size:15px; }
+  .kf-hero{ padding:18px 14px 16px; border-radius:20px; }
+  .kf-hero-in{ display:flex; flex-direction:column; align-items:center; }
+  .kf-hero .kf-visual{ display:contents; }
+  .kf-hero .kf-eyebrow{ order:0; }
+  .kf-page .kf-hero h1{ order:1; font-size:28px; margin:4px 0 6px; }
+  .kf-hero .kf-lead{ order:2; font-size:16px; margin:0 0 8px; }
+  .kf-hero .kf-vault-wrap{ order:3; margin:6px auto 0; }
+  .kf-hero .kf-ring{ width:min(220px,60vw); }
+  .kf-hero .kf-desc{ order:4; font-size:15px; line-height:1.6; margin:8px auto 0; }
+  .kf-hero .kf-pic{ order:5; margin-top:12px; }
+  .kf-hero .kf-left{ order:6; margin:8px 0 0; }
   .kf-card{ grid-template-columns:1fr; text-align:center; gap:14px; padding:20px 16px; }
   .kf-card .kf-ring{ width:min(190px,60vw); }
   .kf-card .kf-nums{ justify-content:center; gap:14px; }

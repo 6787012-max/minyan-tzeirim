@@ -131,11 +131,21 @@
     var k = (c && c.kasefet) || {};
     var src = typeof k.photo === 'string' ? k.photo.trim() : '';
     if (!/^img\/[A-Za-z0-9_\-\/.]+\.(jpe?g|png|webp)$/i.test(src)) return;
+    var W = Number(k.photoW), H = Number(k.photoH);
+    if (!W || !H) return;
+    /* הכרטיס נשאר מוסתר עד שהתמונה נטענה ומידותיה תואמות לערכים מה-config.
+       כך תמונה אחרת, תמונת המתנה, או כשל טעינה לא מופיעים לקהל ואין קפיצה בפריסה. */
     document.querySelectorAll('[data-kf="photo"]').forEach(function (box) {
       var img = document.createElement('img');
       img.className = 'kf-photo-img'; img.alt = 'כספת לספרי התורה'; img.loading = 'lazy'; img.decoding = 'async';
-      img.width = 515; img.height = 845;
-      img.onload = function () { img.classList.add('in'); };
+      img.onload = function () {
+        if (img.naturalWidth === W && img.naturalHeight === H) {
+          box.hidden = false;
+        } else {
+          box.hidden = true;
+        }
+      };
+      img.onerror = function () { box.hidden = true; };
       img.src = src;
       box.appendChild(img);
       if (k.photoCredit) {
@@ -144,7 +154,6 @@
         cap.textContent = String(k.photoCredit);
         box.appendChild(cap);
       }
-      box.hidden = false;
     });
   }
 
@@ -235,6 +244,8 @@
       });
     }, { threshold: 0.12 });
     els.forEach(function (e) { io.observe(e); });
+    /* אם ההצגה בגלילה לא רצה תוך שנייה וחצי (לשונית ברקע וכדומה), מציגים הכול */
+    setTimeout(function () { els.forEach(function (e) { e.classList.add('in'); }); }, 1500);
   }
 
   /* ── דף הבית ─────────────────────────────────────────────────── */
