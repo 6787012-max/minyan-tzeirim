@@ -166,6 +166,66 @@
   $('gbReset').addEventListener('click', clearForm);
   $('gbNew').addEventListener('click', function () { clearForm(); window.scrollTo(0, 0); $('gbForm').name.focus(); });
 
+  /* ── כניסות לאתר ─────────────────────────────────────────────── */
+  var PAGES = { index: 'דף הבית', kasefet: 'כספת', form: 'טופס', hok: 'חוק', shas: 'ש"ס',
+                simchat: 'שמחת תורה', kibud: 'כיבודים', news: 'חדשות' };
+  var DEVS = { mobile: 'טלפון', tablet: 'טאבלט', desktop: 'מחשב' };
+  function num(n) { return String(Math.round(Number(n) || 0)); }
+
+  function drawVisits(d) {
+    $('gvToday').textContent = num(d.today);
+    $('gvTodayDev').textContent = num(d.today_devices);
+    $('gvTotal').textContent = num(d.total);
+    $('gvDev').textContent = num(d.devices);
+    $('gvYesterday').textContent = 'אתמול: ' + num(d.yesterday) + ' כניסות מ-' + num(d.yesterday_devices) + ' מכשירים.';
+
+    var days = d.by_day || [], max = 1;
+    days.forEach(function (x) { max = Math.max(max, Number(x.visits) || 0); });
+    $('gvDays').innerHTML = days.map(function (x) {
+      var n = Number(x.visits) || 0, p = String(x.day || '').split('-');
+      return '<div class="gv-day" title="' + esc(x.day) + ': ' + n + ' כניסות"><b>' + (n || '') + '</b>' +
+        '<i style="height:' + Math.round(n / max * 80) + '%"></i><span>' + esc((p[2] || '') + '/' + (p[1] || '')) + '</span></div>';
+    }).join('');
+
+    $('gvPages').innerHTML = (d.by_page || []).map(function (x) {
+      return '<li><span>' + esc(PAGES[x.page] || x.page) + '</span><b>' + num(x.visits) + ' · ' + num(x.devices) + ' מכשירים</b></li>';
+    }).join('') || '<li>אין נתונים עדיין</li>';
+    $('gvDevices').innerHTML = (d.by_device || []).map(function (x) {
+      return '<li><span>' + esc(DEVS[x.device] || x.device) + '</span><b>' + num(x.visits) + ' · ' + num(x.devices) + ' מכשירים</b></li>';
+    }).join('') || '<li>אין נתונים עדיין</li>';
+
+    $('gvKasefet').textContent = num(d.kasefet_identified) + ' מתוך ' + num(d.kasefet_visitors) +
+      ' מבקרים בדף הכספת סימנו את עצמם.';
+
+    var rows = d.recent || [];
+    $('gvRows').innerHTML = rows.length ? rows.map(function (x) {
+      return '<tr><td data-l="שעה">' + esc(x.at) + '</td>' +
+        '<td data-l="דף">' + esc(PAGES[x.page] || x.page) + '</td>' +
+        '<td data-l="מכשיר">' + esc(DEVS[x.device] || x.device) + '</td>' +
+        '<td data-l="מקור">' + esc(x.referrer || 'ישיר') + '</td>' +
+        '<td data-l="מי">' + esc(x.name || 'אורח') + (x.is_new ? ' <small>(חדש)</small>' : '') + '</td></tr>';
+    }).join('') : '<tr><td colspan="5">אין כניסות עדיין</td></tr>';
+  }
+
+  function loadVisits() {
+    var m = $('gbVisMsg'); m.className = 'gb-msg'; m.textContent = '';
+    return rpc('visits_admin', { p_code: CODE, p_days: 14 }).then(function (d) {
+      var e = fail(d); if (e) throw new Error(e);
+      drawVisits(d);
+    }).catch(function (e) { m.className = 'gb-msg err'; m.textContent = e.message || 'שגיאה'; });
+  }
+
+  function selectGb(id) {
+    var vis = id === 'vis';
+    $('gbPay').hidden = vis; $('gbVis').hidden = !vis;
+    $('gbTabPay').setAttribute('aria-selected', vis ? 'false' : 'true');
+    $('gbTabVis').setAttribute('aria-selected', vis ? 'true' : 'false');
+    if (vis) loadVisits();
+  }
+  $('gbTabPay').addEventListener('click', function () { selectGb('pay'); });
+  $('gbTabVis').addEventListener('click', function () { selectGb('vis'); });
+  $('gbVisRefresh').addEventListener('click', loadVisits);
+
   var saved = '';
   try { saved = sessionStorage.getItem(KEY) || ''; } catch (e) { saved = ''; }
   if (saved) {

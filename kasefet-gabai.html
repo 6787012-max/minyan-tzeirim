@@ -37,9 +37,25 @@
   .gb-login{display:grid;grid-template-columns:1fr auto;gap:10px;max-width:460px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
   .gb-login input{font:inherit;font-size:18px;min-height:44px;padding:7px 10px;border:1px solid #CFC5AE;border-radius:8px;letter-spacing:.15em;text-align:center}
   .gb-login input:focus-visible,.gb-form input:focus-visible,.gb-form select:focus-visible,.gb-tbl input:focus-visible,.gb-btn:focus-visible,.gb-tbl button:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+  .gb-tabs{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap}
+  .gb-tab{font:inherit;font-weight:600;min-height:44px;padding:8px 18px;border-radius:999px;border:1px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+  .gb-tab[aria-selected="true"]{background:var(--navy);color:#fff}
+  .gb-tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  .gb-sum4{grid-template-columns:repeat(4,1fr)}
+  .gv-days{display:flex;align-items:flex-end;gap:4px;height:130px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 8px 6px;direction:ltr}
+  .gv-day{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:11px;color:var(--muted)}
+  .gv-day i{display:block;width:100%;max-width:26px;background:var(--navy);border-radius:4px 4px 0 0;min-height:2px}
+  .gv-day b{font-size:12px;color:var(--navy);font-variant-numeric:tabular-nums}
+  .gv-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .gv-list{list-style:none;margin:0;padding:0;background:#fff;border:1px solid var(--line);border-radius:12px}
+  .gv-list li{display:flex;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid #EEE6D4;font-size:15px}
+  .gv-list li:last-child{border-bottom:0}
+  .gv-list b{font-variant-numeric:tabular-nums;color:var(--navy)}
+  .gv-kasefet{background:var(--cream-2);border:1px solid var(--line);border-radius:12px;padding:12px;margin:14px 0;font-weight:600;color:var(--navy)}
   .gb-h2{font-family:'Frank',Georgia,serif;font-weight:500;font-size:22px;color:var(--navy);margin:18px 0 6px}
   @media (max-width:760px){
-    .gb-sum{grid-template-columns:repeat(2,1fr)}
+    .gb-sum,.gb-sum4{grid-template-columns:repeat(2,1fr)}
+    .gv-two{grid-template-columns:1fr}
     .gb-tbl thead{display:none}
     .gb-tbl,.gb-tbl tbody{display:block;width:100%}
     .gb-tbl tr{display:block;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:8px;background:#fff}
@@ -69,6 +85,11 @@
   <div id="gbApp" hidden>
     <h1 class="gb-h2" style="font-size:28px">עדכון תשלומים · כספת</h1>
     <p class="kf-note" id="gbWho"></p>
+    <div class="gb-tabs" role="tablist">
+      <button type="button" class="gb-tab" role="tab" id="gbTabPay" aria-selected="true" data-gt="pay">תשלומים</button>
+      <button type="button" class="gb-tab" role="tab" id="gbTabVis" aria-selected="false" data-gt="vis">כניסות לאתר</button>
+    </div>
+    <div id="gbPay">
     <div class="gb-sum">
       <div><b id="gbPledged">0</b><span>סך ההתחייבויות</span></div>
       <div><b id="gbPaid">0</b><span>שולם</span></div>
@@ -99,9 +120,38 @@
       <thead><tr><th>שם</th><th>טלפון</th><th>התחייבות</th><th>אופן</th><th>שולם</th><th>הערה</th><th>פעולות</th></tr></thead>
       <tbody id="gbRows"></tbody>
     </table>
+    </div>
+
+    <div id="gbVis" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0">
+        <h2 class="gb-h2" style="margin:0">כניסות לאתר</h2>
+        <button class="gb-btn g" type="button" id="gbVisRefresh">רענון</button>
+      </div>
+      <p class="gb-msg" id="gbVisMsg" role="status"></p>
+      <div class="gb-sum gb-sum4">
+        <div><b id="gvToday">0</b><span>כניסות היום</span></div>
+        <div><b id="gvTodayDev">0</b><span>מכשירים היום</span></div>
+        <div><b id="gvTotal">0</b><span>סך הכניסות</span></div>
+        <div><b id="gvDev">0</b><span>מכשירים ייחודיים</span></div>
+      </div>
+      <p class="kf-note" id="gvYesterday"></p>
+      <h3 class="gb-h2" style="font-size:18px">לפי יום</h3>
+      <div class="gv-days" id="gvDays" aria-label="כניסות לפי יום"></div>
+      <div class="gv-two">
+        <div><h3 class="gb-h2" style="font-size:18px">לפי דף</h3><ul class="gv-list" id="gvPages"></ul></div>
+        <div><h3 class="gb-h2" style="font-size:18px">לפי מכשיר</h3><ul class="gv-list" id="gvDevices"></ul></div>
+      </div>
+      <p class="gv-kasefet" id="gvKasefet"></p>
+      <h3 class="gb-h2" style="font-size:18px">כניסות אחרונות</h3>
+      <table class="gb-tbl gv-tbl">
+        <thead><tr><th>שעה</th><th>דף</th><th>מכשיר</th><th>מקור</th><th>מי</th></tr></thead>
+        <tbody id="gvRows"></tbody>
+      </table>
+      <p class="kf-note">המעקב הוא לפי מכשיר. שם מופיע רק למי שסימן את עצמו מאותו מכשיר.</p>
+    </div>
   </div>
 </main>
 
-<script src="js/kasefet-gabai.js?v=2"></script>
+<script src="js/kasefet-gabai.js?v=3"></script>
 </body>
 </html>
