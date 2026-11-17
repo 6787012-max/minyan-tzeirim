@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>שיבוץ ארוחות · מעלה עמוס</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://cmsusfmwjtpfewbydzpi.supabase.co">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#f4dde2">
+<link rel="stylesheet" href="css/meals.css?v=1">
+</head>
+<body>
+<div class="wrap">
+  <div id="hero"></div>
+  <div class="legend"><span><i style="background:#d5ebdf"></i>פנוי</span><span><i style="background:#f4dde2"></i>נלקח, תודה!</span></div>
+  <div id="days"><div class="empty">רגע, טוענים את הלוח...</div></div>
+  <div class="foot">לחצו על משבצת פנויה כדי לקחת ארוחה. הכול גלוי לכולן, כדי שלא יהיו כפילויות.</div>
+</div>
+
+<div class="sheet-bg" id="bg">
+  <form class="sheet" id="form" autocomplete="off">
+    <h3 id="fTitle"></h3>
+    <div class="sub" id="fSub"></div>
+    <div class="f">
+      <label for="fName">השם שלך</label>
+      <input id="fName" maxlength="60" placeholder="מתחילות להקליד, ונציע שם מוכר" required>
+      <div class="sug" id="sug" hidden></div>
+    </div>
+    <div class="f">
+      <label for="fPhone">טלפון</label>
+      <input id="fPhone" class="ltr" type="tel" inputmode="tel" maxlength="20" placeholder="050-1234567">
+      <div class="hintline" id="phHint">הטלפון יוצג לכולן בצורה מוסתרת חלקית.</div>
+    </div>
+    <div class="f">
+      <label for="fDish">מה מכינות?</label>
+      <input id="fDish" maxlength="120" placeholder="למשל: מרק עוף, אורז וקוגל" required>
+    </div>
+    <div class="msg" id="fMsg"></div>
+    <div class="btnrow"><button class="btn" id="fGo" type="submit">אני לוקחת!</button><button class="btn ghost" id="fX" type="button">סגירה</button></div>
+  </form>
+</div>
+<div class="toast" id="toast"></div>
+<script src="js/meals.js?v=1"></script>
+</body>
+</html>

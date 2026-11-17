@@ -1,0 +1,26 @@
+.wrap.wide { max-width: 860px; }
+.ah { color: var(--rose-d); font-size: 26px; font-weight: 800; margin: 8px 4px 12px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; margin-top: 12px; box-shadow: 0 2px 10px rgba(201, 139, 154, .08); }
+.card h2 { margin: 0 0 6px; font-size: 20px; color: var(--rose-d); font-weight: 800; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.sm { font: inherit; font-size: 15px; font-weight: 600; border: 1.5px solid var(--rose-l); background: #fff; color: var(--rose-d); border-radius: 999px; padding: 6px 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+.sm.pri { background: var(--rose); border-color: var(--rose); color: #fff; }
+.sm.mint { background: var(--mint); border-color: var(--mint); color: #2f5f49; }
+.sm.red { color: #b3475f; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+.f textarea { width: 100%; font: inherit; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 14px; min-height: 70px; }
+.f select { font: inherit; padding: 9px 10px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; }
+.ev { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ev .nm { font-weight: 800; font-size: 19px; }
+.ev .meta { color: var(--mute); font-size: 14.5px; }
+.badge { background: var(--mint); color: #2f5f49; border-radius: 999px; padding: 2px 10px; font-size: 13.5px; font-weight: 600; }
+.badge.cl { background: var(--peach); color: #8a5a35; }
+.aslot { border-top: 1px solid var(--line); padding: 8px 2px; }
+.aslot .t { font-weight: 600; }
+.aslot .d { color: var(--ink); }
+.aslot .ph { direction: ltr; unicode-bidi: embed; display: inline-block; }
+.aslot.free .t { color: var(--mint-d); }
+.aslot.off { opacity: .5; }
+.link { direction: ltr; text-align: left; font-size: 14px; color: var(--mute); word-break: break-all; }
+.dayh { margin: 14px 2px 2px; font-weight: 800; color: var(--rose-d); }
