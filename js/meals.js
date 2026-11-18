@@ -26,7 +26,7 @@
     order.forEach(function (d) { var w = sunday(d); if (!weeks[w]) { weeks[w] = []; wOrder.push(w); } weeks[w].push(d); });
     $('days').innerHTML = wOrder.map(function (w, wi) {
       var ds = weeks[w];
-      return '<section class="week"><h2>שבוע ' + (wi + 1) + '<small>' + esc(C.dayNum(ds[0])) + ' עד ' + esc(C.dayNum(ds[ds.length - 1])) + '</small></h2>' +
+      return '<section class="week"><h2><span class="wn">שבוע ' + (wi + 1) + '</span><small><bdi>' + esc(C.dayNum(ds[0])) + ' עד ' + esc(C.dayNum(ds[ds.length - 1])) + '</bdi></small></h2>' +
         ds.map(function (d) {
           var past = d < today, shab = C.dt(d).getDay() === 6;
           var chips = byDay[d].slice().sort(function (a, b) { return rank(a) - rank(b) || a.id - b.id; }).map(function (s) {
