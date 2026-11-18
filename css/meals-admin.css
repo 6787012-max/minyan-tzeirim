@@ -24,3 +24,16 @@
 .aslot.off { opacity: .5; }
 .link { direction: ltr; text-align: left; font-size: 14px; color: var(--mute); word-break: break-all; }
 .dayh { margin: 14px 2px 2px; font-weight: 800; color: var(--rose-d); }
+.h2s { margin: 16px 0 4px; font-family: var(--head); font-weight: 400; font-size: 17px; color: var(--rose-d); }
+.tplwrap { overflow-x: auto; }
+.tpl { border-collapse: collapse; font-size: 13.5px; margin-top: 6px; }
+.tpl th, .tpl td { padding: 4px 8px; text-align: center; border-bottom: 1px solid var(--line); }
+.tpl th { font-weight: 400; color: var(--rose-d); font-size: 12.5px; }
+.tpl td:first-child { text-align: right; color: var(--rose-d); }
+.chk { display: block; margin-top: 12px; font-size: 14px; color: var(--mute); }
+.editbox { margin-top: 8px; background: var(--rose-l); border-radius: 14px; padding: 4px 10px 10px; }
+.card h2 { font-family: var(--head); font-weight: 400; }
+.ah { font-family: var(--head); font-weight: 400; }
+.sm { font-weight: 400; }
+.f input[hidden], #sl[hidden] { display: none; }
+#sl { font: inherit; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 12px; }
