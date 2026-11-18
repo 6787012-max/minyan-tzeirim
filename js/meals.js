@@ -11,17 +11,17 @@
 
   function render() {
     var e = DATA.event; today = DATA.today || C.localToday();
-    document.title = 'ארוחות ל' + e.family + ' · עזר ליולדת';
+    document.title = 'ארוחות ל' + e.family + ' · פינוק ליולדת';
     var bring = Object.keys(e.bring || {}).filter(function (k) { return e.bring[k]; });
-    $('hero').innerHTML = '<div class="hero"><div class="kicker">עזר ליולדת · שיבוץ ארוחות</div><h1>' + esc(e.family) + '</h1>' +
+    $('hero').innerHTML = '<div class="hero"><div class="kicker">פינוק ליולדת · שיבוץ ארוחות</div><h1>' + esc(e.family) + '</h1>' +
       '<div class="dates">' + esc(C.fmtShort(e.date_from)) + ' עד ' + esc(C.fmtShort(e.date_to)) + (e.address ? ' · ' + esc(e.address) : '') + '</div>' +
       (e.notes ? '<div class="note"><b>חשוב לדעת:</b> ' + esc(e.notes) + '</div>' : '') +
-      (bring.length ? '<details class="bring"><summary>מה מביאים לכל ארוחה</summary>' + bring.map(function (k) { return '<div><b>' + esc(KIND_LABEL[k] || k) + ':</b> ' + esc(e.bring[k]) + '</div>'; }).join('') + '</details>' : '') +
-      (e.closed ? '<div class="closed-banner">השיבוץ נסגר, תודה לכולן!</div>' : '') + '</div>';
+      (bring.length ? '<details class="bring"><summary>מה כיף להביא לכל ארוחה</summary>' + bring.map(function (k) { return '<div><b>' + esc(KIND_LABEL[k] || k) + ':</b> ' + esc(e.bring[k]) + '</div>'; }).join('') + '</details>' : '') +
+      (e.closed ? '<div class="closed-banner">הפינוקים הושלמו, איזה כיף! תודה לכולן.</div>' : '') + '</div>';
     var byDay = {}, order = [];
     DATA.slots.forEach(function (s) { if (!byDay[s.day]) { byDay[s.day] = []; order.push(s.day); } byDay[s.day].push(s); });
     order.sort();
-    if (!order.length) { $('days').innerHTML = '<div class="empty">אין עדיין משבצות.</div>'; return; }
+    if (!order.length) { $('days').innerHTML = '<div class="empty">עוד מכינות את לוח הפינוקים, מיד חוזרים.</div>'; return; }
     var weeks = {}, wOrder = [];
     order.forEach(function (d) { var w = sunday(d); if (!weeks[w]) { weeks[w] = []; wOrder.push(w); } weeks[w].push(d); });
     $('days').innerHTML = wOrder.map(function (w, wi) {
@@ -34,7 +34,7 @@
               return '<button class="chip taken" data-info="' + s.id + '" type="button"><span class="m">' + esc(s.short) + '</span><span class="n">✓ ' + esc(s.taken.name) + '</span></button>';
             }
             var off = e.closed || past;
-            return '<button class="chip free' + (off ? ' off' : '') + '" data-open="' + s.id + '" type="button"' + (off ? ' disabled' : '') + '><span class="m">' + esc(s.short) + '</span><span class="n">' + (off ? 'פנוי' : 'פנוי +') + '</span></button>';
+            return '<button class="chip free' + (off ? ' off' : '') + '" data-open="' + s.id + '" type="button"' + (off ? ' disabled' : '') + '><span class="m">' + esc(s.short) + '</span><span class="n">' + (off ? '·' : 'אני מפנקת') + '</span></button>';
           }).join('');
           return '<div class="drow' + (shab ? ' shab' : '') + (past ? ' past' : '') + (d === today ? ' today' : '') + '"><div class="dlab"><b>' + esc(C.dayName(d)) + '</b><span>' + esc(C.dayNum(d)) + '</span></div><div class="chips">' + chips + '</div></div>';
         }).join('') + '</section>';
@@ -44,9 +44,9 @@
   function find(id) { return DATA.slots.filter(function (x) { return x.id === id; })[0]; }
   function load(quiet) {
     return C.call({ action: 'get', slug: slug }).then(function (d) {
-      if (!d.ok) { if (!quiet) $('days').innerHTML = '<div class="err">לא מצאנו את הארוחות האלה. כדאי לבדוק את הקישור.</div>'; return; }
+      if (!d.ok) { if (!quiet) $('days').innerHTML = '<div class="err">לא מצאנו את הדף הזה. כדאי לבדוק את הקישור.</div>'; return; }
       DATA = d; if (!C.isSignOpen()) render(); else DATA.stale = true;
-    }).catch(function () { if (!quiet) $('days').innerHTML = '<div class="err">אין חיבור כרגע. נסו לרענן.</div>'; });
+    }).catch(function () { if (!quiet) $('days').innerHTML = '<div class="err">אין חיבור כרגע, נסו לרענן.</div>'; });
   }
   function refresh() { return load(true).then(function () { if (DATA) render(); }); }
   C.onInfoClose = function () { if (DATA && DATA.stale) { DATA.stale = false; render(); } };
@@ -65,13 +65,13 @@
       var mine = !!C.tokens(slug)[t.id], br = (DATA.event.bring || {})[t.kind];
       C.openInfo('<h3>' + esc(t.label) + '</h3><div class="sub">' + esc(C.fmtFull(t.day)) + ' · ל' + esc(DATA.event.family) + '</div>' +
         '<div class="who">' + esc(t.taken.name) + '</div><div class="dish">' + esc(t.taken.dish) + '</div><div class="ph">' + esc(t.taken.phone) + '</div>' +
-        (br ? '<div class="bringbox"><b>מה מביאים?</b> ' + esc(br) + '</div>' : '') +
-        '<div class="btnrow">' + (mine ? '<button class="btn" id="iCancel" type="button">לבטל את ההרשמה שלי</button>' : '') + '<button class="btn ghost" id="iX" type="button">סגירה</button></div>');
+        (br ? '<div class="bringbox"><b>מה כיף להביא?</b> ' + esc(br) + '</div>' : '') +
+        '<div class="btnrow">' + (mine ? '<button class="btn" id="iCancel" type="button">לשחרר את הארוחה שלי</button>' : '') + '<button class="btn ghost" id="iX" type="button">סגירה</button></div>');
       $('iX').onclick = C.closeInfo;
       if (mine) $('iCancel').onclick = function () {
-        if (!confirm('לבטל את ההרשמה שלך לארוחה הזאת?')) return;
+        if (!confirm('לשחרר את הארוחה שלך, כדי שמישהי אחרת תפנק?')) return;
         C.call({ action: 'cancel', slot_id: t.id, token: C.tokens(slug)[t.id] || '' }).then(function (d) {
-          if (d.ok) { C.saveTok(slug, t.id, null); C.toast('ההרשמה בוטלה'); } else C.toast('לא הצלחנו לבטל. אפשר לפנות למארגנת.');
+          if (d.ok) { C.saveTok(slug, t.id, null); C.toast('שחררת את הארוחה, תודה שעדכנת'); } else C.toast('לא הצלחנו לשחרר. אפשר לפנות למארגנת.');
           C.closeInfo(); refresh();
         });
       };

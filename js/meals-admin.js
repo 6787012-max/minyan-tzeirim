@@ -29,12 +29,12 @@
   function pubLink(slug) { return SITE + '/meals.html?e=' + slug; }
   function homeLink() { return SITE + '/yoledet.html'; }
   function groupMsg(e) {
-    return 'שלום וברכה,\nנפתח שיבוץ ארוחות ל' + e.family + '.\nמי שיכולה לקחת ארוחה מוזמנת לבחור יום בקישור:\n' + pubLink(e.slug) + '\nכל המשפחות שצריכות עזרה, ומה דחוף היום ומחר:\n' + homeLink() + '\nתודה רבה!';
+    return 'שלום וברכה,\nמזל טוב ל' + e.family + '!\nפותחים לוח פינוקים: מי שרוצה לפנק את היולדת בארוחה טעימה בוחרת יום בקישור:\n' + pubLink(e.slug) + '\nוכאן כל השמחות שלנו עכשיו, ומה עוד מחכה לפינוק היום ומחר:\n' + homeLink() + '\nאיזה כיף שאנחנו יחד!';
   }
   function remindUrl(e, s) {
     var t = s.taken, first = t.name.split(' ')[0];
-    var text = 'שלום ' + first + ',\nתזכורת קטנה: ב' + fmtFull(s.day) + ' (' + s.label + ') את מכינה ' + t.dish + ' ל' + e.family + '.' +
-      (e.address ? '\nהכתובת: ' + e.address + '.' : '') + '\nתודה רבה על העזרה!';
+    var text = 'שלום ' + first + ',\nתזכורת חמה: ב' + fmtFull(s.day) + ' (' + s.label + ') את מפנקת עם ' + t.dish + ' את ' + e.family + '.' +
+      (e.address ? '\nהכתובת: ' + e.address + '.' : '') + '\nהיא תשמח מאוד, איזה כיף שאת מפנקת!';
     return 'https://wa.me/972' + String(t.phone_raw).replace(/^0/, '') + '?text=' + encodeURIComponent(text);
   }
   function tplHtml(tpl) {

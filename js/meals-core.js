@@ -31,11 +31,11 @@
     '<h3 id="fTitle"></h3><div class="sub" id="fSub"></div><div class="bringbox" id="fBring" hidden></div>' +
     '<div class="f"><label for="fName">השם שלך</label><input id="fName" maxlength="60" placeholder="מתחילות להקליד, ונציע שם מוכר" required><div class="sug" id="sug" hidden></div></div>' +
     '<div class="f"><label for="fPhone">טלפון</label><input id="fPhone" class="ltr" type="tel" inputmode="tel" maxlength="20" placeholder="050-1234567"><div class="hintline" id="phHint"></div></div>' +
-    '<div class="f"><label for="fDish">מה מכינות?</label><input id="fDish" maxlength="120" placeholder="למשל: מרק עוף, אורז וקוגל" required></div>' +
+    '<div class="f"><label for="fDish">מה מפנקות?</label><input id="fDish" maxlength="120" placeholder="למשל: מרק עוף, אורז וקוגל" required></div>' +
     '<div class="msg" id="fMsg"></div>' +
-    '<div class="btnrow"><button class="btn" id="fGo" type="submit">אני לוקחת!</button><button class="btn ghost" id="fX" type="button">סגירה</button></div></form>';
+    '<div class="btnrow"><button class="btn" id="fGo" type="submit">אני מפנקת!</button><button class="btn ghost" id="fX" type="button">סגירה</button></div></form>';
   var HINT = 'הטלפון יוצג לכולן בצורה מוסתרת חלקית.';
-  var ERR = { taken: 'מצטערים, מישהי הקדימה אותך ולקחה את המשבצת. בחרי משבצת אחרת.', phone: 'נא למלא טלפון תקין (אפשר להשאיר ריק רק אם בחרת שם מהרשימה).', name: 'נא למלא שם.', dish: 'נא לכתוב מה מכינים.', closed: 'השיבוץ נסגר.', rate: 'נסי שוב בעוד רגע.', net: 'אין חיבור, נסי שוב.' };
+  var ERR = { taken: 'וואו, מישהי הקדימה אותך ופינקה בדיוק את הארוחה הזאת. אפשר לבחור ארוחה אחרת שמחכה לפינוק.', phone: 'נא למלא טלפון תקין (אפשר להשאיר ריק רק אם בחרת שם מהרשימה).', name: 'נא למלא שם.', dish: 'נא לכתוב במה מפנקים.', closed: 'הפינוקים כבר הושלמו, תודה!', rate: 'עוד רגע ננסה שוב, נסי בעוד דקה.', net: 'אין חיבור כרגע, נסי שוב.' };
   var cur = null, picked = null, busy = false, sugTimer = null, sugSeq = 0, built = false;
 
   function build() {
@@ -73,7 +73,7 @@
       var c = cur;
       C.call({ action: 'sign', slug: c.slug, slot_id: c.slot_id, name: $('fName').value, phone: $('fPhone').value, dish: $('fDish').value, contact_id: picked ? picked.id : 0 }).then(function (d) {
         busy = false;
-        if (d.ok) { C.saveTok(c.slug, c.slot_id, d.token); C.closeSign(true); C.toast('תודה רבה! הארוחה שלך נרשמה'); if (c.onDone) c.onDone(true); return; }
+        if (d.ok) { C.saveTok(c.slug, c.slot_id, d.token); C.closeSign(true); C.toast('איזה כיף! הארוחה שלך תשמח מאוד'); if (c.onDone) c.onDone(true); return; }
         $('fMsg').textContent = ERR[d.error] || 'משהו השתבש, נסי שוב.'; $('fGo').disabled = false;
         if (d.error === 'taken' && c.onDone) c.onDone(false);
       });
@@ -84,7 +84,7 @@
   C.openSign = function (o) {
     build(); cur = o; picked = null;
     $('fTitle').textContent = o.title; $('fSub').textContent = o.sub || '';
-    if (o.bring) { $('fBring').hidden = false; $('fBring').innerHTML = '<b>מה מביאים?</b> ' + C.esc(o.bring); } else $('fBring').hidden = true;
+    if (o.bring) { $('fBring').hidden = false; $('fBring').innerHTML = '<b>מה כיף להביא?</b> ' + C.esc(o.bring); } else $('fBring').hidden = true;
     $('fName').value = ''; $('fPhone').value = ''; $('fDish').value = ''; $('fMsg').textContent = '';
     $('fPhone').placeholder = '050-1234567'; $('phHint').textContent = HINT;
     $('sug').hidden = true; $('fGo').disabled = false;
