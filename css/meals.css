@@ -83,7 +83,7 @@ b, strong { font-weight: 400; color: var(--rose-d); }
 /* ---------- דף הבית: עזר ליולדת ---------- */
 .brand { text-align: center; padding: 6px 0 2px; }
 .brand svg { width: 150px; height: auto; display: block; margin: 0 auto; }
-.brand .tag { color: var(--mute); font-size: 14.5px; margin-top: -2px; }
+.brand .tag { color: var(--mute); font-size: 14.5px; margin-top: 8px; padding: 0 10px; }
 .urgent { margin-top: 12px; background: linear-gradient(160deg, #fff1e6, var(--rose-l)); border: 1.5px solid #f1cbb5; border-radius: 22px; padding: 12px 12px 10px; box-shadow: 0 6px 18px rgba(215, 156, 120, .18); }
 .urgent h2 { margin: 0 4px 2px; font-family: var(--head); font-weight: 400; font-size: 21px; color: var(--rose-d); }
 .urgent .sub { margin: 0 4px 6px; font-size: 13.5px; color: var(--mute); }
