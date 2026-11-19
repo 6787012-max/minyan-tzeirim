@@ -36,7 +36,7 @@
 <body>
 <main>
   <h1>העלאת הקלטות</h1>
-  <p class="lead">בוחרים את כל ההקלטות בבת אחת, ולוחצים על שליחה.</p>
+  <p class="lead">לוחצים על הכפתור ומסמנים את כל ההקלטות.<br>לא לסגור את הדף עד שכתוב "התקבל".</p>
 
   <div id="app">
     <button id="pick" type="button">בחר הקלטות ושלח</button>
@@ -93,7 +93,19 @@
     pct.textContent = p + '%';
   }
 
+  var wake = null;
+  function keepAwake() {
+    try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {}); } catch (e) {}
+  }
+  function releaseAwake() {
+    try { if (wake) { wake.release(); wake = null; } } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && pick.disabled) keepAwake();
+  });
+
   function startUpload(files) {
+    keepAwake();
     queue = [];
     totalBytes = 0;
     doneBytes = {};
@@ -195,6 +207,7 @@
   }
 
   function allDone() {
+    releaseAwake();
     pick.disabled = false;
     input.value = '';
     bar.style.width = '100%';
@@ -203,6 +216,7 @@
   }
 
   function showError() {
+    releaseAwake();
     pick.disabled = false;
     setMsg('משהו השתבש. נסו שוב.', 'err');
     retry.style.display = 'inline-block';
