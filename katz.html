@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>העלאת הקלטות</title>
+<style>
+  :root { --bg:#f7f5f0; --fg:#1d1d1f; --accent:#1f5f8b; --ok:#2e7d32; --err:#b3261e; --muted:#5f6368; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#15171a; --fg:#f2f2f2; --accent:#7fb8e6; --ok:#7bd88f; --err:#ff8a80; --muted:#b0b4ba; }
+  }
+  :root[data-theme="dark"] { --bg:#15171a; --fg:#f2f2f2; --accent:#7fb8e6; --ok:#7bd88f; --err:#ff8a80; --muted:#b0b4ba; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font-family: system-ui, "Segoe UI", Arial, sans-serif;
+         font-size:22px; line-height:1.5; }
+  main { max-width:560px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:34px; margin:12px 0 8px; text-align:center; }
+  p.lead { text-align:center; margin:0 0 24px; color:var(--muted); }
+  #pick { display:block; width:100%; min-height:120px; font-size:32px; font-weight:700; color:#fff;
+          background:var(--accent); border:0; border-radius:20px; cursor:pointer; padding:20px; }
+  #pick:disabled { opacity:.5; cursor:default; }
+  #files { display:none; }
+  #status { margin-top:28px; }
+  #barWrap { height:28px; background:rgba(127,127,127,.25); border-radius:14px; overflow:hidden; display:none; }
+  #bar { height:100%; width:0%; background:var(--accent); transition:width .3s; }
+  #pct { text-align:center; font-size:24px; margin-top:8px; display:none; }
+  #msg { text-align:center; font-size:30px; font-weight:700; margin-top:24px; min-height:40px; }
+  #msg.ok { color:var(--ok); }
+  #msg.err { color:var(--err); font-size:24px; }
+  #retry { display:none; margin:16px auto 0; font-size:24px; padding:14px 28px; border-radius:14px;
+           border:2px solid var(--accent); background:transparent; color:var(--accent); cursor:pointer; }
+  .bad { text-align:center; font-size:26px; color:var(--err); margin-top:40px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>העלאת הקלטות</h1>
+  <p class="lead">בוחרים את כל ההקלטות בבת אחת, ולוחצים על שליחה.</p>
+
+  <div id="app">
+    <button id="pick" type="button">בחר הקלטות ושלח</button>
+    <input id="files" type="file" accept="audio/*,video/*" multiple>
+
+    <div id="status">
+      <div id="barWrap"><div id="bar"></div></div>
+      <div id="pct"></div>
+      <div id="msg" role="status" aria-live="polite"></div>
+      <button id="retry" type="button">נסו שוב</button>
+    </div>
+  </div>
+  <div id="nokey" class="bad" hidden>הקישור לא שלם. בקשו מיוסף קישור חדש.</div>
+</main>
+
+<script>
+(function () {
+  var FUNC = 'https://cmsusfmwjtpfewbydzpi.supabase.co/functions/v1/katz-upload';
+  var CHUNK = 8 * 1024 * 1024;            // חייב להיות כפולה של 256KB
+  var PARALLEL = 3;
+  var MAX_TRIES = 4;
+
+  var key = '';
+  try { key = new URLSearchParams(location.search).get('k') || ''; } catch (e) {}
+  if (!key) {
+    document.getElementById('app').hidden = true;
+    document.getElementById('nokey').hidden = false;
+    return;
+  }
+
+  var pick = document.getElementById('pick');
+  var input = document.getElementById('files');
+  var barWrap = document.getElementById('barWrap');
+  var bar = document.getElementById('bar');
+  var pct = document.getElementById('pct');
+  var msg = document.getElementById('msg');
+  var retry = document.getElementById('retry');
+
+  var queue = [];
+  var totalBytes = 0;
+  var doneBytes = {};       // לכל קובץ: כמה בייטים הועלו
+  var failed = false;
+
+  function setMsg(text, cls) {
+    msg.textContent = text;
+    msg.className = cls || '';
+  }
+
+  function paint() {
+    var sent = 0;
+    for (var k in doneBytes) sent += doneBytes[k];
+    var p = totalBytes ? Math.min(100, Math.floor(sent * 100 / totalBytes)) : 0;
+    bar.style.width = p + '%';
+    pct.textContent = p + '%';
+  }
+
+  function startUpload(files) {
+    queue = [];
+    totalBytes = 0;
+    doneBytes = {};
+    failed = false;
+    for (var i = 0; i < files.length; i++) {
+      queue.push({ file: files[i], index: i, id: 'f' + i });
+      totalBytes += files[i].size;
+      doneBytes['f' + i] = 0;
+    }
+    pick.disabled = true;
+    retry.style.display = 'none';
+    barWrap.style.display = 'block';
+    pct.style.display = 'block';
+    setMsg('שולחים... אנא המתינו', '');
+    paint();
+    runPool();
+  }
+
+  function runPool() {
+    var running = 0;
+    var finished = 0;
+    var total = queue.length;
+
+    function next() {
+      if (failed) return;
+      if (!queue.length) {
+        if (running === 0) allDone();
+        return;
+      }
+      var item = queue.shift();
+      running++;
+      uploadOne(item, function (ok) {
+        running--;
+        if (ok) finished++;
+        else failed = true;
+        if (failed) return showError();
+        if (finished === total) return allDone();
+        next();
+      });
+    }
+    for (var i = 0; i < PARALLEL; i++) next();
+  }
+
+  function uploadOne(item, cb) {
+    var f = item.file;
+    var tries = 0;
+    createSession(f, function (err, session) {
+      if (err) return cb(false);
+      sendChunks(f, session, item.id, 0, 0, cb);
+    });
+  }
+
+  function createSession(f, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', FUNC + '?k=' + encodeURIComponent(key));
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function () {
+      try {
+        var j = JSON.parse(xhr.responseText || '{}');
+        if (xhr.status === 200 && j.session) return cb(null, j.session);
+        if (j.message) setMsg(j.message, 'err');
+        cb(new Error('session'));
+      } catch (e) { cb(e); }
+    };
+    xhr.onerror = function () { cb(new Error('net')); };
+    xhr.send(JSON.stringify({ name: f.name, size: f.size, type: f.type, lastModified: f.lastModified }));
+  }
+
+  // שולח מקטע, מתקדם, ומנסה שוב מהמקום שנשאר אם החיבור נפל
+  function sendChunks(f, session, id, start, tries, cb) {
+    if (start >= f.size) return cb(true);
+    var end = Math.min(f.size, start + CHUNK);
+    var blob = f.slice(start, end);
+    var xhr = new XMLHttpRequest();
+    xhr.open('PUT', session);
+    xhr.setRequestHeader('Content-Range', 'bytes ' + start + '-' + (end - 1) + '/' + f.size);
+    xhr.onload = function () {
+      if (xhr.status === 308) {
+        var r = xhr.getResponseHeader('Range');
+        var got = r ? parseInt(r.split('-')[1], 10) + 1 : end;
+        doneBytes[id] = got;
+        paint();
+        return sendChunks(f, session, id, got, 0, cb);
+      }
+      if (xhr.status === 200 || xhr.status === 201) {
+        doneBytes[id] = f.size;
+        paint();
+        return cb(true);
+      }
+      retryChunk(f, session, id, start, tries, cb);
+    };
+    xhr.onerror = function () { retryChunk(f, session, id, start, tries, cb); };
+    xhr.send(blob);
+  }
+
+  function retryChunk(f, session, id, start, tries, cb) {
+    if (tries + 1 >= MAX_TRIES) return cb(false);
+    setTimeout(function () { sendChunks(f, session, id, start, tries + 1, cb); }, 2000 * (tries + 1));
+  }
+
+  function allDone() {
+    pick.disabled = false;
+    input.value = '';
+    bar.style.width = '100%';
+    pct.textContent = '100%';
+    setMsg('התקבל, תודה!', 'ok');
+  }
+
+  function showError() {
+    pick.disabled = false;
+    setMsg('משהו השתבש. נסו שוב.', 'err');
+    retry.style.display = 'inline-block';
+  }
+
+  pick.addEventListener('click', function () { input.click(); });
+  input.addEventListener('change', function () {
+    if (input.files && input.files.length) startUpload(Array.prototype.slice.call(input.files));
+  });
+  retry.addEventListener('click', function () { input.click(); });
+})();
+</script>
+</body>
+</html>
