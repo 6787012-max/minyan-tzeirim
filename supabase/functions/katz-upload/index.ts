@@ -11,7 +11,8 @@ const CLIENT_SECRET = Deno.env.get('KATZ_DRIVE_CLIENT_SECRET') ?? '';
 const REFRESH = Deno.env.get('KATZ_DRIVE_REFRESH_TOKEN') ?? '';
 const FOLDER = Deno.env.get('KATZ_UPLOAD_FOLDER_ID') ?? '';
 const PAGE_ORIGIN = 'https://6787012-max.github.io';
-const ALLOWED = new Set([PAGE_ORIGIN, 'http://localhost:8765', 'http://127.0.0.1:8765']);
+const PAGE_ORIGIN_2 = 'https://minyan.mokad.co.il'; // הדומיין שאליו הדף מפנה
+const ALLOWED = new Set([PAGE_ORIGIN, PAGE_ORIGIN_2, 'http://localhost:8765', 'http://127.0.0.1:8765']);
 const MAX_BYTES = 2 * 1024 * 1024 * 1024; // 2GB
 const AV_EXT = new Set(['m4a', 'mp3', 'wav', 'ogg', 'opus', 'aac', 'mp4', 'mov', 'mkv', 'webm']);
 
