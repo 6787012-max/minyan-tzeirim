@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>עמוד הקורס</title>
+<style>
+:root{--bg:#f7f5f0;--fg:#1d1d1f;--card:#ffffff;--line:#d9d4c7;--accent:#1f5f8b;--ok:#2e7d32;--err:#b3261e;--muted:#5f6368;--soft:#e9f0f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15171a;--fg:#f2f2f2;--card:#1f2226;--line:#3a3f46;--accent:#7fb8e6;--ok:#7bd88f;--err:#ff8a80;--muted:#b0b4ba;--soft:#22303c}}
+:root[data-theme="dark"]{--bg:#15171a;--fg:#f2f2f2;--card:#1f2226;--line:#3a3f46;--accent:#7fb8e6;--ok:#7bd88f;--err:#ff8a80;--muted:#b0b4ba;--soft:#22303c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,"Segoe UI",Arial,sans-serif;font-size:18px;line-height:1.6}
+main{max-width:680px;margin:0 auto;padding:14px 16px 56px}
+nav{font-size:16px;margin-bottom:6px}
+nav a{color:var(--accent);margin-left:12px}
+h1{font-size:28px;margin:6px 0 4px}
+h2{font-size:22px;margin:30px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{font-size:18px;margin:16px 0 6px}
+a{color:var(--accent)}
+.muted{color:var(--muted);font-size:16px}
+.soon{color:var(--muted);font-style:italic}
+.linkbtn{display:inline-block;margin:6px 0;padding:10px 16px;border-radius:12px;border:2px solid var(--accent);color:var(--accent);text-decoration:none;font-weight:700}
+.block{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0}
+.step{border-top:1px dashed var(--line);padding:10px 0}
+.step:first-child{border-top:0}
+.label{font-weight:700;color:var(--accent);font-size:16px}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 14px;margin:12px 0}
+summary{cursor:pointer;font-size:19px;font-weight:700;padding:8px 0}
+.game{border-top:1px dashed var(--line);padding:12px 0}
+.game:first-child{border-top:0}
+.gname{font-weight:700;font-size:18px}
+.gtext{margin:4px 0;font-size:17px}
+.cbox{margin-top:8px;padding:8px 10px;background:var(--soft);border-radius:12px}
+.cbox .c{background:var(--card);border-radius:10px;padding:8px 10px;margin:6px 0;font-size:16px}
+.cbox .who{font-size:14px;color:var(--muted)}
+.kind{font-size:13px;font-weight:700;color:var(--accent);margin-left:6px}
+.btn{min-height:44px;padding:8px 14px;font:inherit;font-size:16px;font-weight:700;border-radius:10px;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;margin:4px 4px 0 0}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{background:transparent;color:var(--err);border-color:var(--err)}
+.btn:disabled{opacity:.5}
+textarea,input,select{width:100%;font:inherit;font-size:17px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);margin-top:4px}
+textarea{min-height:76px;resize:vertical}
+.form{display:none;margin-top:8px}
+.form.open{display:block}
+.cmsg{min-height:20px;font-size:15px;font-weight:700;margin-top:4px}
+.cmsg.err{color:var(--err)}
+.cmsg.ok{color:var(--ok)}
+.bad{font-size:20px;color:var(--err);text-align:center;margin-top:40px}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<main>
+  <nav><a id="lnkHome" href="index.html">דף ראשי</a><a id="lnkRides" href="rides.html">נסיעות לצפת</a></nav>
+  <div id="err" class="bad hidden"></div>
+
+  <div id="app">
+    <h1>עמוד הקורס</h1>
+    <p class="muted" id="updated"></p>
+    <p class="muted">אפשר להעיר, להוסיף או להציע תיקון לכל סיכום ולכל משחק. ההערות נשמרות, ונכנסות לחוברת בעדכון הבא. לכל הערה יש עריכה ומחיקה רק במכשיר שבו כתבתם אותה.</p>
+
+    <h2>החוברת</h2>
+    <div class="block" id="booklet"></div>
+    <h3>מה השתנה בחוברת</h3>
+    <div id="changelog"></div>
+
+    <h2>סרטוני סיכום</h2>
+    <div id="videos"></div>
+
+    <h2>המפגשים</h2>
+    <div id="meetings"></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var params = new URLSearchParams(location.search);
+  var K = params.get('k') || '';
+  var API = 'https://cmsusfmwjtpfewbydzpi.supabase.co/functions/v1/katz-course';
+  function $(id) { return document.getElementById(id); }
+
+  if (!K) {
+    $('app').classList.add('hidden');
+    $('err').textContent = 'הקישור לא שלם. בקשו מיוסף קישור חדש.';
+    $('err').classList.remove('hidden');
+    return;
+  }
+  var q = '?k=' + encodeURIComponent(K);
+  $('lnkHome').href = 'index.html' + q;
+  $('lnkRides').href = 'rides.html' + q;
+
+  var KINDS = { note: 'הערה', fix: 'הצעה לתיקון', add: 'הוספה או רעיון' };
+  var comments = [];
+  var boxes = {};
+  var course = null;
+
+  /* קוד העריכה של כל הערה נשמר בדפדפן בלבד */
+  function ecMap() { try { return JSON.parse(localStorage.getItem('katz_ec') || '{}'); } catch (e) { return {}; } }
+  function ecGet(id) { return ecMap()[id] || ''; }
+  function ecSet(id, ec) { try { var m = ecMap(); m[id] = ec; localStorage.setItem('katz_ec', JSON.stringify(m)); } catch (e) {} }
+  function ecDel(id) { try { var m = ecMap(); delete m[id]; localStorage.setItem('katz_ec', JSON.stringify(m)); } catch (e) {} }
+  function savedName() { try { return localStorage.getItem('katz_name') || ''; } catch (e) { return ''; } }
+  function setName(n) { try { localStorage.setItem('katz_name', n); } catch (e) {} }
+  function newEc() {
+    var a = new Uint8Array(12), s = '', alpha = 'abcdefghijkmnpqrstuvwxyz23456789';
+    crypto.getRandomValues(a);
+    for (var i = 0; i < a.length; i++) s += alpha[a[i] % alpha.length];
+    return s;
+  }
+
+  function api(action, body) {
+    var url = API + '?k=' + encodeURIComponent(K) + '&a=' + action;
+    var opt = body
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+      : { cache: 'no-store' };
+    return fetch(url, opt).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, data: j }; });
+    }).catch(function () {
+      return { ok: false, data: { message: 'אין חיבור לשרת, נסו שוב' } };
+    });
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('he-IL');
+  }
+
+  function loadComments() {
+    return api('comments').then(function (res) {
+      if (res.ok) comments = res.data.comments || [];
+      else if (!comments.length) comments = [];
+      return res.ok;
+    });
+  }
+
+  function renderHeader(c) {
+    $('updated').textContent = 'עודכן לאחרונה: ' + (c.updated || '');
+    var b = $('booklet');
+    b.textContent = '';
+    if (c.booklet && c.booklet.full_url) {
+      var a = el('a', 'linkbtn', 'לפתיחת החוברת המלאה');
+      a.href = c.booklet.full_url; a.target = '_blank'; a.rel = 'noopener';
+      b.appendChild(a);
+    } else {
+      b.appendChild(el('p', 'soon', 'החוברת המלאה: בקרוב'));
+    }
+    if (c.booklet && c.booklet.short_url) {
+      var s = el('a', 'linkbtn', 'לפתיחת החוברת המקוצרת');
+      s.href = c.booklet.short_url; s.target = '_blank'; s.rel = 'noopener';
+      b.appendChild(s);
+    } else {
+      b.appendChild(el('p', 'soon', 'החוברת המקוצרת: בקרוב'));
+    }
+  }
+
+  function renderChangelog(list) {
+    var box = $('changelog');
+    box.textContent = '';
+    if (!list || !list.length) { box.appendChild(el('p', 'muted', 'עדיין אין עדכונים.')); return; }
+    list.forEach(function (u) {
+      var blk = el('div', 'block');
+      blk.appendChild(el('div', 'label', u.date || ''));
+      blk.appendChild(el('div', '', u.summary || ''));
+      if (Array.isArray(u.items)) {
+        var ul = el('ul');
+        u.items.forEach(function (t) { ul.appendChild(el('li', '', String(t))); });
+        blk.appendChild(ul);
+      }
+      box.appendChild(blk);
+    });
+  }
+
+  function renderVideos(list) {
+    var box = $('videos');
+    box.textContent = '';
+    (list || []).forEach(function (v) {
+      var blk = el('div', 'block');
+      blk.appendChild(el('div', 'label', v.title));
+      if (v.enabled && v.url) {
+        var a = el('a', 'linkbtn', 'לצפייה בסרטון'); a.href = v.url; a.target = '_blank'; a.rel = 'noopener';
+        blk.appendChild(a);
+      } else {
+        blk.appendChild(el('p', 'soon', 'בקרוב'));
+      }
+      box.appendChild(blk);
+    });
+    if (!list || !list.length) box.appendChild(el('p', 'soon', 'בקרוב'));
+  }
+
+  /* תיבת ההערות של יעד אחד (סיכום או משחק). נבנית מחדש אחרי כל שינוי. */
+  function renderBox(target) {
+    var box = boxes[target];
+    if (!box) return;
+    box.textContent = '';
+    var mine = comments.filter(function (c) { return c.target === target; });
+    var wrap = el('div', 'cbox');
+    if (mine.length) {
+      mine.forEach(function (c) { wrap.appendChild(commentEl(c)); });
+    } else {
+      wrap.appendChild(el('div', 'muted', 'עדיין אין הערות.'));
+    }
+    var open = el('button', 'btn', 'הוספת הערה או הצעה'); open.type = 'button';
+    var form = el('div', 'form');
+    var sel = el('select');
+    Object.keys(KINDS).forEach(function (k) { var o = el('option', '', KINDS[k]); o.value = k; sel.appendChild(o); });
+    var ta = el('textarea'); ta.maxLength = 2000; ta.placeholder = 'כתבו כאן';
+    var nm = el('input'); nm.maxLength = 40; nm.placeholder = 'השם שלכם (לא חובה)'; nm.value = savedName();
+    var msg = el('div', 'cmsg');
+    var send = el('button', 'btn', 'שליחה'); send.type = 'button';
+    var cancel = el('button', 'btn ghost', 'ביטול'); cancel.type = 'button';
+    form.appendChild(sel); form.appendChild(ta); form.appendChild(nm); form.appendChild(msg);
+    form.appendChild(send); form.appendChild(cancel);
+    open.addEventListener('click', function () { form.classList.toggle('open'); if (form.classList.contains('open')) ta.focus(); });
+    cancel.addEventListener('click', function () { form.classList.remove('open'); });
+    send.addEventListener('click', function () {
+      var body = ta.value.trim();
+      if (!body) { msg.textContent = 'צריך לכתוב הערה'; msg.className = 'cmsg err'; return; }
+      var ec = newEc();
+      send.disabled = true;
+      api('comment_create', { target: target, kind: sel.value, body: body, name: nm.value.trim(), ec: ec }).then(function (res) {
+        send.disabled = false;
+        if (!res.ok) { msg.textContent = res.data.message || 'השמירה נכשלה'; msg.className = 'cmsg err'; return; }
+        if (res.data.id) ecSet(res.data.id, ec);
+        setName(nm.value.trim());
+        loadComments().then(function () { renderBox(target); });
+      });
+    });
+    wrap.appendChild(open);
+    wrap.appendChild(form);
+    box.appendChild(wrap);
+  }
+
+  function commentEl(c) {
+    var d = el('div', 'c');
+    var head = el('div', 'who');
+    head.appendChild(el('span', 'kind', KINDS[c.kind] || ''));
+    head.appendChild(document.createTextNode((c.name || 'בלי שם') + ' · ' + fmtDate(c.created_at)));
+    d.appendChild(head);
+    var text = el('div', '', c.body);
+    d.appendChild(text);
+    if (ecGet(c.id)) {
+      var ed = el('button', 'btn ghost', 'עריכה'); ed.type = 'button';
+      var del = el('button', 'btn danger', 'מחיקה'); del.type = 'button';
+      var row = el('div');
+      row.appendChild(ed); row.appendChild(del);
+      d.appendChild(row);
+      ed.addEventListener('click', function () { editComment(c, d, text); });
+      del.addEventListener('click', function () {
+        if (!confirm('למחוק את ההערה?')) return;
+        api('comment_delete', { id: c.id, ec: ecGet(c.id) }).then(function (res) {
+          if (res.ok) { ecDel(c.id); loadComments().then(function () { renderBox(c.target); }); }
+          else alert(res.data.message || 'המחיקה נכשלה');
+        });
+      });
+    }
+    return d;
+  }
+
+  function editComment(c, holder, textEl) {
+    holder.textContent = '';
+    var sel = el('select');
+    Object.keys(KINDS).forEach(function (k) { var o = el('option', '', KINDS[k]); o.value = k; if (k === c.kind) o.selected = true; sel.appendChild(o); });
+    var ta = el('textarea'); ta.maxLength = 2000; ta.value = c.body;
+    var msg = el('div', 'cmsg');
+    var save = el('button', 'btn', 'שמירה'); save.type = 'button';
+    var cancel = el('button', 'btn ghost', 'ביטול'); cancel.type = 'button';
+    holder.appendChild(sel); holder.appendChild(ta); holder.appendChild(msg); holder.appendChild(save); holder.appendChild(cancel);
+    cancel.addEventListener('click', function () { renderBox(c.target); });
+    save.addEventListener('click', function () {
+      var body = ta.value.trim();
+      if (!body) { msg.textContent = 'צריך לכתוב הערה'; msg.className = 'cmsg err'; return; }
+      api('comment_update', { id: c.id, ec: ecGet(c.id), body: body, kind: sel.value }).then(function (res) {
+        if (!res.ok) { msg.textContent = res.data.message || 'העדכון נכשל'; msg.className = 'cmsg err'; return; }
+        loadComments().then(function () { renderBox(c.target); });
+      });
+    });
+  }
+
+  function renderMeetings(list) {
+    var root = $('meetings');
+    root.textContent = '';
+    (list || []).forEach(function (m) {
+      var det = el('details');
+      det.appendChild(el('summary', '', m.title + (m.partial ? ' (סיכום חלקי)' : '')));
+      if (m.note) det.appendChild(el('p', 'muted', m.note));
+
+      det.appendChild(el('h3', '', 'שלבי המפגש'));
+      (m.steps || []).forEach(function (s) {
+        var st = el('div', 'step');
+        st.appendChild(el('div', 'gname', s.title));
+        if (s.what) st.appendChild(el('div', 'gtext', s.what));
+        if (s.goal) st.appendChild(el('div', 'gtext', 'מטרה: ' + s.goal));
+        if (s.note) st.appendChild(el('div', 'muted', s.note));
+        var box = el('div'); boxes[s.target] = box; st.appendChild(box);
+        det.appendChild(st);
+      });
+
+      det.appendChild(el('h3', '', 'משחקים'));
+      (m.games || []).forEach(function (g) {
+        var gm = el('div', 'game');
+        gm.appendChild(el('div', 'gname', g.name));
+        if (g.solutions) gm.appendChild(el('div', 'gtext', 'גרסאות ושדרוגים: ' + g.solutions));
+        if (g.processing) gm.appendChild(el('div', 'gtext', 'שאלות לשיחה אחרי המשחק: ' + g.processing));
+        var box = el('div'); boxes[g.target] = box; gm.appendChild(box);
+        det.appendChild(gm);
+      });
+      root.appendChild(det);
+    });
+  }
+
+  function renderAll() {
+    renderHeader(course);
+    renderChangelog(window.__changelog || []);
+    renderVideos(course.videos);
+    renderMeetings(course.meetings);
+    Object.keys(boxes).forEach(renderBox);
+  }
+
+  Promise.all([
+    fetch('data/course.json', { cache: 'no-store' }).then(function (r) { return r.json(); }),
+    fetch('data/changelog.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return []; }),
+    loadComments()
+  ]).then(function (v) {
+    course = v[0];
+    window.__changelog = Array.isArray(v[1]) ? v[1] : [];
+    renderAll();
+  }).catch(function () {
+    $('app').classList.add('hidden');
+    $('err').textContent = 'העמוד לא נטען. נסו לרענן.';
+    $('err').classList.remove('hidden');
+  });
+})();
+</script>
+</body>
+</html>

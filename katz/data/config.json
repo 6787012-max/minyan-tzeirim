@@ -1,0 +1,7 @@
+{
+  "videos": [
+    {"id": "v1", "title": "סרטון סיכום: מפגש 1", "enabled": false, "url": null},
+    {"id": "v2", "title": "סרטון סיכום: מפגש 2", "enabled": false, "url": null},
+    {"id": "v3", "title": "סרטון סיכום: מפגש 3", "enabled": false, "url": null}
+  ]
+}

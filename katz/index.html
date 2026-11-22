@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>קורס חיים כץ</title>
+<style>
+:root{--bg:#f7f5f0;--fg:#1d1d1f;--card:#ffffff;--line:#d9d4c7;--accent:#1f5f8b;--muted:#5f6368;--soft:#e9f0f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15171a;--fg:#f2f2f2;--card:#1f2226;--line:#3a3f46;--accent:#7fb8e6;--muted:#b0b4ba;--soft:#22303c}}
+:root[data-theme="dark"]{--bg:#15171a;--fg:#f2f2f2;--card:#1f2226;--line:#3a3f46;--accent:#7fb8e6;--muted:#b0b4ba;--soft:#22303c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,"Segoe UI",Arial,sans-serif;font-size:18px;line-height:1.6}
+main{max-width:640px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:30px;margin:8px 0 4px;text-align:center}
+.sub{text-align:center;color:var(--muted);margin:0 0 28px}
+.tile{display:block;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin:14px 0;text-decoration:none;color:var(--fg)}
+.tile strong{display:block;font-size:22px;color:var(--accent);margin-bottom:4px}
+.tile span{color:var(--muted)}
+.bad{font-size:20px;color:#b3261e;text-align:center;margin-top:40px}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<main>
+  <h1>קורס חיים כץ</h1>
+  <p class="sub">מרכז גישה · מנחי ODT</p>
+
+  <div id="app">
+    <a class="tile" id="tRides" href="rides.html">
+      <strong>נסיעות לצפת</strong>
+      <span>יום שלישי 24.11, המפגש בשעה 9:30. מי יוצא מאיפה, ומי מחפש טרמפ</span>
+    </a>
+    <a class="tile" id="tCourse" href="course.html">
+      <strong>עמוד הקורס</strong>
+      <span>סרטוני סיכום, החוברת והעדכונים שלה, והערות לסיכומים ולמשחקים</span>
+    </a>
+  </div>
+
+  <div id="nokey" class="bad hidden">הקישור לא שלם. בקשו מיוסף קישור חדש.</div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var K = new URLSearchParams(location.search).get('k') || '';
+  if (!K) {
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('nokey').classList.remove('hidden');
+    return;
+  }
+  var q = '?k=' + encodeURIComponent(K);
+  document.getElementById('tRides').href = 'rides.html' + q;
+  document.getElementById('tCourse').href = 'course.html' + q;
+})();
+</script>
+</body>
+</html>

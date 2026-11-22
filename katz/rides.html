@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>נסיעות לצפת</title>
+<style>
+:root{--bg:#f7f5f0;--fg:#1d1d1f;--card:#ffffff;--line:#d9d4c7;--accent:#1f5f8b;--ok:#2e7d32;--err:#b3261e;--muted:#5f6368;--soft:#e9f0f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15171a;--fg:#f2f2f2;--card:#1f2226;--line:#3a3f46;--accent:#7fb8e6;--ok:#7bd88f;--err:#ff8a80;--muted:#b0b4ba;--soft:#22303c}}
+:root[data-theme="dark"]{--bg:#15171a;--fg:#f2f2f2;--card:#1f2226;--line:#3a3f46;--accent:#7fb8e6;--ok:#7bd88f;--err:#ff8a80;--muted:#b0b4ba;--soft:#22303c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,"Segoe UI",Arial,sans-serif;font-size:18px;line-height:1.55}
+main{max-width:640px;margin:0 auto;padding:14px 16px 56px}
+nav{font-size:16px;margin-bottom:6px}
+nav a{color:var(--accent)}
+h1{font-size:28px;margin:6px 0 8px}
+h2{font-size:21px;margin:26px 0 10px}
+.place{background:var(--soft);border-radius:14px;padding:14px 16px;margin:12px 0}
+.lead{color:var(--muted);margin:8px 0}
+.note{font-size:16px;color:var(--muted)}
+.toggle{display:flex;gap:10px;margin-top:6px}
+.toggle button{flex:1;min-height:56px;font:inherit;font-size:18px;font-weight:700;border-radius:14px;border:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--accent);color:#fff}
+label{display:block;margin:12px 0 4px;font-weight:600}
+input,select,textarea{width:100%;font:inherit;font-size:18px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--fg)}
+textarea{min-height:84px;resize:vertical}
+.btn{min-height:48px;padding:10px 18px;font:inherit;font-size:17px;font-weight:700;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{background:transparent;color:var(--err);border-color:var(--err)}
+.btn:disabled{opacity:.5}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:12px 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:14px;font-weight:700;padding:3px 10px;border-radius:999px}
+.badge.offer{background:#e3f1e5;color:#1e5b24}
+.badge.seek{background:#fbeccf;color:#7a4a00}
+.meta{margin:5px 0;font-size:17px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.stat{background:var(--soft);border-radius:12px;padding:8px 12px;font-size:16px}
+#msg{min-height:26px;font-weight:700;margin:10px 0}
+#msg.ok{color:var(--ok)}
+#msg.err{color:var(--err)}
+.hidden{display:none !important}
+.bad{font-size:20px;color:var(--err);text-align:center;margin-top:40px}
+</style>
+</head>
+<body>
+<main>
+  <nav><a id="back" href="index.html">חזרה לדף הראשי</a></nav>
+  <div id="err" class="bad hidden"></div>
+
+  <div id="app">
+    <h1>נסיעות לצפת</h1>
+    <div class="place">
+      <strong>יום שלישי 24.11.2026, המפגש בשעה 9:30</strong><br>
+      בצפת, בית ציפר, רחוב קרן היסוד (הבית משמאל למלון רות)
+    </div>
+    <p class="lead">כל אחד כותב מאיפה הוא יוצא ובאיזו שעה. מי שיש לו מקומות ברכב כותב כמה מקומות פנויים יש לו, ומי כבר נוסע איתו. מי שמחפש טרמפ כותב את זה. אפשר לראות, לעדכן ולהתעדכן.</p>
+    <p class="note">כפתורי העריכה והמחיקה מופיעים רק במכשיר שבו יצרתם את הכרטיס, כי קוד העריכה נשמר בדפדפן הזה. אם תנקו נתוני דפדפן, תצטרכו לבקש מיוסף לעדכן.</p>
+
+    <div class="stats" id="stats"></div>
+
+    <h2 id="formTitle">להוסיף נסיעה</h2>
+    <div>
+      <div class="toggle">
+        <button type="button" id="bOffer" aria-pressed="true">יש לי מקומות ברכב</button>
+        <button type="button" id="bSeek" aria-pressed="false">אני מחפש טרמפ</button>
+      </div>
+
+      <label for="fName">שם</label>
+      <input id="fName" maxlength="40" autocomplete="name">
+
+      <label for="fCity">מאיזו עיר יוצאים</label>
+      <input id="fCity" maxlength="30" list="cities">
+      <datalist id="cities"></datalist>
+
+      <label for="fTime">שעת יציאה</label>
+      <input id="fTime" maxlength="20" placeholder="למשל 08:00">
+
+      <div id="offerOnly">
+        <label for="fSeats">כמה מקומות פנויים יש לך</label>
+        <input id="fSeats" type="number" min="0" max="12" value="3" inputmode="numeric">
+
+        <label for="fPass">מי כבר נוסע איתך (שם בכל שורה)</label>
+        <textarea id="fPass" placeholder="אפשר להשאיר ריק"></textarea>
+      </div>
+
+      <label for="fPickup">איפה אפשר לאסוף אותך (לא חובה)</label>
+      <input id="fPickup" maxlength="200">
+
+      <label for="fContact">איך יוצרים איתך קשר (לא חובה)</label>
+      <input id="fContact" maxlength="100">
+
+      <label for="fNote">הערה (לא חובה)</label>
+      <textarea id="fNote" maxlength="300"></textarea>
+
+      <div class="btnrow">
+        <button class="btn" id="save" type="button">שמירה</button>
+        <button class="btn ghost hidden" id="cancel" type="button">ביטול</button>
+      </div>
+      <div id="msg" role="status" aria-live="polite"></div>
+    </div>
+
+    <h2>הנסיעות</h2>
+    <label for="filter">סינון לפי עיר</label>
+    <select id="filter"></select>
+    <div id="list"></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var params = new URLSearchParams(location.search);
+  var K = params.get('k') || '';
+  var API = 'https://cmsusfmwjtpfewbydzpi.supabase.co/functions/v1/katz-course';
+  function $(id) { return document.getElementById(id); }
+
+  if (!K) {
+    $('app').classList.add('hidden');
+    $('err').textContent = 'הקישור לא שלם. בקשו מיוסף קישור חדש.';
+    $('err').classList.remove('hidden');
+    return;
+  }
+  $('back').href = 'index.html?k=' + encodeURIComponent(K);
+
+  var rides = [];
+  var mode = 'offer';
+  var editId = '';
+
+  /* קוד העריכה נשמר בדפדפן בלבד. אם האחסון חסום, הכפתורים פשוט לא יופיעו. */
+  function ecMap() { try { return JSON.parse(localStorage.getItem('katz_ec') || '{}'); } catch (e) { return {}; } }
+  function ecGet(id) { return ecMap()[id] || ''; }
+  function ecSet(id, ec) { try { var m = ecMap(); m[id] = ec; localStorage.setItem('katz_ec', JSON.stringify(m)); } catch (e) {} }
+  function ecDel(id) { try { var m = ecMap(); delete m[id]; localStorage.setItem('katz_ec', JSON.stringify(m)); } catch (e) {} }
+  function newEc() {
+    var a = new Uint8Array(12), s = '', alpha = 'abcdefghijkmnpqrstuvwxyz23456789';
+    crypto.getRandomValues(a);
+    for (var i = 0; i < a.length; i++) s += alpha[a[i] % alpha.length];
+    return s;
+  }
+
+  function api(action, body) {
+    var url = API + '?k=' + encodeURIComponent(K) + '&a=' + action;
+    var opt = body
+      ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+      : { cache: 'no-store' };
+    return fetch(url, opt).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, data: j }; });
+    }).catch(function () {
+      return { ok: false, data: { message: 'אין חיבור לשרת, נסו שוב' } };
+    });
+  }
+
+  function say(t, cls) { var m = $('msg'); m.textContent = t; m.className = cls || ''; }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function free(r) { return r.mode === 'offer' ? Math.max(0, r.seats - r.passengers.length) : 0; }
+
+  function load() {
+    return api('rides').then(function (res) {
+      if (!res.ok) { say(res.data.message || 'הטעינה נכשלה', 'err'); return; }
+      rides = res.data.rides || [];
+      render();
+    });
+  }
+
+  function render() {
+    var offers = rides.filter(function (r) { return r.mode === 'offer'; });
+    var seeks = rides.filter(function (r) { return r.mode === 'seek'; });
+    var seatsFree = offers.reduce(function (s, r) { return s + free(r); }, 0);
+    var stats = $('stats');
+    stats.textContent = '';
+    stats.appendChild(el('span', 'stat', 'נסיעות: ' + offers.length));
+    stats.appendChild(el('span', 'stat', 'מקומות פנויים: ' + seatsFree));
+    stats.appendChild(el('span', 'stat', 'מחפשים טרמפ: ' + seeks.length));
+
+    var cities = [];
+    rides.forEach(function (r) { if (cities.indexOf(r.from_city) < 0) cities.push(r.from_city); });
+    cities.sort(function (a, b) { return a.localeCompare(b, 'he'); });
+    var f = $('filter'), dl = $('cities'), keep = f.value;
+    f.textContent = ''; dl.textContent = '';
+    var all = el('option', '', 'כל הערים'); all.value = ''; f.appendChild(all);
+    cities.forEach(function (c) {
+      var o = el('option', '', c); o.value = c; f.appendChild(o);
+      var d = el('option'); d.value = c; dl.appendChild(d);
+    });
+    f.value = cities.indexOf(keep) >= 0 ? keep : '';
+
+    var list = $('list');
+    list.textContent = '';
+    var shown = rides.filter(function (r) { return !f.value || r.from_city === f.value; });
+    shown.sort(function (a, b) {
+      return a.from_city.localeCompare(b.from_city, 'he') || a.leave_time.localeCompare(b.leave_time, 'he');
+    });
+    if (!shown.length) {
+      list.appendChild(el('p', 'note', rides.length ? 'אין נסיעות לעיר הזו.' : 'עדיין אין נסיעות ברשימה. אפשר להיות הראשונים.'));
+      return;
+    }
+    shown.forEach(function (r) { list.appendChild(card(r)); });
+  }
+
+  function meta(text) { return el('div', 'meta', text); }
+
+  function card(r) {
+    var c = el('div', 'card');
+    var top = el('div', 'top');
+    top.appendChild(el('strong', '', r.name));
+    top.appendChild(el('span', 'badge ' + r.mode, r.mode === 'offer' ? 'יש מקומות' : 'מחפש טרמפ'));
+    c.appendChild(top);
+    c.appendChild(meta('יוצא/ת מ' + r.from_city + ' בשעה ' + r.leave_time));
+    if (r.mode === 'offer') {
+      c.appendChild(meta('פנויים: ' + free(r) + ' מתוך ' + r.seats));
+      c.appendChild(meta(r.passengers.length ? 'נוסעים איתו/ה: ' + r.passengers.join(', ') : 'עדיין אין נוסעים'));
+    }
+    if (r.pickup) c.appendChild(meta('איפה לאסוף: ' + r.pickup));
+    if (r.contact) c.appendChild(meta('קשר: ' + r.contact));
+    if (r.note) c.appendChild(meta('הערה: ' + r.note));
+    if (ecGet(r.id)) {
+      var row = el('div', 'btnrow');
+      var ed = el('button', 'btn ghost', 'עריכה'); ed.type = 'button';
+      ed.addEventListener('click', function () { startEdit(r); });
+      var del = el('button', 'btn danger', 'מחיקה'); del.type = 'button';
+      del.addEventListener('click', function () { removeRide(r.id); });
+      row.appendChild(ed); row.appendChild(del);
+      c.appendChild(row);
+    }
+    return c;
+  }
+
+  function setMode(m) {
+    mode = m;
+    $('bOffer').setAttribute('aria-pressed', m === 'offer' ? 'true' : 'false');
+    $('bSeek').setAttribute('aria-pressed', m === 'seek' ? 'true' : 'false');
+    $('offerOnly').classList.toggle('hidden', m !== 'offer');
+  }
+
+  function resetForm() {
+    editId = '';
+    ['fName', 'fCity', 'fTime', 'fPass', 'fPickup', 'fContact', 'fNote'].forEach(function (id) { $(id).value = ''; });
+    $('fSeats').value = '3';
+    setMode('offer');
+    $('formTitle').textContent = 'להוסיף נסיעה';
+    $('save').textContent = 'שמירה';
+    $('cancel').classList.add('hidden');
+  }
+
+  function startEdit(r) {
+    editId = r.id;
+    setMode(r.mode);
+    $('fName').value = r.name;
+    $('fCity').value = r.from_city;
+    $('fTime').value = r.leave_time;
+    $('fSeats').value = String(r.seats);
+    $('fPass').value = r.passengers.join('\n');
+    $('fPickup').value = r.pickup || '';
+    $('fContact').value = r.contact || '';
+    $('fNote').value = r.note || '';
+    $('formTitle').textContent = 'עריכת נסיעה';
+    $('save').textContent = 'שמירת שינויים';
+    $('cancel').classList.remove('hidden');
+    say('');
+    $('formTitle').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function save() {
+    var offer = mode === 'offer';
+    var body = {
+      name: $('fName').value.trim(),
+      from_city: $('fCity').value.trim(),
+      leave_time: $('fTime').value.trim(),
+      mode: mode,
+      seats: offer ? Number($('fSeats').value || 0) : 0,
+      passengers: offer ? $('fPass').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean) : [],
+      pickup: $('fPickup').value.trim(),
+      contact: $('fContact').value.trim(),
+      note: $('fNote').value.trim()
+    };
+    if (!body.name || !body.from_city || !body.leave_time) { say('צריך למלא שם, עיר ושעת יציאה', 'err'); return; }
+    $('save').disabled = true;
+    var p;
+    if (editId) {
+      body.id = editId;
+      body.ec = ecGet(editId);
+      p = api('ride_update', body);
+    } else {
+      body.ec = newEc();
+      p = api('ride_create', body);
+    }
+    var ec = body.ec, wasEdit = editId;
+    p.then(function (res) {
+      $('save').disabled = false;
+      if (!res.ok) { say(res.data.message || 'השמירה נכשלה, נסו שוב', 'err'); return; }
+      if (!wasEdit && res.data.id) ecSet(res.data.id, ec);
+      say('נשמר', 'ok');
+      resetForm();
+      load();
+    });
+  }
+
+  function removeRide(id) {
+    if (!confirm('למחוק את הנסיעה?')) return;
+    api('ride_delete', { id: id, ec: ecGet(id) }).then(function (res) {
+      if (res.ok) { ecDel(id); say('נמחק', 'ok'); load(); }
+      else say(res.data.message || 'המחיקה נכשלה', 'err');
+    });
+  }
+
+  $('bOffer').addEventListener('click', function () { setMode('offer'); });
+  $('bSeek').addEventListener('click', function () { setMode('seek'); });
+  $('save').addEventListener('click', save);
+  $('cancel').addEventListener('click', function () { resetForm(); say(''); });
+  $('filter').addEventListener('change', render);
+
+  resetForm();
+  load();
+  setInterval(function () { if (!editId) load(); }, 60000);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && !editId) load();
+  });
+})();
+</script>
+</body>
+</html>
