@@ -41,6 +41,8 @@ textarea{min-height:84px;resize:vertical}
 #msg{min-height:26px;font-weight:700;margin:10px 0}
 #msg.ok{color:var(--ok)}
 #msg.err{color:var(--err)}
+.card.unproc{border-style:dashed;background:var(--soft)}
+.badge.unproc{background:#eee;color:#555}
 .hidden{display:none !important}
 .bad{font-size:20px;color:var(--err);text-align:center;margin-top:40px}
 </style>
@@ -103,9 +105,16 @@ textarea{min-height:84px;resize:vertical}
     </div>
 
     <h2>הנסיעות</h2>
+    <p class="note">נסיעות שסומנו "לא ודאי" נאספו מההתכתבויות ועדיין לא אומתו.</p>
     <label for="filter">סינון לפי עיר</label>
     <select id="filter"></select>
     <div id="list"></div>
+
+    <div id="unprocBox" class="hidden">
+      <h2>הודעות חדשות על נסיעה, עדיין לא עובדו</h2>
+      <p class="note">נאספו אוטומטית מהקבוצה ומהמייל, והטקסט מקוצר. יוסף יעביר אותן לרשימה למעלה.</p>
+      <div id="unproc"></div>
+    </div>
   </div>
 </main>
 
@@ -160,6 +169,7 @@ textarea{min-height:84px;resize:vertical}
     if (text != null) n.textContent = text;
     return n;
   }
+  var UNPROC = 'לא מעובד';
   function free(r) { return r.mode === 'offer' ? Math.max(0, r.seats - r.passengers.length) : 0; }
 
   function load() {
@@ -171,13 +181,28 @@ textarea{min-height:84px;resize:vertical}
   }
 
   function render() {
+    var unproc = rides.filter(function (r) { return r.from_city === UNPROC; });
+    rides = rides.filter(function (r) { return r.from_city !== UNPROC; });
+    var ub = $('unprocBox'), ul = $('unproc');
+    ul.textContent = '';
+    unproc.forEach(function (r) {
+      var c = el('div', 'card unproc');
+      var top = el('div', 'top');
+      top.appendChild(el('strong', '', r.name));
+      top.appendChild(el('span', 'badge unproc', 'לא מעובד'));
+      c.appendChild(top);
+      c.appendChild(meta(r.note || ''));
+      ul.appendChild(c);
+    });
+    ub.classList.toggle('hidden', !unproc.length);
     var offers = rides.filter(function (r) { return r.mode === 'offer'; });
     var seeks = rides.filter(function (r) { return r.mode === 'seek'; });
     var seatsFree = offers.reduce(function (s, r) { return s + free(r); }, 0);
+    var unknownSeats = offers.filter(function (r) { return r.seats === 0 && !r.passengers.length; }).length;
     var stats = $('stats');
     stats.textContent = '';
     stats.appendChild(el('span', 'stat', 'נסיעות: ' + offers.length));
-    stats.appendChild(el('span', 'stat', 'מקומות פנויים: ' + seatsFree));
+    stats.appendChild(el('span', 'stat', 'מקומות פנויים: ' + seatsFree + (unknownSeats ? ' (ועוד ' + unknownSeats + ' נסיעות בלי מספר מקומות)' : '')));
     stats.appendChild(el('span', 'stat', 'מחפשים טרמפ: ' + seeks.length));
 
     var cities = [];
@@ -215,7 +240,7 @@ textarea{min-height:84px;resize:vertical}
     c.appendChild(top);
     c.appendChild(meta('יוצא/ת מ' + r.from_city + ' בשעה ' + r.leave_time));
     if (r.mode === 'offer') {
-      c.appendChild(meta('פנויים: ' + free(r) + ' מתוך ' + r.seats));
+      c.appendChild(meta(r.seats === 0 && !r.passengers.length ? 'מקומות פנויים: לא צוין' : 'פנויים: ' + free(r) + ' מתוך ' + r.seats));
       c.appendChild(meta(r.passengers.length ? 'נוסעים איתו/ה: ' + r.passengers.join(', ') : 'עדיין אין נוסעים'));
     }
     if (r.pickup) c.appendChild(meta('איפה לאסוף: ' + r.pickup));
